@@ -22,7 +22,7 @@ already knows what is in their cupboard → an estimate of what is left afterwar
 
 ---
 
-## Ten mechanics, all demonstrated in the prototype
+## Eleven mechanics, all demonstrated in the prototype
 
 ### 1. Foundation and layers
 
@@ -238,7 +238,79 @@ not accurate enough to manage a medical condition on. **Wire FoodData Central
 before shipping this feature to real users** — a diabetic counting carbohydrate on
 approximations is a genuine harm, not a rough edge.
 
-### 6. Purchase-anchored pantry ledger
+### 6. Allergens
+
+A deliberately separate system from the diet engine, because the stakes differ.
+Getting halal wrong is distressing. Getting peanut wrong puts someone in hospital.
+Three consequences shape the design.
+
+#### Hidden allergens are the point
+
+Nobody with a fish allergy is surprised by mackerel. They are caught out by
+Worcestershire sauce, which contains anchovy. The ones this leads with:
+
+| Ingredient | Hidden allergen | Why it is missed |
+|---|---|---|
+| Soy sauce | **Wheat, gluten** | Most soy sauce is wheat-brewed. The single most missed allergen in Asian cooking |
+| Shaoxing wine | **Wheat, gluten** | Fermented with wheat |
+| Worcestershire sauce | **Fish** | Anchovy. A classic in British cooking |
+| Stock cubes and cartons | **Celery**, often wheat | Almost universal and almost never expected |
+| Thai curry paste | **Crustacean**, sometimes peanut | Shrimp paste is standard; brands vary enormously |
+| Sausages | **Wheat** | Rusk or breadcrumb binder, plus sulphites |
+
+A separate "easy to miss" block leads the panel, above the obvious conflicts.
+
+#### Three buckets that are never merged
+
+- **Contains** — a fact about the food itself.
+- **Check the label** — a fact about commerce. The brand decides and the app cannot
+  see the brand.
+- **Advisory** — worth knowing, not treated as a conflict.
+
+Collapsing the first two would either cry wolf or give false comfort, and both
+destroy trust in an allergy tool. A test asserts a label-dependent allergen never
+leaks into the "contains" bucket.
+
+Coconut is the advisory case: US labelling classifies it as a tree nut, but most
+people with tree-nut allergy tolerate it. Treated as a note with the reasoning
+shown rather than a hard block, which would otherwise strip coconut out of half
+the catalogue for no good reason.
+
+#### The critical invariant
+
+**No substitution offered for an allergen may itself contain that allergen.**
+Trading peanut for cashew is worse than offering nothing. A test verifies this
+across all 14 allergens against every substitutable ingredient, and swap targets
+carry their own allergen tags — tamari is wheat-free but still soy; dairy-free
+cheese is frequently cashew-based; seeds are often packed on tree-nut lines. Each
+of those is surfaced as a caution on the swap button itself.
+
+#### Where a dish cannot survive, it says so
+
+Khinkali without wheat is not khinkali: the gluten network is what holds the broth
+in under a hard boil. Rather than offer a swap that produces something else, the
+app says exactly that. Same for jiaozi and the mince pie. An honest dead end beats
+a substitution that fails in the pan.
+
+Substitution notes describe the **structural** consequence, not just the flavour —
+taking egg out of pastry is a mechanical change. Ground flax binds but will not
+glaze; oil in mash carries no water so you use 20% less; rice flour has no gluten
+network at all and cannot hold liquid in a dumpling.
+
+#### What the app refuses to claim
+
+Stated on the selector and again on every recipe panel:
+
+> The app cannot make this dish safe for you. It reads a recipe; it does not read
+> the label on what you buy, and it cannot see cross-contact in a factory, a bulk
+> bin, or a kitchen. Check every product every time. If a reaction could be severe,
+> this is a starting point for your own checking and nothing more.
+
+Region matters too: the US Big 9 show by default, and the extra EU-declared
+allergens (celery, mustard, sulphites, molluscs) appear when shopping from a
+country that requires them, with a note about which regime applies.
+
+### 7. Purchase-anchored pantry ledger
 
 The differentiator, and the feature most likely to fail if built naively.
 
@@ -255,7 +327,7 @@ The design that survives:
 - **Present estimates as estimates.** "≈ 210 g left" with one-tap correction,
   never a ledger claiming precision it does not have.
 
-### 7. Protein and dietary swaps
+### 8. Protein and dietary swaps
 
 Religion and preference decide the protein long before taste does. The diet
 engine holds eight profiles — halal, kosher, no pork, no beef, pescatarian,
@@ -279,13 +351,13 @@ Swaps resolve in one function, `effectiveIng()`. Quantities, pantry coverage and
 the shopping list all read through it, so a swap propagates without any of them
 knowing diets exist.
 
-### 8. Region browsing
+### 9. Region browsing
 
 The Atlas filters by region before country, because that is how travel memory is
 organised — people remember *Southeast Asia* or *the Gulf*, not a country list.
 Each region carries a line on what it is known for.
 
-### 9. Global sourcing from a derived platform registry
+### 10. Global sourcing from a derived platform registry
 
 The first version of this hand-curated a store list per country. That does not
 scale past a handful of markets, and the product is global by definition — the
@@ -325,7 +397,7 @@ Country coverage is researched but not verified market by market, and platforms
 enter and leave countries constantly. The tier assignments are the durable part;
 treat coverage as a starting point that needs maintenance.
 
-### 10. Community layer
+### 11. Community layer
 
 Ratings and notes from people who actually cooked the dish, stored per-dish.
 This is original user content, owned outright, and it is the only realistic way
@@ -459,6 +531,10 @@ partner APIs or deep links; the user checks out in their own account.
   sources.
 - Cart buttons are disabled — no partner credentials are wired up.
 - The unit conversion table covers only the ingredients these eight recipes use.
+- Allergen data is hand-authored per ingredient. It covers the 11 recipes here
+  honestly, but every new ingredient needs its own allergen review — and a missed
+  tag in this system is a safety issue, not a cosmetic one. This is the part of
+  the data model that most needs a second pair of eyes before launch.
 - Nutrition values are still approximations: the FoodData Central resolver is
   written and tested but has not been run, because `api.nal.usda.gov` is blocked
   by the egress policy of the environment this was built in. One command with a

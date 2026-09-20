@@ -192,6 +192,31 @@ ul.ings li.swapped .iname em{color:var(--jade)}
 .store b{font-size:13.5px}
 .store .tierrow{display:flex;gap:4px;flex-wrap:wrap}
 .store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+/* ---------- allergens ---------- */
+.allergsel{margin-top:14px;border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;background:var(--surface)}
+.achips{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.achip{font-size:12px;padding:4px 10px}
+.achip[aria-pressed="true"]{background:var(--chili);border-color:var(--chili);color:#fff}
+.panel.allerg{border-left:3px solid var(--line-2)}
+.panel.allerg.bad{border-left-color:var(--chili)}
+.panel.allerg.warn{border-left-color:var(--accent)}
+.panel.allerg.good{border-left-color:var(--jade)}
+.astat{font-size:13.5px;line-height:1.5;margin-top:8px}
+.ahidden{margin-top:13px;background:var(--chili-soft);border-radius:8px;padding:10px 12px}
+.acheck{margin-top:13px;background:var(--accent-soft);border-radius:8px;padding:10px 12px}
+.aadvisory{margin-top:13px;background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.arow{font-size:12.5px;line-height:1.5;margin-top:6px}
+.arow:first-of-type{margin-top:5px}
+.arow b{font-size:13px}
+.an{display:block;color:var(--ink-2);margin-top:2px}
+.ahidden .an,.acheck .an{color:inherit;opacity:.85}
+.ablocked{font-size:12.5px;line-height:1.5;margin:6px 0 0;background:var(--chili-soft);color:var(--chili);
+  border-radius:8px;padding:9px 11px}
+.acaut{display:block;font-size:11px;color:var(--accent-ink);margin-top:3px;font-weight:600}
+.asafety{margin-top:13px;border:1px solid var(--chili);border-radius:8px;padding:10px 12px;
+  font-size:12px;line-height:1.55;color:var(--chili)}
+.asafety strong{display:block;margin-bottom:2px}
+
 /* ---------- provenance ---------- */
 .prov{display:flex;flex-direction:column;gap:6px;margin-top:12px;padding:10px 11px;border-radius:8px;
   background:var(--surface-2);font-size:11.5px;line-height:1.5;color:var(--ink-2)}
@@ -451,7 +476,18 @@ const ING = {
   bay:        {n:'Bay leaves',               buy:'staple', conv:{g:1, piece:0.2}},
   almond:     {n:'Slivered almonds',         buy:'staple', conv:{g:1, tbsp:7}},
   raisin:     {n:'Raisins',                  buy:'staple', conv:{g:1, tbsp:10}},
-  potato_fl:  {n:'Floury potatoes',          buy:'fresh',  conv:{g:1, piece:180}}
+  potato_fl:  {n:'Floury potatoes',          buy:'fresh',  conv:{g:1, piece:180}},
+  /* allergen substitution targets */
+  tamari:     {n:'Tamari (wheat-free soy sauce)', buy:'staple', conv:{ml:1, g:1.1, tbsp:16, tsp:5.3}},
+  coco_amino: {n:'Coconut aminos',           buy:'staple', conv:{ml:1, g:1.1, tbsp:16, tsp:5.3}},
+  flour_gf:   {n:'Gluten-free flour blend',  buy:'staple', conv:{g:1, cup:130, tbsp:8}},
+  flour_rice: {n:'Rice flour',               buy:'staple', conv:{g:1, cup:158, tbsp:10}},
+  milk_oat:   {n:'Oat milk, unsweetened',    buy:'staple', conv:{ml:1, g:1.03, cup:244}},
+  marg_df:    {n:'Dairy-free baking block',  buy:'fresh',  conv:{g:1, tbsp:14, cup:227}},
+  cheese_df:  {n:'Dairy-free hard cheese',   buy:'fresh',  conv:{g:1, cup:113}},
+  flax:       {n:'Ground flaxseed',          buy:'staple', conv:{g:1, tbsp:7, tsp:2.3}},
+  seed_sun:   {n:'Sunflower seeds',          buy:'staple', conv:{g:1, tbsp:9}},
+  seed_pump:  {n:'Pumpkin seeds',            buy:'staple', conv:{g:1, tbsp:8}}
 };
 
 /* ---------- dietary flags ----------
@@ -469,9 +505,153 @@ const FLAGS = {
   mackerel:['fish'], fishsauce:['fish'], worcester:['fish'],
   butter:['dairy'], milk:['dairy'], cheddar:['dairy'], ghee:['dairy'],
   egg:['egg'],
-  shaoxing:['alcohol'], vinegar_rw:['alcohol_derived']
+  shaoxing:['alcohol'], vinegar_rw:['alcohol_derived'],
+  marg_df:[], cheese_df:[], milk_oat:[], tamari:[], coco_amino:[]
 };
 const flagsOf = id => FLAGS[id] || [];
+
+/* ---------- allergens ----------
+   Deliberately a separate system from the diet engine. A diet conflict is a
+   values violation: eating pork by accident is distressing. An allergen
+   conflict can put someone in hospital. Three rules follow from that:
+
+   1. Hidden allergens matter more than obvious ones. Nobody with a fish
+      allergy is surprised by mackerel; they are surprised by
+      Worcestershire sauce, which contains anchovy. Most soy sauce is
+      brewed with wheat, so it is not gluten-free — the single most missed
+      one in Asian cooking.
+   2. The app checks ingredients. It cannot check the jar in your hand.
+      Formulations change, brands differ by country, and cross-contact in
+      shared facilities is invisible to any software. Said plainly and
+      repeatedly rather than once in small print.
+   3. Where a dish cannot survive the substitution, say so instead of
+      offering a swap that produces something else.                       */
+const ALLERGENS = {
+  milk:      {label:'Milk',            us:true,  eu:true},
+  egg:       {label:'Egg',             us:true,  eu:true},
+  fish:      {label:'Fish',            us:true,  eu:true},
+  crustacean:{label:'Crustacean shellfish', us:true, eu:true},
+  mollusc:   {label:'Mollusc',         us:false, eu:true},
+  treenut:   {label:'Tree nuts',       us:true,  eu:true},
+  peanut:    {label:'Peanut',          us:true,  eu:true},
+  wheat:     {label:'Wheat',           us:true,  eu:true},
+  gluten:    {label:'Gluten',          us:false, eu:true},
+  soy:       {label:'Soy',             us:true,  eu:true},
+  sesame:    {label:'Sesame',          us:true,  eu:true},
+  mustard:   {label:'Mustard',         us:false, eu:true},
+  celery:    {label:'Celery',          us:false, eu:true},
+  sulphite:  {label:'Sulphites',       us:false, eu:true}
+};
+/* Countries that follow the EU's 14-allergen declaration rules, where
+   labels carry more than the US Big 9. */
+const EU_LABELLING = ['FR','DE','IT','ES','PT','NL','BE','PL','CZ','SK','HU','RO','BG',
+                      'HR','GR','SE','DK','FI','EE','LV','LT','IE','CY','MT','GB'];
+
+/* `has` is present in the food itself. `hidden` marks the ones people are
+   caught out by, which the UI leads with. `check` means it depends on the
+   brand and the label is the only authority. */
+const ALLERGEN = {
+  flour:       {has:['wheat','gluten']},
+  pastry_sh:   {has:['wheat','gluten'], check:['milk','soy']},
+  pastry_pf:   {has:['wheat','gluten'], check:['milk','soy']},
+  noodle_rice: {check:['wheat'], note:'Rice noodles are usually pure rice, but some brands add wheat as a binder.'},
+  soy:         {has:['soy','wheat','gluten'], hidden:['wheat','gluten'],
+                note:'Most soy sauce is brewed with wheat. This is the allergen people miss most often in Asian cooking.'},
+  shaoxing:    {has:['wheat','gluten'], hidden:['wheat','gluten'],
+                note:'Shaoxing wine is fermented with wheat.'},
+  worcester:   {has:['fish'], hidden:['fish'], check:['soy','sulphite'],
+                note:'Worcestershire sauce contains anchovy. A classic hidden fish allergen in British cooking.'},
+  fishsauce:   {has:['fish']},
+  mackerel:    {has:['fish']},
+  paste_pnng:  {has:[], check:['crustacean','fish','soy','peanut'], hidden:['crustacean'],
+                note:'Most commercial Thai curry pastes contain shrimp paste, and some contain peanut. Brands vary enormously — the label is the only authority.'},
+  paste_aji:   {check:['sulphite']},
+  peanut:      {has:['peanut']},
+  almond:      {has:['treenut']},
+  sesame_oil:  {has:['sesame']},
+  butter:      {has:['milk']}, ghee:{has:['milk'], note:'Ghee is clarified, so most of the milk protein is removed — but not reliably all of it.'},
+  milk:        {has:['milk']}, cheddar:{has:['milk']},
+  egg:         {has:['egg']},
+  sausage_pork:{check:['wheat','gluten','milk','soy','sulphite'], hidden:['wheat'],
+                note:'Sausages very often use breadcrumb or rusk as a binder, and sulphites as a preservative.'},
+  sausage_chk: {check:['wheat','gluten','milk','soy','sulphite'], hidden:['wheat']},
+  sausage_bf:  {check:['wheat','gluten','milk','soy','sulphite'], hidden:['wheat']},
+  coconut_ck:  {has:[], advisory:['treenut']},
+  coconut_mk:  {has:[], advisory:['treenut']},
+  coconut_fr:  {has:[], advisory:['treenut']},
+  stock_beef:  {check:['celery','wheat','gluten','soy'], hidden:['celery'],
+                note:'Stock cubes and cartons very commonly contain celery, and often wheat.'},
+  stock_chx:   {check:['celery','wheat','gluten','soy'], hidden:['celery']},
+  vinegar_rw:  {check:['sulphite']},
+  olive_grn:   {check:['sulphite']},
+  raisin:      {check:['sulphite'], note:'Dried fruit is routinely sulphited.'},
+  baharat:     {check:['mustard','celery']},
+  tomato_pst:  {check:['celery']},
+  tamari:      {has:['soy'], note:'Wheat-free, but still soy.'},
+  coco_amino:  {has:[], advisory:['treenut'], note:'No soy, no wheat, no gluten.'},
+  flour_gf:    {check:['gluten'], note:'Certified gluten-free blends are tested; uncertified ones may be milled alongside wheat.'},
+  milk_oat:    {check:['gluten'], note:'Oats are often processed with wheat. Look for certified gluten-free oat milk.'},
+  marg_df:     {check:['soy','milk'], note:'Dairy-free spreads are commonly soy-based, and some contain milk traces.'},
+  cheese_df:   {check:['treenut','soy'], note:'Dairy-free cheeses are frequently cashew or soy based.'},
+  seed_sun:    {check:['treenut'], note:'Seeds are often packed on tree-nut lines.'},
+  seed_pump:   {check:['treenut']},
+  flax:        {}
+};
+/* Coconut is classified as a tree nut in US labelling, but most people with
+   a tree-nut allergy tolerate it. Advisory rather than a block, with the
+   reasoning shown — a hard exclusion here would strip coconut out of half
+   the catalogue for no good reason. */
+const ADVISORY_NOTE = {
+  treenut:'US labelling classifies coconut as a tree nut, though most people with tree-nut allergy tolerate it. Not treated as a conflict here. If yours includes coconut, say so to your allergist rather than to an app.'
+};
+
+function allergensOf(id){
+  const a = ALLERGEN[id];
+  if(!a) return {has:[], check:[], hidden:[], advisory:[]};
+  return {has:a.has || [], check:a.check || [], hidden:a.hidden || [],
+          advisory:a.advisory || [], note:a.note};
+}
+
+/* ---------- allergen substitutions ----------
+   Notes describe what the swap does structurally, not just how it tastes.
+   Taking egg out of a pastry is a mechanical change, and a substitution
+   that ignores that produces a failed dish rather than a safe one.       */
+const ALT = {
+  soy:[
+    {to:'tamari',   note:'Tamari is brewed without wheat by definition. Closest possible swap — slightly rounder, less sharp. Still soy, so no use for a soy allergy.'},
+    {to:'coco_amino', note:'Coconut aminos: no soy, no wheat. Noticeably sweeter and much less salty, so add salt and use about a third more.'}],
+  shaoxing:[{to:'stock_chx', note:'Loses the fermented depth entirely; nothing wheat-free replaces it properly. Add a splash of rice vinegar for lift.'}],
+  worcester:[{to:'tamari', note:'No anchovy. Gives the same savoury backbone; add a pinch of sugar and a drop of vinegar for the sweet-sour edge.'}],
+  fishsauce:[{to:'coco_amino', note:'No fish. You lose the funk that defines the dish — this is a real compromise, not an equivalent.'}],
+  flour:[
+    {to:'flour_gf', note:'A gluten-free blend with xanthan gum. For dumpling dough the result is workable but tears more easily, so roll a little thicker and expect a softer bite.'},
+    {to:'flour_rice', note:'Rice flour alone has no gluten network at all. Fine for coatings, not for a dough that has to hold liquid.'}],
+  butter:[
+    {to:'oil_olive', note:'For mash, use 20% less by weight — oil carries no water. Flavour goes savoury rather than sweet.'},
+    {to:'marg_df',   note:'A dairy-free block behaves closest to butter in pastry, where the water content matters structurally.'}],
+  milk:[{to:'milk_oat', note:'Oat milk is the closest for mash and sauces. Do not use a sweetened or vanilla one.'}],
+  cheddar:[{to:'cheese_df', note:'Dairy-free hard cheeses melt but rarely brown. In the pie it works; expect a paler, softer top.'}],
+  egg:[{to:'flax', note:'One tablespoon ground flax with three of water, rested ten minutes, replaces one egg as a binder. It will not glaze pastry — use oat milk for the wash instead.'}],
+  peanut:[
+    {to:'seed_sun', note:'Toasted and ground sunflower seeds give the same body and a similar roast. The closest safe swap in phanaeng.'},
+    {to:'seed_pump', note:'Ground pumpkin seed. Slightly greener in flavour, works the same way.'}],
+  almond:[{to:'seed_pump', note:'Toasted pumpkin seeds instead of slivered almonds on the kabsa. Same crunch, no tree nut.'}],
+  sesame_oil:[{to:'oil_veg', note:'You lose the toasted aroma, which is much of the point. Nothing replaces it — better to leave it out and accept the dish is different.'}],
+  stock_beef:[{to:'water', note:'Homemade stock, or water plus aromatics. Commercial stock is where the celery hides.'}],
+  stock_chx:[{to:'water', note:'Homemade, or water plus aromatics.'}]
+};
+
+/* Dishes where an allergen is load-bearing and no substitution rescues the
+   dish as itself. Honesty beats a swap that produces something else. */
+const CANNOT_SUB = {
+  khinkali:{wheat:'The dough is the dish — it has to hold liquid under a hard boil, and no gluten-free blend does that reliably. A gluten-free version is worth making, but it is a different dumpling.',
+            gluten:'Same as wheat: the gluten network is what holds the broth in.'},
+  jiaozi:{wheat:'Hot-water wheat dough is the whole technique here. Rice-flour wrappers make something closer to har gow.',
+          gluten:'As above.'},
+  mincepie:{wheat:'Both pastries are wheat. A gluten-free pie is possible but the puff lid will not laminate the same way.',
+            gluten:'As above.'},
+  bangers:{wheat:'Only if your sausages contain rusk — many do, some do not. This one is solved by reading the label rather than by substitution.'}
+};
 
 /* ---------- diet profiles ---------- */
 const DIETS = {
@@ -782,7 +962,12 @@ const NUTR = {
   loomi:{k:60,p:2.0,c:15.0,f:1.0},          cardamom:{k:311,p:10.8,c:68.5,f:6.7},
   clove_sp:{k:274,p:6.0,c:65.5,f:13.0},     bay:{k:313,p:7.6,c:75.0,f:8.4},
   almond:{k:579,p:21.2,c:21.6,f:49.9},      raisin:{k:299,p:3.1,c:79.2,f:0.5},
-  potato_fl:{k:77,p:2.0,c:17.5,f:0.1}
+  potato_fl:{k:77,p:2.0,c:17.5,f:0.1},
+  tamari:{k:60,p:10.5,c:5.6,f:0.1},       coco_amino:{k:100,p:0,c:23.0,f:0},
+  flour_gf:{k:363,p:6.0,c:77.0,f:1.5},    flour_rice:{k:366,p:6.0,c:80.1,f:1.4},
+  milk_oat:{k:45,p:1.0,c:7.0,f:1.5},      marg_df:{k:717,p:0.2,c:0.7,f:80.0},
+  cheese_df:{k:290,p:1.0,c:23.0,f:21.0},  flax:{k:534,p:18.3,c:28.9,f:42.2},
+  seed_sun:{k:584,p:20.8,c:20.0,f:51.5},  seed_pump:{k:559,p:30.2,c:10.7,f:49.1}
 };
 
 /* ---------- daily budget ----------
@@ -1004,6 +1189,10 @@ const SOURCE = {
   olive_grn:{oc:'euro'}, sausage_pork:{oc:'euro', keep:'chill'},
   sausage_chk:{oc:'euro', keep:'chill'}, sausage_bf:{oc:'euro', keep:'chill'},
   fenugreek:{oc:'cauc'},
+  tamari:{oc:'asian'}, coco_amino:{oc:'sea'}, flour_gf:{oc:'universal'},
+  flour_rice:{oc:'asian'}, milk_oat:{oc:'universal'}, marg_df:{oc:'universal', keep:'chill'},
+  cheese_df:{oc:'universal', keep:'chill'}, flax:{oc:'universal'},
+  seed_sun:{oc:'universal'}, seed_pump:{oc:'universal'},
   donne:{oc:'pac', keep:'fresh'}
 };
 function ocOf(id){ return (SOURCE[id] && SOURCE[id].oc) || 'universal'; }
@@ -1495,7 +1684,7 @@ const EXAMPLE_PANTRY = {
 /* ---------- state ---------- */
 const state = {
   view:'atlas', dishId:null, servingsMul:1, filter:'all', regionFilter:'all',
-  diet:'none', market:'SA', swaps:{}, need:{},
+  diet:'none', allergies:[], market:'SA', swaps:{}, need:{},
   date:new Date().toISOString().slice(0,10), day:{}, editProfile:false,
   profile:{mode:'calc', target:2200, sex:'unspecified', age:40, height:175,
            weight:80, activity:1.375, goal:'maintain', framework:'balanced'},
@@ -1619,6 +1808,52 @@ function applySwap(recipeId, from, to){
 }
 function clearSwaps(recipeId){ delete state.swaps[recipeId]; render(); }
 
+/* ---------- allergen checking ----------
+   Returns three separate buckets, deliberately not merged. "Contains" is a
+   fact about the food. "Check the label" is a fact about commerce — the
+   brand decides, and the app cannot see the brand. Collapsing the two
+   would either cry wolf or give false comfort, and both destroy trust in
+   an allergy tool. */
+function allergyCheck(r){
+  if(!state.allergies.length) return {contains:[], check:[], advisory:[], ok:true, blocked:{}};
+  const contains = [], check = [], advisory = [], blocked = {};
+  effectiveIngs(r).forEach(ing => {
+    const a = allergensOf(ing.i);
+    const hitHas = state.allergies.filter(x => a.has.includes(x));
+    const hitChk = state.allergies.filter(x => a.check.includes(x) && !a.has.includes(x));
+    const hitAdv = state.allergies.filter(x => a.advisory.includes(x));
+    if(hitHas.length) contains.push({ing, which:hitHas, hidden:hitHas.filter(x => a.hidden.includes(x)), note:a.note});
+    if(hitChk.length) check.push({ing, which:hitChk, hidden:hitChk.filter(x => a.hidden.includes(x)), note:a.note});
+    if(hitAdv.length) advisory.push({ing, which:hitAdv, note:a.note});
+  });
+  // where the dish cannot be rescued, record it against the allergen
+  contains.forEach(c => c.which.forEach(x => {
+    if(CANNOT_SUB[r.id] && CANNOT_SUB[r.id][x]) blocked[x] = CANNOT_SUB[r.id][x];
+  }));
+  return {contains, check, advisory, blocked, ok:contains.length === 0};
+}
+/* Substitutions that do not themselves carry any of the user's allergens.
+   A swap that trades peanut for cashew is worse than no swap at all. */
+function safeAlts(ingId){
+  return (ALT[ingId] || []).filter(alt => {
+    const a = allergensOf(alt.to);
+    return !state.allergies.some(x => a.has.includes(x));
+  }).map(alt => {
+    const a = allergensOf(alt.to);
+    return {...alt, caution:state.allergies.filter(x => a.check.includes(x))};
+  });
+}
+function allergyStatus(r){
+  const c = allergyCheck(r);
+  if(!state.allergies.length) return 'na';
+  if(c.contains.length){
+    const rescuable = c.contains.every(x => safeAlts(x.ing.i).length && !x.which.some(w => c.blocked[w]));
+    return rescuable ? 'swap' : 'no';
+  }
+  return c.check.length ? 'check' : 'clear';
+}
+const euLabels = () => EU_LABELLING.includes(state.market);
+
 /* ---------- pantry mechanics ---------- */
 function stockOf(id){ return state.pantry[id] ? state.pantry[id].left : 0; }
 function needOf(recipe, ing){ return toGrams(ing.i, ing.q * state.servingsMul, ing.u); }
@@ -1741,6 +1976,20 @@ function viewAtlas(){
       </select>
     </label>
   </div>
+  <div class="allergsel">
+    <span class="eyebrow">Allergies — tap to add</span>
+    <div class="achips">
+      ${Object.keys(ALLERGENS).filter(k => ALLERGENS[k].us || euLabels() || state.allergies.includes(k))
+        .map(k => `<button class="chip achip" data-allerg="${k}" aria-pressed="${state.allergies.includes(k)}">${esc(ALLERGENS[k].label)}</button>`).join('')}
+    </div>
+    ${state.allergies.length ? `<div class="asafety">
+      <strong>This checks recipe ingredients. It cannot check the jar in your hand.</strong>
+      Brands differ by country, formulations change without notice, and cross-contact in shared facilities is invisible to any app. Read the label every time — including on something you have bought before. If a reaction could be severe, treat this as a starting point for your own checking, never as a clearance.
+    </div>` : ''}
+    <div class="nnote dim">${euLabels()
+      ? `Shopping from ${esc(COUNTRIES[state.market].n)}, where labels must declare all 14 EU allergens — celery, mustard and sulphites included.`
+      : `Shopping from ${esc(COUNTRIES[state.market].n)}. The US Big 9 are shown by default; the extra EU-declared allergens appear when shopping from a country that requires them.`}</div>
+  </div>
   ${d.note ? `<div class="notice" style="margin-top:10px">${esc(d.note)}</div>` : ''}
 
   <hr class="rule">
@@ -1775,6 +2024,11 @@ function viewAtlas(){
             st === 'fits' ? `<span class="pill jade">✓ ${esc(d.label)}</span>` :
             st === 'swap' ? `<span class="pill amber">Needs a swap</span>` :
                             `<span class="pill chili">Doesn't fit</span>`) : ''}
+          ${(() => { const a = allergyStatus(r); return a === 'na' ? '' :
+            a === 'clear' ? `<span class="pill jade">No listed allergens</span>` :
+            a === 'check' ? `<span class="pill amber">Check labels</span>` :
+            a === 'swap'  ? `<span class="pill amber">Allergen · swappable</span>` :
+                            `<span class="pill chili">Contains your allergen</span>`; })()}
           ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} · ${rat.n} cooked</span>` : `<span class="pill amber">Draft · untested</span>`}
         </div>
       </button>`;
@@ -1805,6 +2059,7 @@ function viewRecipe(){
   const proteinOpts = (proteinId && !conflictIds.includes(proteinId)) ? cleanSubs(proteinId) : [];
   const tickedHere = effectiveIngs(r).filter(ing => isNeeded(ing.i)).length;
   const nut = nutritionOf(r);
+  const alg = allergyCheck(r);
 
   return `
   <button class="back" id="back">← All dishes</button>
@@ -1859,6 +2114,62 @@ function viewRecipe(){
           ${Object.keys(state.swaps[r.id] || {}).length ? `<button class="mini" id="clearswaps">Undo swaps</button>` : ''}
         </div>
       </div>
+
+      ${state.allergies.length ? `
+      <div class="panel allerg ${alg.contains.length ? 'bad' : alg.check.length ? 'warn' : 'good'}">
+        <h2>Allergens</h2>
+        <div class="astat">
+          ${alg.contains.length
+            ? `<strong>Contains ${[...new Set(alg.contains.flatMap(c => c.which))].map(w => esc(ALLERGENS[w].label)).join(', ')}.</strong>`
+            : alg.check.length
+              ? `<strong>Nothing in this recipe inherently contains your allergens</strong> — but ${alg.check.length} ingredient${alg.check.length > 1 ? 's' : ''} below depend${alg.check.length > 1 ? '' : 's'} entirely on the brand.`
+              : `<strong>No listed allergens in these ingredients.</strong> That is a statement about the recipe, not about the products you buy.`}
+        </div>
+
+        ${alg.contains.filter(c => c.hidden.length).length ? `
+          <div class="ahidden">
+            <span class="eyebrow">Easy to miss</span>
+            ${alg.contains.filter(c => c.hidden.length).map(c => `
+              <div class="arow"><b>${esc(ING[c.ing.i].n)}</b> — contains ${c.hidden.map(w => esc(ALLERGENS[w].label)).join(', ')}.
+              ${c.note ? `<span class="an">${esc(c.note)}</span>` : ''}</div>`).join('')}
+          </div>` : ''}
+
+        ${alg.contains.map(c => {
+          const blockedBy = c.which.find(w => alg.blocked[w]);
+          const alts = safeAlts(c.ing.i);
+          return `<div class="swapblock">
+            <div class="swaphead">${esc(ING[c.ing.i].n)} <span class="pill chili">${c.which.map(w => esc(ALLERGENS[w].label)).join(', ')}</span></div>
+            ${c.note && !c.hidden.length ? `<p class="an">${esc(c.note)}</p>` : ''}
+            ${blockedBy
+              ? `<p class="ablocked"><strong>No substitution saves this dish.</strong> ${esc(alg.blocked[blockedBy])}</p>`
+              : alts.length
+                ? alts.map(a => `<button class="swapopt" data-swapfrom="${c.ing.i}" data-swapto="${a.to}">
+                    <b>${esc(ING[a.to].n)}</b><span>${esc(a.note)}</span>
+                    ${a.caution.length ? `<span class="acaut">Check the label for ${a.caution.map(w => esc(ALLERGENS[w].label)).join(', ')} — brands vary.</span>` : ''}
+                  </button>`).join('')
+                : `<p class="swapnone">No substitution in the table avoids your allergens here. Better to choose another dish than to improvise with something that might carry the same one.</p>`}
+          </div>`;
+        }).join('')}
+
+        ${alg.check.length ? `
+          <div class="acheck">
+            <span class="eyebrow">Depends on the brand — read the label</span>
+            ${alg.check.map(c => `<div class="arow">
+              <b>${esc(ING[c.ing.i].n)}</b> — may contain ${c.which.map(w => esc(ALLERGENS[w].label)).join(', ')}.
+              ${c.note ? `<span class="an">${esc(c.note)}</span>` : ''}
+            </div>`).join('')}
+          </div>` : ''}
+
+        ${alg.advisory.length ? `
+          <div class="aadvisory">
+            <span class="eyebrow">Worth knowing, not treated as a conflict</span>
+            ${alg.advisory.map(c => `<div class="arow"><b>${esc(ING[c.ing.i].n)}</b> — ${c.which.map(w => esc(ADVISORY_NOTE[w] || ALLERGENS[w].label)).join(' ')}</div>`).join('')}
+          </div>` : ''}
+
+        <div class="asafety">
+          <strong>The app cannot make this dish safe for you.</strong> It reads a recipe; it does not read the label on what you buy, and it cannot see cross-contact in a factory, a bulk bin, or a kitchen. Check every product every time. If a reaction could be severe, this is a starting point for your own checking and nothing more.
+        </div>
+      </div>` : ''}
 
       ${diet.conflicts.length || diet.warnings.length || proteinOpts.length ? `
       <div class="panel">
@@ -2255,6 +2566,14 @@ el.addEventListener('click', async e => {
 
   const chip = t.closest('[data-filter]');
   if(chip){ state.filter = chip.dataset.filter; render(); return; }
+
+  const ac = t.closest('[data-allerg]');
+  if(ac){
+    const k = ac.dataset.allerg;
+    state.allergies = state.allergies.includes(k)
+      ? state.allergies.filter(x => x !== k) : [...state.allergies, k];
+    render(); return;
+  }
 
   const rg = t.closest('[data-region]');
   if(rg){ state.regionFilter = rg.dataset.region; state.filter = 'all'; render(); return; }
