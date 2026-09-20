@@ -192,6 +192,41 @@ ul.ings li.swapped .iname em{color:var(--jade)}
 .store b{font-size:13.5px}
 .store .tierrow{display:flex;gap:4px;flex-wrap:wrap}
 .store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+.ingshint{font-size:12.5px;color:var(--ink-3);margin:8px 0 0;line-height:1.45}
+.ingacts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.tick{
+  flex:0 0 auto;width:21px;height:21px;border-radius:5px;border:1.5px solid var(--line-2);
+  background:var(--paper);font-size:12px;font-weight:700;line-height:1;padding:0;
+  display:grid;place-items:center;color:var(--on-accent);
+}
+.tick:hover{border-color:var(--accent)}
+.tick.on{background:var(--accent);border-color:var(--accent)}
+.tick:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+ul.ings li{align-items:center}
+ul.ings li.ticked{background:var(--accent-soft);margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:6px}
+ul.ings li.ticked + li{border-top-color:transparent}
+.stock.have{color:var(--jade)}
+.stock.part{color:var(--accent-ink)}
+.stock.out{color:var(--chili)}
+.stock.unknown{color:var(--ink-3)}
+
+/* ---------- shopping list ---------- */
+.shoplist{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.shopitem{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:13px 14px}
+.shopitem.hard{border-left:3px solid var(--chili)}
+.sihead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.sihead b{font-size:14.5px}
+.siqty{font-size:12px;color:var(--ink-2);margin-top:1px}
+.sitags{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.whohas{display:flex;flex-direction:column;margin-top:11px;border-top:1px solid var(--line);padding-top:3px}
+.who{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:7px 0;text-decoration:none;color:inherit;border-bottom:1px solid var(--line);
+}
+.who:last-child{border-bottom:0}
+.who:hover .wn{color:var(--accent-ink)}
+.wn{font-size:13px;font-weight:600}
+.wt{display:flex;gap:4px;flex-wrap:wrap}
 .nostore{margin-top:13px;border:1px dashed var(--line-2);border-radius:8px;padding:11px 13px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
 .nostore strong{color:var(--ink);display:block;margin-bottom:3px}
 
@@ -622,10 +657,131 @@ const COUNTRIES = {
   NL:{n:'Netherlands', f:'🇳🇱'}, JM:{n:'Jamaica', f:'🇯🇲'}, GU:{n:'Guam', f:'🇬🇺'}
 };
 
+/* ---------- sourcing channels ----------
+   An ingredient's difficulty is relative to where you are: fish sauce is
+   a specialty import in Warsaw and a shelf staple in Hanoi. `oc` is the
+   culinary channel that carries an ingredient, `keep` decides whether
+   mail order is viable at all. Defaults cover most of the registry, so
+   only the interesting ones are listed.                                 */
+const OC_LABEL = {
+  universal:'Any supermarket', asian:'East Asian', sea:'Southeast Asian',
+  me:'Middle Eastern', carib:'Caribbean', latin:'Latin American',
+  euro:'European', cauc:'Caucasian', pac:'Pacific Islander'
+};
+const SOURCE = {
+  soy:{oc:'asian'}, sesame_oil:{oc:'asian'}, shaoxing:{oc:'asian'},
+  vinegar_rc:{oc:'asian'}, whitepep:{oc:'asian'}, chives_g:{oc:'asian', keep:'fresh'},
+  fishsauce:{oc:'sea'}, paste_pnng:{oc:'sea'}, sugar_palm:{oc:'sea'},
+  coconut_ck:{oc:'sea'}, coconut_mk:{oc:'sea'}, noodle_rice:{oc:'sea'},
+  limeleaf:{oc:'sea', keep:'fresh'}, basil_thai:{oc:'sea', keep:'fresh'},
+  coconut_fr:{oc:'sea', keep:'fresh'}, chili_dry:{oc:'sea'},
+  baharat:{oc:'me'}, loomi:{oc:'me'}, ghee:{oc:'me'}, rice_bas:{oc:'me'},
+  preslemon:{oc:'me'}, cardamom:{oc:'me'}, saffron:{oc:'me'},
+  scotch:{oc:'carib', keep:'fresh'}, allspice:{oc:'carib'},
+  mackerel:{oc:'carib'}, banana_grn:{oc:'carib', keep:'fresh'},
+  paste_aji:{oc:'latin'},
+  worcester:{oc:'euro'}, cheddar:{oc:'euro', keep:'chill'},
+  pastry_sh:{oc:'euro', keep:'chill'}, pastry_pf:{oc:'euro', keep:'chill'},
+  olive_grn:{oc:'euro'}, sausage_pork:{oc:'euro', keep:'chill'},
+  sausage_chk:{oc:'euro', keep:'chill'}, sausage_bf:{oc:'euro', keep:'chill'},
+  fenugreek:{oc:'cauc'},
+  donne:{oc:'pac', keep:'fresh'}
+};
+function ocOf(id){ return (SOURCE[id] && SOURCE[id].oc) || 'universal'; }
+function keepOf(id){
+  if(SOURCE[id] && SOURCE[id].keep) return SOURCE[id].keep;
+  return ING[id].buy === 'fresh' ? 'fresh' : 'shelf';
+}
+
+/* Which channels are simply everyday shopping in a given country. */
+const NATIVE = {
+  TH:['sea','asian'], VN:['sea','asian'], CN:['asian'], HK:['asian'],
+  TW:['asian'], JP:['asian'], KR:['asian'], SG:['sea','asian'],
+  MY:['sea','asian'], ID:['sea','asian'], PH:['sea','asian'],
+  KH:['sea','asian'], MM:['sea','asian'], LA:['sea','asian'],
+  SA:['me'], AE:['me','asian'], KW:['me'], QA:['me'], BH:['me'], OM:['me'],
+  JO:['me'], IQ:['me'], EG:['me'], MA:['me'], TR:['me'], IL:['me'],
+  GE:['cauc'], AM:['cauc'], AZ:['cauc'],
+  JM:['carib'], MX:['latin'], PE:['latin'], CO:['latin'], BR:['latin'],
+  AR:['latin'], CL:['latin'], EC:['latin'], UY:['latin'], CR:['latin'],
+  GU:['pac'],
+  GB:['euro'], IE:['euro'], FR:['euro'], DE:['euro'], IT:['euro'],
+  ES:['euro'], PT:['euro'], NL:['euro'], BE:['euro'], PL:['euro'],
+  CZ:['euro'], SK:['euro'], HU:['euro'], RO:['euro'], BG:['euro'],
+  HR:['euro'], RS:['euro'], GR:['euro'], SE:['euro'], DK:['euro'],
+  NO:['euro'], FI:['euro'], EE:['euro'], LV:['euro'], LT:['euro'],
+  AU:['euro'], NZ:['euro'], US:['euro'], CA:['euro'],
+  IN:['asian','me'], PK:['asian','me'], BD:['asian']
+};
+
+/* ---------- store sourcing profiles ----------
+   Side map so the platform registry stays about coverage. `strong` is the
+   channels a store reliably carries; `ships` means it can mail-order, so
+   it cannot serve anything that must arrive fresh; `wide` marks a
+   hypermarket whose range is broad enough to be worth checking for
+   almost anything.                                                      */
+const STORE_META = {
+  'Lulu Hypermarket':        {strong:['asian','sea','me'], wide:true},
+  'Carrefour':               {strong:['euro','me'], wide:true},
+  'Carrefour KSA':           {strong:['euro','me'], wide:true},
+  'Tamimi Markets':          {strong:['euro','me'], wide:true},
+  'Danube':                  {strong:['euro','me'], wide:true},
+  'Panda':                   {strong:['me']},
+  'Amazon':                  {strong:['asian','sea','me','euro','latin','cauc'], ships:true},
+  'noon':                    {strong:['me','asian'], ships:true},
+  'Salla merchants':         {strong:['me','asian','sea','cauc','latin'], ships:true},
+  'Zid merchants':           {strong:['me','asian','sea'], ships:true},
+  'H Mart / 99 Ranch':       {strong:['asian','sea']},
+  'Tai Ping / Lim Chhour':   {strong:['asian','sea']},
+  'Ocado':                   {strong:['euro','asian'], wide:true},
+  'Tesco':                   {strong:['euro'], wide:true},
+  'Spinneys':                {strong:['euro'], wide:true},
+  'New World':               {strong:['euro'], wide:true},
+  'Woolworths NZ':           {strong:['euro']},
+  'Agrohub':                 {strong:['euro','cauc'], wide:true},
+  "Deserter's Bazaar":       {strong:['cauc','me']},
+  'Tops / Gourmet Market':   {strong:['sea','asian','euro'], wide:true},
+  'Bách Hóa Xanh':           {strong:['sea','asian']},
+  'BigBasket':               {strong:['asian','me'], wide:true},
+  'Landers / S&R':           {strong:['asian','euro'], wide:true},
+  'Nana':                    {strong:['me'], wide:true},
+  'Ninja':                   {strong:['me']},
+  'InstaShop':               {strong:['me','euro'], wide:true},
+  'Kibsons':                 {strong:[]},
+  'Glovo':                   {strong:[], wide:true},
+  'Local supermarkets and the market':      {strong:['carib'], wide:true},
+  'Local stores and the fiesta network':    {strong:['pac'], wide:true}
+};
+const metaOf = s => STORE_META[s.n] || {strong:[]};
+
 /* A country's store list is derived from platform coverage plus locals. */
 function storesFor(cc){
   const global = Object.values(PLATFORMS).filter(p => p.cc.includes(cc));
   return [...(LOCAL[cc] || []), ...global];
+}
+
+/* ---------- who actually has this ingredient ----------
+   Not live inventory — no catalogue API exists for most of these stores.
+   A ranked sourcing judgement, labelled as one.                         */
+function sourcesFor(ingId, cc){
+  const oc = ocOf(ingId), keep = keepOf(ingId);
+  const native = (NATIVE[cc] || []).includes(oc) || oc === 'universal';
+  const out = [];
+  storesFor(cc).forEach(s => {
+    const m = metaOf(s);
+    // Mail order cannot deliver something that has to arrive fresh.
+    if(m.ships && keep === 'fresh') return;
+    // A delivery platform only carries what the shops behind it carry.
+    let conf = null;
+    if(native && (m.wide || s.for.includes(ING[ingId].buy))) conf = 'likely';
+    else if(m.strong.includes(oc)) conf = 'likely';
+    else if(m.wide) conf = 'maybe';
+    if(conf) out.push({store:s, conf});
+  });
+  const rank = {likely:0, maybe:1};
+  out.sort((a, b) => rank[a.conf] - rank[b.conf]
+    || (a.store.tier === 'cart' ? -1 : 0) - (b.store.tier === 'cart' ? -1 : 0));
+  return {list:out.slice(0, 6), native, oc, keep};
 }
 /* Countries the registry can actually serve — no empty screens. */
 const SERVED = Object.keys(COUNTRIES)
@@ -1020,11 +1176,10 @@ const EXAMPLE_PANTRY = {
 /* ---------- state ---------- */
 const state = {
   view:'atlas', dishId:null, servingsMul:1, filter:'all', regionFilter:'all',
-  diet:'none', market:'SA', swaps:{},
+  diet:'none', market:'SA', swaps:{}, need:{},
   pantry:JSON.parse(JSON.stringify(EXAMPLE_PANTRY)),
   pantryIsExample:true,
   cooked:[],           // {id, dishId, rating, note, at}
-  planned:[],          // dish ids queued for shopping
   db:null, sample:null, coachAnswer:'', coachBusy:false
 };
 const byId = id => R.find(r => r.id === id);
@@ -1138,31 +1293,49 @@ async function cookDish(recipe, rating, note){
   }
 }
 
-/* ---------- shopping list ---------- */
-function buildList(){
-  const need = {};
-  state.planned.forEach(did => {
-    const r = byId(did); if(!r) return;
-    effectiveIngs(r).forEach(ing => {
-      const g = toGrams(ing.i, ing.q, ing.u);
-      if(g === null){
-        need[ing.i] = need[ing.i] || {g:0, unresolved:[]};
-        need[ing.i].unresolved.push(fmtIng(ing.q, ing.u));
-      }else{
-        need[ing.i] = need[ing.i] || {g:0, unresolved:[]};
-        need[ing.i].g += g;
-      }
-    });
-  });
-  const rows = [];
-  Object.keys(need).forEach(id => {
-    const have = stockOf(id);
-    const short = need[id].g - have;
-    if(short > 0 || need[id].unresolved.length){
-      rows.push({id, short:Math.max(0, short), unresolved:need[id].unresolved, buy:ING[id].buy});
+/* ---------- shopping list ----------
+   Driven by what the cook ticked, ingredient by ingredient, rather than
+   by whole dishes. state.need maps an ingredient to how much is wanted
+   and which dishes asked for it.                                        */
+function shortfallOf(r, ing){
+  const need = needOf(r, ing);
+  if(need === null) return null;                 // unconvertible: cannot do the maths
+  return Math.max(0, need - stockOf(ing.i));
+}
+function isNeeded(id){ return Object.prototype.hasOwnProperty.call(state.need, id); }
+function toggleNeed(r, ing){
+  const id = ing.i;
+  if(isNeeded(id)){ delete state.need[id]; render(); return; }
+  const g = shortfallOf(r, ing);
+  const nat = needOf(r, ing);
+  state.need[id] = {
+    g: g === null ? null : (g > 0 ? g : nat),      // if stocked, buying still means the full amount
+    unit: g === null ? fmtIng(ing.q * state.servingsMul, ing.u) : null,
+    dishes:[r.id]
+  };
+  render();
+}
+function needAllShort(r){
+  effectiveIngs(r).forEach(ing => {
+    const s = shortfallOf(r, ing);
+    if(s === null || s > 0){
+      if(!isNeeded(ing.i)) state.need[ing.i] = {
+        g: s === null ? null : s,
+        unit: s === null ? fmtIng(ing.q * state.servingsMul, ing.u) : null,
+        dishes:[r.id]
+      };
     }
   });
-  return rows;
+  render();
+}
+function clearNeed(){ state.need = {}; render(); }
+function buildList(){
+  return Object.keys(state.need)
+    .map(id => ({id, ...state.need[id], buy:ING[id].buy, oc:ocOf(id)}))
+    .sort((a, b) => {
+      const order = {spec:0, fresh:1, staple:2};
+      return order[a.buy] - order[b.buy] || ING[a.id].n.localeCompare(ING[b.id].n);
+    });
 }
 
 /* ---------- rendering ---------- */
@@ -1250,7 +1423,6 @@ function viewRecipe(){
   const rat = ratingFor(r.id);
   const craft = CRAFT[r.id];
   const logs = state.cooked.filter(c => c.dishId === r.id).slice(0, 8);
-  const planned = state.planned.includes(r.id);
   const ytQuery = `${r.dish} ${r.native} recipe`;
   const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQuery);
   const diet = dietCheck(r);
@@ -1260,6 +1432,7 @@ function viewRecipe(){
   const proteinIng = effectiveIngs(r).find(ing => flagsOf(ing.i).some(f => f === 'meat' || f === 'fish'));
   const proteinId = proteinIng ? proteinIng.i : null;
   const proteinOpts = (proteinId && !conflictIds.includes(proteinId)) ? cleanSubs(proteinId) : [];
+  const tickedHere = effectiveIngs(r).filter(ing => isNeeded(ing.i)).length;
 
   return `
   <button class="back" id="back">← All dishes</button>
@@ -1275,7 +1448,7 @@ function viewRecipe(){
         ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} from ${rat.n} cooks</span>` : `<span class="pill amber">No one has cooked this yet</span>`}
       </div>
     </div>
-    <button class="btn ${planned ? '' : 'primary'}" id="plan">${planned ? '✓ On shopping list' : 'Add to shopping list'}</button>
+    ${tickedHere ? `<button class="btn" id="goshop">${tickedHere} on shopping list →</button>` : ''}
   </div>
   <p class="lede" style="margin-top:16px">${esc(r.blurb)}</p>
 
@@ -1288,18 +1461,30 @@ function viewRecipe(){
           <span class="val num">${r.serves * state.servingsMul} servings</span>
           <button id="mup" aria-label="More servings">+</button>
         </div>
+        <p class="ingshint">Your pantry is checked against every line. Tick what you need and it goes to Shopping, where the app works out who is likely to have it.</p>
         <ul class="ings">
           ${effectiveIngs(r).map(ing => {
             const cov = coverage(r, ing);
             const g = needOf(r, ing);
-            return `<li${ing.swappedFrom ? ' class="swapped"' : ''}>
+            const short = shortfallOf(r, ing);
+            const ticked = isNeeded(ing.i);
+            const state_ = short === null ? 'unknown' : short > 0 ? (cov.have > 0 ? 'part' : 'out') : 'have';
+            const label = {
+              have:'in pantry', part:'only ' + fmtG(cov.have), out:'none in pantry', unknown:'not tracked'
+            }[state_];
+            return `<li class="${ing.swappedFrom ? 'swapped ' : ''}${ticked ? 'ticked' : ''}">
+              <button class="tick ${ticked ? 'on' : ''}" data-need="${ing.i}" aria-pressed="${ticked}"
+                      aria-label="${ticked ? 'Remove' : 'Add'} ${esc(ING[ing.i].n)} ${ticked ? 'from' : 'to'} shopping list">${ticked ? '✓' : ''}</button>
               <span class="qty num">${fmtIng(ing.q * state.servingsMul, ing.u)}</span>
               <span class="iname">${esc(ING[ing.i].n)}<em>${ing.swappedFrom ? 'swapped from ' + esc(ING[ing.swappedFrom].n) + ' · ' : ''}${g === null ? 'no gram conversion defined' : '≈ ' + fmtG(g)}</em></span>
-              <span class="stock ${cov.cls}">${esc(cov.label)}</span>
+              <span class="stock ${state_}">${esc(label)}${short > 0 && cov.have > 0 ? ` · short ${fmtG(short)}` : ''}</span>
             </li>`;
           }).join('')}
         </ul>
-        ${Object.keys(state.swaps[r.id] || {}).length ? `<button class="mini" id="clearswaps" style="margin-top:10px">Undo swaps</button>` : ''}
+        <div class="ingacts">
+          <button class="btn primary" id="needall">Add everything I'm short of</button>
+          ${Object.keys(state.swaps[r.id] || {}).length ? `<button class="mini" id="clearswaps">Undo swaps</button>` : ''}
+        </div>
       </div>
 
       ${diet.conflicts.length || diet.warnings.length || proteinOpts.length ? `
@@ -1439,16 +1624,12 @@ function viewPantry(){
 function viewList(){
   const rows = buildList();
   const mkt = COUNTRIES[state.market];
-  const stores = storesFor(state.market);
-  const groups = [
-    {k:'fresh',  label:'Fresh — grocery delivery', hint:'Produce, meat and dairy, delivered same day where available'},
-    {k:'staple', label:'Shelf stable — buy the large size once', hint:'Spices, oils, sauces, rice. Worth stocking properly'},
-    {k:'spec',   label:'Specialty — the hard ones', hint:'The ingredients that decide whether the dish tastes right'}
-  ];
+  const CONF = {likely:{l:'Usually stocks it', c:'jade'}, maybe:{l:'Worth checking', c:'amber'}};
+
   return `
-  <div class="eyebrow">Recipes on deck minus what you already have</div>
+  <div class="eyebrow">What you ticked, and who is likely to have it</div>
   <h1 class="title" style="margin:6px 0 10px">Shopping</h1>
-  <div class="prefs" style="margin-bottom:14px">
+  <div class="prefs" style="margin-bottom:6px">
     <label class="pref">
       <span class="eyebrow">Shopping from</span>
       <select id="marketsel">
@@ -1456,40 +1637,49 @@ function viewList(){
       </select>
     </label>
   </div>
-  ${state.planned.length ? `<p class="lede">For: ${state.planned.map(d => esc(byId(d).dish)).join(', ')}.</p>` : ''}
-  ${!state.planned.length ? `<div class="empty">Nothing queued yet. Open a dish and add it to your shopping list.</div>` : ''}
-  ${state.planned.length && !rows.length ? `<div class="empty">Your pantry already covers everything on the list.</div>` : ''}
-  ${groups.map(g => {
-    const items = rows.filter(r => r.buy === g.k);
-    if(!items.length) return '';
-    return `<div class="lgroup panel">
-      <h3>${esc(g.label)} <span class="pill ${g.k === 'spec' ? 'chili' : g.k === 'fresh' ? 'jade' : 'amber'}">${items.length}</span></h3>
-      <div style="font-size:12px;color:var(--ink-3);margin-top:2px">${esc(g.hint)}</div>
-      <ul class="buy">
-        ${items.map(it => `<li>
-          <span class="q num">${it.short > 0 ? fmtG(it.short) : '—'}</span>
-          <span style="flex:1">${esc(ING[it.id].n)}${it.unresolved.length ? `<div style="font-size:11px;color:var(--chili)">plus ${esc(it.unresolved.join(', '))} — no gram conversion</div>` : ''}</span>
-        </li>`).join('')}
-      </ul>
-      ${!stores.filter(s => s.for.includes(g.k)).length ? `
-      <div class="nostore">
-        <strong>No ${esc(g.k === 'spec' ? 'specialty' : g.k)} source known in ${esc(mkt.n)}.</strong>
-        ${g.k === 'spec'
-          ? 'This is the honest answer for most countries, and it is the category that decides whether the dish tastes right. Look for a diaspora grocer — the community that cooks this food will have one — or mail-order from a specialist abroad.'
-          : 'The registry has no platform covering this category here. Worth checking locally; coverage changes fast.'}
-      </div>` : `
-      <div class="stores">
-        ${stores.filter(s => s.for.includes(g.k)).map(s => `
-          <a class="store" href="https://duckduckgo.com/?q=${encodeURIComponent(s.n + ' ' + mkt.n + ' online grocery')}" target="_blank" rel="noopener noreferrer">
-            <b>${esc(s.n)}</b>
-            <span class="tierrow"><span class="pill ${TIERS[s.tier].cls}">${esc(TIERS[s.tier].label)}</span><span class="pill plain">${esc(s.t)}</span></span>
-            <span class="sd">${esc(s.d)}</span>
-          </a>`).join('')}
-      </div>`}
-    </div>`;
-  }).join('')}
-  <div class="notice" style="margin-top:18px"><strong>How this list is built.</strong> These ${stores.length} destinations for ${esc(mkt.n)} are derived, not hand-written: ${Object.keys(PLATFORMS).length} platform operators each declare which countries they serve, and local specialists are layered on only where they beat the global options. Adding a country is a two-letter code. ${SERVED.length} countries are served today.</div>
-  <div class="notice" style="margin-top:10px"><strong>What the badges mean.</strong> Platforms across the Gulf and Asia do publish real, well-documented APIs — Talabat, Jahez, noon and HungerStation all have developer portals. Nearly all are <em>vendor-side</em>: they let a shop receive and fulfil orders placed in the platform's own app, the opposite direction from what this app needs. The exceptions worth building on are Salla and Zid, where a merchant authorises your app and you can then build real carts against their catalogue. Deep link means the app opens the store and you finish there. It never holds your store credentials in any tier.</div>`;
+
+  ${!rows.length ? `<div class="empty">
+      Nothing on the list yet. Open a dish, and tick the ingredients you need — the pantry is checked against every line for you.
+    </div>` : `
+    <p class="lede" style="margin-bottom:4px">${rows.length} ingredient${rows.length > 1 ? 's' : ''} for ${esc(mkt.n)}. Hardest to find first.</p>
+    <div class="shoplist">
+      ${rows.map(row => {
+        const src = sourcesFor(row.id, state.market);
+        const hard = !src.native && row.buy === 'spec';
+        return `<div class="shopitem ${hard ? 'hard' : ''}">
+          <div class="sihead">
+            <div>
+              <b>${esc(ING[row.id].n)}</b>
+              <div class="siqty num">${row.g === null ? esc(row.unit) + ' · no gram conversion' : fmtG(row.g)}</div>
+            </div>
+            <div class="sitags">
+              ${src.native
+                ? `<span class="pill jade">Everyday here</span>`
+                : `<span class="pill ${row.buy === 'spec' ? 'chili' : 'amber'}">${esc(OC_LABEL[src.oc])}</span>`}
+              ${src.keep === 'fresh' ? `<span class="pill plain">must be fresh</span>` : ''}
+              <button class="mini" data-unneed="${row.id}">Remove</button>
+            </div>
+          </div>
+          ${src.list.length ? `<div class="whohas">
+            ${src.list.map(x => `
+              <a class="who" href="https://duckduckgo.com/?q=${encodeURIComponent(x.store.n + ' ' + mkt.n + ' ' + ING[row.id].n)}" target="_blank" rel="noopener noreferrer">
+                <span class="wn">${esc(x.store.n)}</span>
+                <span class="wt"><span class="pill ${CONF[x.conf].c}">${CONF[x.conf].l}</span><span class="pill ${TIERS[x.store.tier].cls}">${esc(TIERS[x.store.tier].label)}</span></span>
+              </a>`).join('')}
+          </div>` : `<div class="nostore">
+            <strong>Nothing in ${esc(mkt.n)} reliably carries this.</strong>
+            ${src.keep === 'fresh'
+              ? 'It has to arrive fresh, so mail order is out. Look for a grower, a diaspora grocer, or substitute — the recipe page lists what works and what it costs you.'
+              : 'Try a diaspora grocer, or mail-order from a specialist abroad. Shelf-stable means shipping is at least possible.'}
+          </div>`}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="ingacts" style="margin-top:16px"><button class="mini" id="clearneed">Clear the list</button></div>
+  `}
+
+  <div class="notice" style="margin-top:20px"><strong>These are sourcing judgements, not live stock.</strong> No catalogue API exists for most of these stores, so the app reasons from what each one reliably carries rather than pretending to know today's shelves. Where a real API exists — Instacart, Kroger, a Salla merchant — the same field gets replaced by actual availability.</div>
+  <div class="notice" style="margin-top:10px"><strong>Difficulty is relative to where you are.</strong> Fish sauce is a specialty import in Warsaw and a shelf staple in Hanoi. Switch the country above and watch the same ingredient change from <em>Everyday here</em> to a channel you have to go hunting for. That is why a single global "specialty" label would be wrong.</div>`;
 }
 
 function render(){
@@ -1537,11 +1727,19 @@ el.addEventListener('click', async e => {
   if(t.id === 'mup'){ state.servingsMul = Math.min(4, state.servingsMul + 0.5); render(); return; }
   if(t.id === 'mdown'){ state.servingsMul = Math.max(0.5, state.servingsMul - 0.5); render(); return; }
 
-  if(t.id === 'plan'){
-    const id = state.dishId;
-    state.planned = state.planned.includes(id) ? state.planned.filter(x => x !== id) : [...state.planned, id];
-    render(); return;
+  const tick = t.closest('[data-need]');
+  if(tick){
+    const r = byId(state.dishId);
+    const ing = effectiveIngs(r).find(i => i.i === tick.dataset.need);
+    if(ing) toggleNeed(r, ing);
+    return;
   }
+  if(t.id === 'needall'){ needAllShort(byId(state.dishId)); return; }
+  if(t.id === 'goshop'){ state.view = 'list'; state.dishId = null; render(); return; }
+  if(t.id === 'clearneed'){ clearNeed(); return; }
+
+  const un = t.closest('[data-unneed]');
+  if(un){ delete state.need[un.dataset.unneed]; render(); return; }
 
   const star = t.closest('[data-star]');
   if(star){ pendingStars = Number(star.dataset.star); restoreStars(); return; }

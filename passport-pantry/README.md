@@ -22,7 +22,7 @@ already knows what is in their cupboard → an estimate of what is left afterwar
 
 ---
 
-## Seven mechanics, all demonstrated in the prototype
+## Eight mechanics, all demonstrated in the prototype
 
 ### 1. Foundation and layers
 
@@ -53,7 +53,51 @@ the gap.** It never guesses. Nothing downstream — pantry, shopping list, scali
 — works without this table, and filling it out properly is the single largest
 engineering task in the product.
 
-### 3. Purchase-anchored pantry ledger
+### 3. The core loop: dish to pantry to shopping
+
+The flow the product is built around:
+
+1. **Click a dish.** Every ingredient line is checked against the pantry as it
+   renders — *in pantry*, *only 210 g · short 190 g*, *none in pantry*, or *not
+   tracked* where no gram conversion exists.
+2. **Tick what you need.** Per ingredient, not per dish, because that is how
+   people actually shop. "Add everything I'm short of" does the obvious bulk case.
+3. **Shopping works out who has it.** For each ticked ingredient, the app ranks
+   the stores that reliably carry it in the country you are shopping from.
+
+**Difficulty is relative to where you are.** This is the part worth getting
+right. Fish sauce is a specialty import in Warsaw and a shelf staple in Hanoi, so
+a single global "specialty" label would be wrong everywhere except by accident.
+Each ingredient carries a culinary channel (`sea`, `me`, `carib`, `cauc`, `pac`,
+`asian`, `latin`, `euro`, `universal`), each country declares which channels are
+simply everyday shopping there, and the same ingredient reads as *Everyday here*
+in one country and a hunt in another:
+
+| Fish sauce | Reads as | Where |
+|---|---|---|
+| Vietnam | Everyday here | Bách Hóa Xanh |
+| Thailand | Everyday here | Tops / Gourmet Market |
+| Saudi Arabia | Southeast Asian | Salla merchant, Zid, Lulu |
+| United Kingdom | Southeast Asian | Amazon, then Tesco or Ocado worth checking |
+| Poland | Southeast Asian | Amazon, then Glovo or Carrefour worth checking |
+
+**These are sourcing judgements, not live stock, and the app says so.** No
+catalogue API exists for most of these stores, so it reasons from what each one
+reliably carries rather than pretending to know today's shelves. Two rules keep
+the judgements honest:
+
+- An ingredient that must arrive fresh is never routed to mail order. Makrut lime
+  leaves, scotch bonnet, donne' sali and fresh grated coconut never appear under
+  Amazon or a Salla merchant, in any country.
+- A dead end is stated, not hidden. Across every ingredient and country pair,
+  26% have no reliable source, and each one gets an explicit message with
+  different advice depending on whether the item could ship at all.
+
+Where a real catalogue API exists — Instacart, Kroger, a Salla merchant — this
+same field is replaced by actual availability without the rest of the flow
+changing.
+
+### 4. Purchase-anchored pantry ledger
 
 The differentiator, and the feature most likely to fail if built naively.
 
@@ -70,7 +114,7 @@ The design that survives:
 - **Present estimates as estimates.** "≈ 210 g left" with one-tap correction,
   never a ledger claiming precision it does not have.
 
-### 4. Protein and dietary swaps
+### 5. Protein and dietary swaps
 
 Religion and preference decide the protein long before taste does. The diet
 engine holds eight profiles — halal, kosher, no pork, no beef, pescatarian,
@@ -94,13 +138,13 @@ Swaps resolve in one function, `effectiveIng()`. Quantities, pantry coverage and
 the shopping list all read through it, so a swap propagates without any of them
 knowing diets exist.
 
-### 5. Region browsing
+### 6. Region browsing
 
 The Atlas filters by region before country, because that is how travel memory is
 organised — people remember *Southeast Asia* or *the Gulf*, not a country list.
 Each region carries a line on what it is known for.
 
-### 6. Global sourcing from a derived platform registry
+### 7. Global sourcing from a derived platform registry
 
 The first version of this hand-curated a store list per country. That does not
 scale past a handful of markets, and the product is global by definition — the
@@ -140,7 +184,7 @@ Country coverage is researched but not verified market by market, and platforms
 enter and leave countries constantly. The tier assignments are the durable part;
 treat coverage as a starting point that needs maintenance.
 
-### 7. Community layer
+### 8. Community layer
 
 Ratings and notes from people who actually cooked the dish, stored per-dish.
 This is original user content, owned outright, and it is the only realistic way
