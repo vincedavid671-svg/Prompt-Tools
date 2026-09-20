@@ -22,7 +22,7 @@ already knows what is in their cupboard → an estimate of what is left afterwar
 
 ---
 
-## Nine mechanics, all demonstrated in the prototype
+## Ten mechanics, all demonstrated in the prototype
 
 ### 1. Foundation and layers
 
@@ -146,7 +146,82 @@ Honest limits, all stated in the UI:
   absorbed by frying is estimated rather than measured.
 - It is informational, not medical or dietary advice, and says so.
 
-### 5. Purchase-anchored pantry ledger
+### 5. Daily calorie budget
+
+The feature that turns this from a reference into something you open every
+evening. A **Today** tab with a target, a day log, and the question that actually
+matters: *what can I cook with what's left?*
+
+**Setting the target.** Either enter a figure you already have, or let the app
+estimate it with Mifflin-St Jeor plus an activity multiplier — the standard
+clinical equation:
+
+    male:        10·kg + 6.25·cm − 5·age + 5
+    female:      10·kg + 6.25·cm − 5·age − 161
+    unspecified: 10·kg + 6.25·cm − 5·age − 78   (midpoint)
+
+Times 1.2 to 1.9 for activity, plus a goal delta (−250, −500, 0, +350). The
+working is shown on screen, not hidden, so the number is inspectable. Tests pin
+the equation to hand-computed values.
+
+**The macro framework** (balanced, high protein, low carb, keto) converts the
+target into protein/carb/fat gram targets, and the Today view tracks each against
+what has been logged. A test asserts all four frameworks reconcile back to the
+calorie target within 3%.
+
+**Logging.** Any dish logs at 0.5×, 1×, 1.5× or 2× a serving, and "I cooked this"
+logs one serving automatically — so the cook log, the pantry depletion and the
+day's calories all come from one action.
+
+**The payoff.** Below the ring, the catalogue filtered to what fits in the
+remaining budget, with anything within 150 kcal marked as just over. Go past the
+target and it says so without moralising: *one day over target is not a problem;
+a pattern of them is.*
+
+#### The safety floor, and a bug worth recording
+
+Weight-loss targets get checked against commonly cited floors — 1200 kcal, or
+1500 for men — below which sustained intake is held to need professional
+oversight.
+
+The first implementation applied that floor to *any* target and offered the
+mildest goal that would clear it. Test output showed it telling a 45 kg woman with
+a normal BMI to **gain weight**. The bug was conceptual, not arithmetic: those
+figures are floors for a *deliberate deficit*, not minimums every body must
+exceed. A small, sedentary, older person can have a genuine maintenance
+requirement near 1100 kcal, and flagging normal eating as dangerous — then
+prescribing weight gain — would be wrong and would devalue every other warning
+the app gives.
+
+Corrected behaviour, each case covered by a test:
+
+| Situation | Response |
+|---|---|
+| Deliberate deficit below the floor, easing the goal fixes it | Suggests the specific milder goal and its number |
+| Deficit below the floor, maintenance is *also* below it | Says so and defers to a dietitian — no slider fixes this |
+| Maintenance target below the floor | **No warning.** That is their requirement, not a crash diet |
+| Any gaining target | No warning |
+| Figure the user entered themselves | Noted where it sits, never overridden — if a dietitian set it, it stands |
+
+The remedy never recommends a surplus as the way out of a deficit.
+
+#### Privacy
+
+A food diary and body-composition figures are personal health data, so they are
+written to the viewer's **private** path (`data/users/<id>/`) via the `user`
+capability, not the shared collections the pantry and cook log use. Without that
+capability they stay in memory for the session rather than being written anywhere
+another viewer could read, and the UI states which of the two is happening.
+
+#### Honest limit
+
+The budget inherits the nutrition table's uncertainty and compounds it across
+everything logged in a day. Stated on the screen: useful for direction and habit,
+not accurate enough to manage a medical condition on. **Wire FoodData Central
+before shipping this feature to real users** — a diabetic counting carbohydrate on
+approximations is a genuine harm, not a rough edge.
+
+### 6. Purchase-anchored pantry ledger
 
 The differentiator, and the feature most likely to fail if built naively.
 
@@ -163,7 +238,7 @@ The design that survives:
 - **Present estimates as estimates.** "≈ 210 g left" with one-tap correction,
   never a ledger claiming precision it does not have.
 
-### 6. Protein and dietary swaps
+### 7. Protein and dietary swaps
 
 Religion and preference decide the protein long before taste does. The diet
 engine holds eight profiles — halal, kosher, no pork, no beef, pescatarian,
@@ -187,13 +262,13 @@ Swaps resolve in one function, `effectiveIng()`. Quantities, pantry coverage and
 the shopping list all read through it, so a swap propagates without any of them
 knowing diets exist.
 
-### 7. Region browsing
+### 8. Region browsing
 
 The Atlas filters by region before country, because that is how travel memory is
 organised — people remember *Southeast Asia* or *the Gulf*, not a country list.
 Each region carries a line on what it is known for.
 
-### 8. Global sourcing from a derived platform registry
+### 9. Global sourcing from a derived platform registry
 
 The first version of this hand-curated a store list per country. That does not
 scale past a handful of markets, and the product is global by definition — the
@@ -233,7 +308,7 @@ Country coverage is researched but not verified market by market, and platforms
 enter and leave countries constantly. The tier assignments are the durable part;
 treat coverage as a starting point that needs maintenance.
 
-### 9. Community layer
+### 10. Community layer
 
 Ratings and notes from people who actually cooked the dish, stored per-dish.
 This is original user content, owned outright, and it is the only realistic way
@@ -430,12 +505,14 @@ coverage resolves to a listed country; every listed country is reachable; and
 every dish country is shoppable-from. Category gaps are reported rather than
 asserted, because they are real — the UI handles them explicitly.
 
-Two runtime capabilities when published as an artifact:
+Three runtime capabilities when published as an artifact:
 
 - `db` — pantry state and cook log, shared and durable. Degrades to in-memory
   when unavailable; the page still works.
 - `sample` — the cooking coach. The page hides the feature when it is not
   granted rather than failing.
+- `user` — identifies the viewer so the food diary and profile can be written to
+  their own private path instead of shared storage.
 
 Example pantry stock is shown on first load so the screen is not empty, and is
 plainly labelled as example data until the viewer logs a cook or edits a line.

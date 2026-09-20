@@ -192,6 +192,39 @@ ul.ings li.swapped .iname em{color:var(--jade)}
 .store b{font-size:13.5px}
 .store .tierrow{display:flex;gap:4px;flex-wrap:wrap}
 .store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+/* ---------- daily budget ---------- */
+.budget{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-top:18px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.ring{position:relative;flex:0 0 132px;width:132px;height:132px}
+.ringin{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.rbig{font-family:var(--display);font-size:32px;font-weight:600;line-height:1;letter-spacing:-.02em;display:block}
+.rlab{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.bstats{flex:1;min-width:210px;display:flex;flex-direction:column;gap:7px}
+.brow{display:flex;justify-content:space-between;align-items:center;font-size:13px;gap:10px}
+.brow b{font-size:15px}
+.brow.dim{color:var(--ink-3);font-size:12px;border-top:1px solid var(--line);padding-top:8px;margin-top:2px}
+.mtrack{margin-top:3px}
+.mtl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-2);margin-bottom:3px}
+.sech{font-family:var(--display);font-size:19px;font-weight:600;margin:26px 0 10px}
+.daylog{list-style:none;margin:0;padding:0}
+.daylog li{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.dl-n{font-size:13.5px;font-weight:600;flex:1;min-width:130px}
+.dl-m{font-size:12px;color:var(--ink-2)}
+.dim{color:var(--ink-3);font-weight:400}
+.pmode{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px}
+.pf{display:flex;flex-direction:column;gap:3px}
+.pf.wide{grid-column:1/-1}
+.pf span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.pf input,.pf select{border:1px solid var(--line-2);background:var(--paper);color:var(--ink);
+  border-radius:8px;padding:8px 10px;font-size:13.5px;width:100%}
+.pf input:focus-visible,.pf select:focus-visible{outline:2px solid var(--accent);outline-offset:-1px}
+.calcout{font-size:12.5px;color:var(--ink-2);margin-top:12px;background:var(--surface-2);
+  border-radius:8px;padding:9px 11px;line-height:1.6}
+.logrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.logbtns{display:flex;gap:5px}
+
 /* ---------- nutrition ---------- */
 .kcal{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:10px}
 .kbig{font-family:var(--display);font-size:38px;font-weight:600;line-height:1;letter-spacing:-.02em}
@@ -291,6 +324,7 @@ footer.foot{border-top:1px solid var(--line);margin-top:34px;padding-top:14px;fo
       <div class="brand"><b>Passport Pantry</b><span>Prototype</span></div>
       <nav class="tabs" role="tablist" id="tabs">
         <button role="tab" data-view="atlas" aria-selected="true">Atlas</button>
+        <button role="tab" data-view="today" aria-selected="false">Today</button>
         <button role="tab" data-view="pantry" aria-selected="false">Pantry</button>
         <button role="tab" data-view="list" aria-selected="false">Shopping</button>
       </nav>
@@ -729,6 +763,89 @@ const NUTR = {
   almond:{k:579,p:21.2,c:21.6,f:49.9},      raisin:{k:299,p:3.1,c:79.2,f:0.5},
   potato_fl:{k:77,p:2.0,c:17.5,f:0.1}
 };
+
+/* ---------- daily budget ----------
+   Mifflin-St Jeor for resting metabolic rate, times an activity factor.
+   It is the standard clinical estimate and it is still an estimate:
+   individual variance runs to roughly 10-15% either way, which is 200-300
+   kcal on a typical target. The UI says so, and offers direct entry for
+   anyone who already has a figure from a dietitian.                      */
+const ACTIVITY = {
+  1.2:  'Desk job, little exercise',
+  1.375:'Light exercise, 1-3 days a week',
+  1.55: 'Moderate exercise, 3-5 days',
+  1.725:'Hard exercise, 6-7 days',
+  1.9:  'Physical job or twice-daily training'
+};
+const GOALS = {
+  lose_slow:{label:'Lose slowly', delta:-250, note:'About 0.25 kg a week'},
+  lose:     {label:'Lose',        delta:-500, note:'About 0.5 kg a week'},
+  maintain: {label:'Maintain',    delta:0,    note:'Hold current weight'},
+  gain:     {label:'Gain',        delta:350,  note:'About 0.3 kg a week'}
+};
+/* Widely cited floors below which a deficit needs professional oversight.
+   The app will not silently hand someone a 900 kcal target. */
+const FLOOR = {male:1500, female:1200, unspecified:1200};
+const FRAMEWORKS = {
+  balanced:    {label:'Balanced',     p:20, c:50, f:30},
+  highprotein: {label:'High protein', p:35, c:35, f:30},
+  lowcarb:     {label:'Low carb',     p:30, c:20, f:50},
+  keto:        {label:'Keto',         p:20, c:5,  f:75}
+};
+
+function bmr(pr){
+  const base = 10 * pr.weight + 6.25 * pr.height - 5 * pr.age;
+  if(pr.sex === 'male') return base + 5;
+  if(pr.sex === 'female') return base - 161;
+  return base - 78;                          // midpoint when unspecified
+}
+function computedTarget(pr){
+  const raw = bmr(pr) * pr.activity + GOALS[pr.goal].delta;
+  return Math.round(raw / 10) * 10;
+}
+function targetOf(pr){
+  return pr.mode === 'direct' ? pr.target : computedTarget(pr);
+}
+/* The 1200/1500 figures are floors for a deliberate weight-loss deficit,
+   not minimums every body must exceed. A small, sedentary, older person
+   can have a genuine maintenance requirement near 1100 — flagging that as
+   unsafe, and then suggesting they eat to gain weight, would be wrong and
+   would undermine every other warning the app gives. So the floor applies
+   only to an intentional deficit, and the suggested remedy never pushes
+   anyone upward past maintenance. */
+function floorWarning(pr){
+  const t = targetOf(pr), f = FLOOR[pr.sex] || 1200;
+  if(t >= f) return null;
+  const deliberate = pr.mode === 'direct' || GOALS[pr.goal].delta < 0;
+  if(!deliberate) return null;                     // maintenance or a surplus is not a crash diet
+  if(pr.mode === 'direct') return {target:t, floor:f, fix:null, fixTarget:null, ownNumber:true};
+  // Only ease the deficit — never recommend a surplus as the way out.
+  const fix = ['lose_slow', 'maintain'].find(g => computedTarget({...pr, goal:g}) >= f) || null;
+  const maint = computedTarget({...pr, goal:'maintain'});
+  return {target:t, floor:f, fix, fixTarget:fix ? computedTarget({...pr, goal:fix}) : null,
+          maintBelowFloor:maint < f, maint};
+}
+function macroTargets(pr){
+  const t = targetOf(pr), fw = FRAMEWORKS[pr.framework];
+  return {p:Math.round(t * fw.p / 100 / 4), c:Math.round(t * fw.c / 100 / 4), f:Math.round(t * fw.f / 100 / 9)};
+}
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+function dayEntries(){ return state.day[state.date] || []; }
+function dayTotals(){
+  return dayEntries().reduce((a, e) => ({
+    k:a.k + e.k, p:a.p + e.p, c:a.c + e.c, f:a.f + e.f
+  }), {k:0, p:0, c:0, f:0});
+}
+function remainingKcal(){ return targetOf(state.profile) - dayTotals().k; }
+/* Does one serving of this dish fit in what is left today? */
+function fitsToday(r){
+  const left = remainingKcal();
+  const k = nutritionOf(r).k;
+  if(k <= left) return 'fits';
+  if(k <= left + 150) return 'close';
+  return 'over';
+}
 
 /* ---------- what actually gets eaten ----------
    The trap in every recipe calorie count: summing raw ingredients assumes
@@ -1315,6 +1432,10 @@ const EXAMPLE_PANTRY = {
 const state = {
   view:'atlas', dishId:null, servingsMul:1, filter:'all', regionFilter:'all',
   diet:'none', market:'SA', swaps:{}, need:{},
+  date:new Date().toISOString().slice(0,10), day:{}, editProfile:false,
+  profile:{mode:'calc', target:2200, sex:'unspecified', age:40, height:175,
+           weight:80, activity:1.375, goal:'maintain', framework:'balanced'},
+  user:null,
   pantry:JSON.parse(JSON.stringify(EXAMPLE_PANTRY)),
   pantryIsExample:true,
   cooked:[],           // {id, dishId, rating, note, at}
@@ -1331,6 +1452,29 @@ async function initCaps(){
   try{
     state.sample = await window.claude?.use?.('sample') ?? null;
   }catch(e){ state.sample = null; }
+  try{
+    state.user = await window.claude?.use?.('user') ?? null;
+  }catch(e){ state.user = null; }
+
+  /* A food diary and a body-composition profile are personal health data,
+     so they go under the viewer's own private path rather than the shared
+     collections the pantry and cook log use. Without the user capability
+     we keep them in memory for the session instead of writing them
+     somewhere other people could read. */
+  if(state.db && state.user){
+    try{
+      const uid = await state.user.id();
+      state.privBase = 'data/users/' + uid + '/';
+      const prof = await state.db.doc(state.privBase + 'profile').get();
+      if(prof) state.profile = {...state.profile, ...prof};
+      state.db.collection(state.privBase + 'days').onSnapshot(docs => {
+        const next = {};
+        (docs || []).forEach(d => { next[d.id] = d.entries || []; });
+        state.day = {...state.day, ...next};
+        render();
+      });
+    }catch(e){ state.privBase = null; }
+  }
 
   if(state.db){
     try{
@@ -1347,6 +1491,16 @@ async function initCaps(){
     }catch(e){ /* subscription unavailable; stay local */ }
   }
   render();
+}
+async function saveDay(){
+  if(!state.db || !state.privBase) return;                 // in-memory only
+  try{ await state.db.doc(state.privBase + 'days/' + state.date).set({entries:dayEntries()}); }
+  catch(e){}
+}
+async function saveProfile(){
+  if(!state.db || !state.privBase) return;
+  try{ await state.db.doc(state.privBase + 'profile').set(state.profile); }
+  catch(e){}
 }
 async function savePantryItem(id){
   const p = state.pantry[id];
@@ -1412,6 +1566,19 @@ function coverage(recipe, ing){
   if(have >= need) return {cls:'ok', label:fmtG(have) + ' on hand', need, have};
   return {cls:'low', label:'only ' + fmtG(have), need, have};
 }
+async function logServing(r, servings){
+  const n = nutritionOf(r);
+  const e = {id:'e' + Date.now(), dishId:r.id, dish:r.dish, servings,
+             k:n.k * servings, p:n.p * servings, c:n.c * servings, f:n.f * servings, at:Date.now()};
+  state.day[state.date] = [...dayEntries(), e];
+  render();
+  saveDay();
+}
+function unlog(id){
+  state.day[state.date] = dayEntries().filter(e => e.id !== id);
+  render();
+  saveDay();
+}
 async function cookDish(recipe, rating, note){
   // Purchase-anchored depletion: subtract what the recipe consumed, floor at 0.
   effectiveIngs(recipe).forEach(ing => {
@@ -1422,6 +1589,7 @@ async function cookDish(recipe, rating, note){
     p.left = Math.max(0, p.left - need);
   });
   state.pantryIsExample = false;
+  logServing(recipe, 1);
   const entry = {dishId:recipe.id, rating, note:note || '', at:Date.now()};
   state.cooked = [{id:'local-' + Date.now(), ...entry}, ...state.cooked];
   render();
@@ -1676,6 +1844,13 @@ function viewRecipe(){
         </div>
         <div class="mbarkey">Share of energy — protein, carbohydrate, fat</div>
         ${nut.tags.length ? `<div class="ntags">${nut.tags.map(t => `<span class="pill jade">${esc(t)}</span>`).join('')}</div>` : ''}
+        <div class="logrow">
+          <span class="eyebrow">Log a serving</span>
+          <div class="logbtns">
+            ${[0.5, 1, 1.5, 2].map(x => `<button class="mini" data-log="${x}">${x === 1 ? '1' : x}×</button>`).join('')}
+          </div>
+        </div>
+        <div class="nnote dim" style="margin-top:6px">${Math.round(remainingKcal())} kcal left today — ${fitsToday(r) === 'fits' ? 'a serving fits' : fitsToday(r) === 'close' ? 'a serving is just over' : 'a full serving is over budget'}.</div>
 
         ${nut.adjusted ? `<div class="nnote"><strong>Adjusted for what you don't eat.</strong> ${esc(EATEN_NOTE[r.id] || '')}</div>` : ''}
         ${nut.missing ? `<div class="nnote warn">${nut.missing} ingredient${nut.missing > 1 ? 's' : ''} could not be counted — no nutrition row or no gram conversion. The figure above is low by that much.</div>` : ''}
@@ -1789,6 +1964,123 @@ function viewPantry(){
   <div class="notice" style="margin-top:14px"><strong>Known gap.</strong> Ingredients with no gram conversion (a "bunch" of thyme, a "pinch") cannot be tracked here. That conversion table is the single hardest piece of engineering in this product and it is only partly filled in.</div>`;
 }
 
+function viewToday(){
+  const pr = state.profile;
+  const target = targetOf(pr), tot = dayTotals(), left = remainingKcal();
+  const mt = macroTargets(pr), warn = floorWarning(pr);
+  const pct = target > 0 ? Math.min(100, tot.k / target * 100) : 0;
+  const over = tot.k > target;
+  const C = 2 * Math.PI * 54;
+  const fitting = R.map(r => ({r, n:nutritionOf(r), fit:fitsToday(r)}))
+                   .filter(x => x.fit !== 'over')
+                   .sort((a, b) => b.n.k - a.n.k);
+
+  return `
+  <div class="eyebrow">${new Date(state.date + 'T12:00:00').toLocaleDateString(undefined,{weekday:'long', day:'numeric', month:'long'})}</div>
+  <h1 class="title" style="margin:6px 0 4px">Today</h1>
+
+  <div class="budget">
+    <div class="ring">
+      <svg viewBox="0 0 120 120" width="132" height="132" aria-hidden="true">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="var(--sunk)" stroke-width="11"/>
+        <circle cx="60" cy="60" r="54" fill="none" stroke="${over ? 'var(--chili)' : 'var(--jade)'}"
+                stroke-width="11" stroke-linecap="round" transform="rotate(-90 60 60)"
+                stroke-dasharray="${(C * pct / 100).toFixed(1)} ${C.toFixed(1)}"/>
+      </svg>
+      <div class="ringin">
+        <span class="rbig num">${Math.abs(Math.round(left))}</span>
+        <span class="rlab">${left < 0 ? 'kcal over' : 'kcal left'}</span>
+      </div>
+    </div>
+    <div class="bstats">
+      <div class="brow"><span>Eaten</span><b class="num">${Math.round(tot.k)}</b></div>
+      <div class="brow"><span>Target</span><b class="num">${target}</b></div>
+      <div class="brow dim"><span>${pr.mode === 'calc' ? GOALS[pr.goal].label + ' · ' + FRAMEWORKS[pr.framework].label : 'Set directly · ' + FRAMEWORKS[pr.framework].label}</span><button class="mini" id="editprof">${state.editProfile ? 'Close' : 'Adjust'}</button></div>
+      ${[['Protein','p',tot.p,mt.p,'var(--jade)'],['Carbs','c',tot.c,mt.c,'var(--accent)'],['Fat','f',tot.f,mt.f,'var(--chili)']].map(([lab,k,v,t,col]) => `
+        <div class="mtrack">
+          <div class="mtl"><span>${lab}</span><span class="num">${Math.round(v)} / ${t} g</span></div>
+          <div class="meter"><i style="width:${t > 0 ? Math.min(100, v / t * 100) : 0}%;background:${col}"></i></div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  ${warn ? `<div class="notice" style="margin-top:14px;border-color:var(--chili);color:var(--chili)">
+    <strong>That deficit works out to ${warn.target} kcal, below the ${warn.floor} kcal mark.</strong>
+    Sustained intake this low while trying to lose weight is generally held to need professional supervision, and the dishes below are filtered against it, so you would see very little.
+    ${warn.ownNumber
+      ? ' If a dietitian set this figure, carry on — the app is only noting where it sits.'
+      : warn.fix
+        ? ` Switching the goal to <strong>${esc(GOALS[warn.fix].label)}</strong> gives ${warn.fixTarget} kcal.`
+        : ` Your estimated maintenance is already about ${warn.maint} kcal, so there is not much room for a deficit at all. This is worth discussing with a dietitian rather than solving with a slider.`}
+  </div>` : ''}
+
+  ${state.editProfile ? `
+  <div class="panel" style="margin-top:14px">
+    <h2>Your target</h2>
+    <div class="pmode">
+      <button class="chip" data-pmode="calc" aria-pressed="${pr.mode === 'calc'}">Estimate it for me</button>
+      <button class="chip" data-pmode="direct" aria-pressed="${pr.mode === 'direct'}">I know my number</button>
+    </div>
+    ${pr.mode === 'direct' ? `
+      <div class="pgrid" style="margin-top:12px">
+        <label class="pf"><span>Daily calories</span><input type="number" id="pf-target" value="${pr.target}" min="800" max="6000" step="10"></label>
+      </div>
+    ` : `
+      <div class="pgrid" style="margin-top:12px">
+        <label class="pf"><span>Sex</span><select id="pf-sex">
+          ${['unspecified','female','male'].map(v => `<option value="${v}" ${pr.sex === v ? 'selected' : ''}>${v === 'unspecified' ? 'Prefer not to say' : v[0].toUpperCase() + v.slice(1)}</option>`).join('')}
+        </select></label>
+        <label class="pf"><span>Age</span><input type="number" id="pf-age" value="${pr.age}" min="14" max="100"></label>
+        <label class="pf"><span>Height (cm)</span><input type="number" id="pf-height" value="${pr.height}" min="120" max="230"></label>
+        <label class="pf"><span>Weight (kg)</span><input type="number" id="pf-weight" value="${pr.weight}" min="30" max="300"></label>
+        <label class="pf wide"><span>Activity</span><select id="pf-activity">
+          ${Object.keys(ACTIVITY).map(v => `<option value="${v}" ${String(pr.activity) === v ? 'selected' : ''}>${esc(ACTIVITY[v])}</option>`).join('')}
+        </select></label>
+        <label class="pf wide"><span>Goal</span><select id="pf-goal">
+          ${Object.keys(GOALS).map(v => `<option value="${v}" ${pr.goal === v ? 'selected' : ''}>${esc(GOALS[v].label)} — ${esc(GOALS[v].note)}</option>`).join('')}
+        </select></label>
+      </div>
+      <div class="calcout">
+        Resting rate ≈ <b class="num">${Math.round(bmr(pr))}</b> kcal · with activity <b class="num">${Math.round(bmr(pr) * pr.activity)}</b> · ${GOALS[pr.goal].delta ? (GOALS[pr.goal].delta > 0 ? '+' : '') + GOALS[pr.goal].delta + ' for your goal' : 'no adjustment'} → <b class="num">${computedTarget(pr)}</b>
+      </div>
+      <div class="nnote dim">Mifflin-St Jeor with an activity multiplier — the standard clinical estimate, and still an estimate. Individual metabolic rate varies by roughly 10-15%, which is 200 to 300 kcal at this target. Treat it as a starting point and adjust from what actually happens over a few weeks.</div>
+    `}
+    <div class="pgrid" style="margin-top:12px">
+      <label class="pf wide"><span>Macro framework</span><select id="pf-framework">
+        ${Object.keys(FRAMEWORKS).map(v => `<option value="${v}" ${pr.framework === v ? 'selected' : ''}>${esc(FRAMEWORKS[v].label)} — ${FRAMEWORKS[v].p}% protein, ${FRAMEWORKS[v].c}% carbs, ${FRAMEWORKS[v].f}% fat</option>`).join('')}
+      </select></label>
+    </div>
+    <div class="nnote dim">${state.privBase ? 'Saved privately to your own storage — not visible to anyone else, including whoever published this page.' : 'Kept in memory for this session only. Persisting a food diary needs the private-storage capability, and it will not be written anywhere shared.'}</div>
+  </div>` : ''}
+
+  <h2 class="sech">Logged today</h2>
+  ${dayEntries().length ? `<ul class="daylog">
+    ${dayEntries().map(e => `<li>
+      <span class="dl-n">${esc(e.dish)}${e.servings !== 1 ? ` <span class="dim">× ${e.servings}</span>` : ''}</span>
+      <span class="dl-m num">${Math.round(e.k)} kcal · P${Math.round(e.p)} C${Math.round(e.c)} F${Math.round(e.f)}</span>
+      <button class="mini" data-unlog="${e.id}">Remove</button>
+    </li>`).join('')}
+  </ul>` : `<div class="empty">Nothing logged. Open a dish and log a serving, or use the list below.</div>`}
+
+  <h2 class="sech">${left < 0 ? 'You are over for today' : `What fits in ${Math.round(left)} kcal`}</h2>
+  ${left < 0
+    ? `<div class="empty">One day over target is not a problem; a pattern of them is. Tomorrow resets.</div>`
+    : fitting.length
+      ? `<div class="grid">
+          ${fitting.map(x => `<button class="dish" data-dish="${x.r.id}">
+            <div class="where"><span aria-hidden="true">${x.r.flag}</span>${esc(x.r.country)}</div>
+            <h3>${esc(x.r.dish)}</h3>
+            <div class="foot">
+              <span class="pill ${x.fit === 'fits' ? 'jade' : 'amber'} num">${Math.round(x.n.k)} kcal${x.fit === 'close' ? ' · just over' : ''}</span>
+              <span class="pill plain num">P${Math.round(x.n.p)} C${Math.round(x.n.c)} F${Math.round(x.n.f)}</span>
+            </div>
+          </button>`).join('')}
+        </div>`
+      : `<div class="empty">Nothing in the catalogue fits what is left. A smaller portion of something will — the servings control on any dish scales it.</div>`}
+
+  <div class="notice" style="margin-top:20px"><strong>Built on approximate nutrition data.</strong> The ingredient values behind these figures are reference approximations, not USDA-sourced, so a day's total carries that error compounded across everything you logged. Useful for direction and habit; not accurate enough to manage a medical condition on. Informational only, not dietary or medical advice.</div>`;
+}
+
 function viewList(){
   const rows = buildList();
   const mkt = COUNTRIES[state.market];
@@ -1853,6 +2145,7 @@ function viewList(){
 function render(){
   el.innerHTML =
     state.view === 'atlas'  ? (state.dishId ? viewRecipe() : viewAtlas()) :
+    state.view === 'today'  ? viewToday() :
     state.view === 'pantry' ? viewPantry() :
                               viewList();
   document.querySelectorAll('#tabs button').forEach(b =>
@@ -1906,6 +2199,17 @@ el.addEventListener('click', async e => {
   if(t.id === 'goshop'){ state.view = 'list'; state.dishId = null; render(); return; }
   if(t.id === 'clearneed'){ clearNeed(); return; }
 
+  const lg = t.closest('[data-log]');
+  if(lg){ logServing(byId(state.dishId), Number(lg.dataset.log)); return; }
+
+  const ul = t.closest('[data-unlog]');
+  if(ul){ unlog(ul.dataset.unlog); return; }
+
+  if(t.id === 'editprof'){ state.editProfile = !state.editProfile; render(); return; }
+
+  const pm = t.closest('[data-pmode]');
+  if(pm){ state.profile.mode = pm.dataset.pmode; render(); saveProfile(); return; }
+
   const un = t.closest('[data-unneed]');
   if(un){ delete state.need[un.dataset.unneed]; render(); return; }
 
@@ -1941,9 +2245,21 @@ el.addEventListener('click', async e => {
   }
 });
 
+const PF = {
+  'pf-target':['target','int'], 'pf-age':['age','int'], 'pf-height':['height','int'],
+  'pf-weight':['weight','num'], 'pf-activity':['activity','num'],
+  'pf-sex':['sex','str'], 'pf-goal':['goal','str'], 'pf-framework':['framework','str']
+};
 el.addEventListener('change', e => {
-  if(e.target.id === 'dietsel'){ state.diet = e.target.value; render(); }
-  if(e.target.id === 'marketsel'){ state.market = e.target.value; render(); }
+  if(e.target.id === 'dietsel'){ state.diet = e.target.value; render(); return; }
+  if(e.target.id === 'marketsel'){ state.market = e.target.value; render(); return; }
+  const f = PF[e.target.id];
+  if(f){
+    const [key, kind] = f;
+    const raw = e.target.value;
+    state.profile[key] = kind === 'str' ? raw : kind === 'int' ? parseInt(raw, 10) || 0 : parseFloat(raw) || 0;
+    render(); saveProfile();
+  }
 });
 
 el.addEventListener('keydown', e => {
