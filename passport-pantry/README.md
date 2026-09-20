@@ -22,7 +22,7 @@ already knows what is in their cupboard → an estimate of what is left afterwar
 
 ---
 
-## Eight mechanics, all demonstrated in the prototype
+## Nine mechanics, all demonstrated in the prototype
 
 ### 1. Foundation and layers
 
@@ -97,7 +97,56 @@ Where a real catalogue API exists — Instacart, Kroger, a Salla merchant — th
 same field is replaced by actual availability without the rest of the flow
 changing.
 
-### 4. Purchase-anchored pantry ledger
+### 4. Calories and macros, corrected for what you actually eat
+
+Per serving: kcal, protein, carbohydrate, fat, and the share of energy each
+macro contributes. It reads through `effectiveIngs()`, so swapping pork for
+chicken moves the numbers, and per-serving figures are invariant under scaling —
+tripling the batch does not change what one plate contains.
+
+**The trap most recipe calorie counts fall into.** Summing raw ingredients
+assumes you eat all of them. You do not:
+
+| Dish | Raw sum | Actually eaten | Overcount avoided |
+|---|---|---|---|
+| Phở Gà | 1321 kcal | 659 kcal | **50%** |
+| Chicken Tagine | 1058 kcal | 731 kcal | 31% |
+| Lomo Saltado | 777 kcal | 701 kcal | 10% |
+| Khinkali | 807 kcal | 770 kcal | 5% |
+
+Phở is the extreme case and it is instructive: the carcass and every aromatic
+are strained out and binned, and you eat roughly a third of the bird by weight.
+Counting the whole chicken, the star anise and the charred onion would report a
+bowl of chicken noodle soup at 1321 kcal. That is not a rounding error, it is
+double.
+
+So each recipe carries an `EATEN` map — the fraction of each ingredient's mass
+actually consumed — with a written explanation shown in the UI wherever a
+correction applies. Bones are discarded, frying oil mostly drains, potatoes are
+peeled, khinkali knots are famously not eaten, and a whole scotch bonnet is
+lifted out before serving.
+
+**Tags need an absolute threshold, not just an energy share.** The first version
+tagged Bangers and Mash "Low carb" at 54 g of carbohydrate, because the fat was
+high enough to dominate the energy split. Correct arithmetic, useless advice, and
+exactly the kind of thing that makes a dieting user stop trusting an app. Both
+tests now have to pass: keto requires ≤10 g *and* ≤10% of energy; low carb
+requires ≤30 g *and* ≤25%.
+
+Honest limits, all stated in the UI:
+
+- The per-100g table holds **reference approximations, not sourced values.**
+  Production resolves every ingredient against USDA FoodData Central — CC0 public
+  domain, free API key, 1,000 requests an hour — rather than shipping numbers in
+  source. Each row has a place for its FDC ID.
+- Carbohydrate is **total, not net.** Fibre is not tracked, so keto users doing
+  net-carb maths need to adjust.
+- Cooking losses beyond the yield map are not modelled: water evaporating from a
+  reduction concentrates nothing nutritionally but changes portion size, and oil
+  absorbed by frying is estimated rather than measured.
+- It is informational, not medical or dietary advice, and says so.
+
+### 5. Purchase-anchored pantry ledger
 
 The differentiator, and the feature most likely to fail if built naively.
 
@@ -114,7 +163,7 @@ The design that survives:
 - **Present estimates as estimates.** "≈ 210 g left" with one-tap correction,
   never a ledger claiming precision it does not have.
 
-### 5. Protein and dietary swaps
+### 6. Protein and dietary swaps
 
 Religion and preference decide the protein long before taste does. The diet
 engine holds eight profiles — halal, kosher, no pork, no beef, pescatarian,
@@ -138,13 +187,13 @@ Swaps resolve in one function, `effectiveIng()`. Quantities, pantry coverage and
 the shopping list all read through it, so a swap propagates without any of them
 knowing diets exist.
 
-### 6. Region browsing
+### 7. Region browsing
 
 The Atlas filters by region before country, because that is how travel memory is
 organised — people remember *Southeast Asia* or *the Gulf*, not a country list.
 Each region carries a line on what it is known for.
 
-### 7. Global sourcing from a derived platform registry
+### 8. Global sourcing from a derived platform registry
 
 The first version of this hand-curated a store list per country. That does not
 scale past a handful of markets, and the product is global by definition — the
@@ -184,7 +233,7 @@ Country coverage is researched but not verified market by market, and platforms
 enter and leave countries constantly. The tier assignments are the durable part;
 treat coverage as a starting point that needs maintenance.
 
-### 8. Community layer
+### 9. Community layer
 
 Ratings and notes from people who actually cooked the dish, stored per-dish.
 This is original user content, owned outright, and it is the only realistic way
@@ -292,7 +341,7 @@ unverified. The tier assignments are the part worth trusting; the URLs are not.
 
 | Need | Source | Terms |
 |---|---|---|
-| Nutrition, calories, macros | USDA FoodData Central | CC0 public domain, free key, 1,000 req/hr |
+| Nutrition, calories, macros | USDA FoodData Central | CC0 public domain, free key, 1,000 req/hr — **not yet wired up; values are approximations** |
 | Grocery cart | Instacart Developer Platform (`/idp/v1/products/recipe`) | Partner approval required |
 | Grocery cart, direct | Kroger Cart API | OAuth2 authorization code, user authorizes |
 | Product links | Walmart affiliate / content provider API | Read-only, drives traffic out |
@@ -318,8 +367,8 @@ partner APIs or deep links; the user checks out in their own account.
   sources.
 - Cart buttons are disabled — no partner credentials are wired up.
 - The unit conversion table covers only the ingredients these eight recipes use.
-- Nutrition and calorie data are not wired up; the diet engine covers
-  religious and preference restrictions only, not macros.
+- Nutrition values are reference approximations rather than USDA-sourced, and
+  fibre (so net carbs) is not tracked.
 - Store links open a web search rather than a verified retailer URL, since
   deep-link formats have not been confirmed per retailer. The integration tier
   shown against each store is researched; the link is not.
@@ -349,8 +398,9 @@ Saudi Arabia. Instacart and Kroger last, as a US-only enhancement rather than a
 global dependency.
 
 **Later — scale content**
-Contributor programme for regional cooks, YouTube variation indexing, nutrition
-from FoodData Central, diet filters.
+Contributor programme for regional cooks, YouTube variation indexing, and
+replacing the approximate nutrition table with resolved FoodData Central rows
+keyed by FDC ID — including fibre, so net carbs become possible.
 
 ---
 

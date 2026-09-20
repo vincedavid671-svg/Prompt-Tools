@@ -192,6 +192,25 @@ ul.ings li.swapped .iname em{color:var(--jade)}
 .store b{font-size:13.5px}
 .store .tierrow{display:flex;gap:4px;flex-wrap:wrap}
 .store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+/* ---------- nutrition ---------- */
+.kcal{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:10px}
+.kbig{font-family:var(--display);font-size:38px;font-weight:600;line-height:1;letter-spacing:-.02em}
+.kunit{font-size:13px;font-weight:700;color:var(--ink-2);letter-spacing:.04em;text-transform:uppercase}
+.kserves{font-size:12px;color:var(--ink-3);margin-left:auto}
+.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.macro{display:flex;flex-direction:column;gap:1px}
+.mlab{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.mval{font-size:15px;font-weight:600}
+.mpct{font-size:11.5px;color:var(--ink-2)}
+.mbar{display:flex;height:7px;border-radius:4px;overflow:hidden;margin-top:12px;background:var(--sunk)}
+.mbar i{display:block;height:100%}
+.mbarkey{font-size:11px;color:var(--ink-3);margin-top:5px}
+.ntags{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px}
+.nnote{font-size:12px;line-height:1.5;margin-top:11px;padding:9px 11px;border-radius:8px;background:var(--surface-2);color:var(--ink-2)}
+.nnote strong{color:var(--ink)}
+.nnote.warn{background:var(--chili-soft);color:var(--chili)}
+.nnote.dim{background:transparent;padding:0;color:var(--ink-3);font-size:11.5px}
+
 .ingshint{font-size:12.5px;color:var(--ink-3);margin:8px 0 0;line-height:1.45}
 .ingacts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .tick{
@@ -656,6 +675,125 @@ const COUNTRIES = {
   UY:{n:'Uruguay', f:'🇺🇾'}, CR:{n:'Costa Rica', f:'🇨🇷'}, ZM:{n:'Zambia', f:'🇿🇲'},
   NL:{n:'Netherlands', f:'🇳🇱'}, JM:{n:'Jamaica', f:'🇯🇲'}, GU:{n:'Guam', f:'🇬🇺'}
 };
+
+/* ---------- nutrition, per 100 g ----------
+   kcal, protein, carbohydrate, fat. `fdc` is the FoodData Central ID that
+   should replace each row: USDA FDC is CC0 public domain with a free key,
+   so production resolves every one of these from the real database rather
+   than carrying numbers in the source. Until then these are reference
+   approximations and the UI labels them as such — nobody should make a
+   medical decision on a hardcoded table.
+   Fibre is not tracked, so carbohydrate here is total, not net.         */
+const NUTR = {
+  flour:{k:364,p:10.3,c:76.3,f:1.0},      water:{k:0,p:0,c:0,f:0},
+  salt:{k:0,p:0,c:0,f:0},                 pepper:{k:251,p:10.4,c:63.9,f:3.3},
+  beef_grd:{k:254,p:17.2,c:0,f:20.0},     pork_grd:{k:263,p:16.9,c:0,f:21.2},
+  beef_loin:{k:201,p:21.4,c:0,f:12.7},    chicken_wh:{k:215,p:18.6,c:0,f:15.1},
+  chicken_th:{k:209,p:17.3,c:0,f:15.3},   mackerel:{k:220,p:18.5,c:0,f:16.0},
+  onion:{k:40,p:1.1,c:9.3,f:0.1},         onion_red:{k:40,p:1.1,c:9.3,f:0.1},
+  scallion:{k:32,p:1.8,c:7.3,f:0.2},      garlic:{k:149,p:6.4,c:33.1,f:0.5},
+  ginger:{k:80,p:1.8,c:17.8,f:0.8},       cilantro:{k:23,p:2.1,c:3.7,f:0.5},
+  chives_g:{k:30,p:1.8,c:4.4,f:0.5},      tomato:{k:18,p:0.9,c:3.9,f:0.2},
+  pepper_bell:{k:31,p:1.0,c:6.0,f:0.3},   thyme:{k:101,p:5.6,c:24.5,f:1.7},
+  scotch:{k:40,p:1.9,c:8.8,f:0.4},        donne:{k:40,p:1.9,c:8.8,f:0.4},
+  chili_dry:{k:324,p:12.0,c:57.0,f:17.0}, basil_thai:{k:23,p:3.2,c:2.7,f:0.6},
+  limeleaf:{k:50,p:2.0,c:10.0,f:1.0},     soy:{k:53,p:8.1,c:4.9,f:0.6},
+  shaoxing:{k:130,p:0.3,c:5.0,f:0},       vinegar_rw:{k:19,p:0,c:0.3,f:0},
+  sesame_oil:{k:884,p:0,c:0,f:100},       oil_veg:{k:884,p:0,c:0,f:100},
+  oil_olive:{k:884,p:0,c:0,f:100},        fishsauce:{k:35,p:5.1,c:3.6,f:0},
+  sugar_palm:{k:383,p:0,c:96.0,f:0},      sugar_rock:{k:400,p:0,c:100,f:0},
+  coconut_ck:{k:330,p:3.6,c:6.7,f:34.7},  coconut_mk:{k:230,p:2.3,c:5.5,f:24.0},
+  coconut_fr:{k:354,p:3.3,c:15.2,f:33.5}, peanut:{k:587,p:24.0,c:21.5,f:49.7},
+  paste_pnng:{k:150,p:3.0,c:20.0,f:6.0},  paste_aji:{k:100,p:2.0,c:12.0,f:4.0},
+  fenugreek:{k:323,p:23.0,c:58.0,f:6.0},  anise:{k:337,p:17.6,c:50.0,f:15.9},
+  cinnamon:{k:247,p:4.0,c:81.0,f:1.2},    coriander_s:{k:298,p:12.4,c:55.0,f:17.8},
+  allspice:{k:263,p:6.1,c:72.1,f:8.7},    turmeric:{k:312,p:9.7,c:67.0,f:3.3},
+  ginger_g:{k:335,p:9.0,c:71.6,f:4.2},    saffron:{k:310,p:11.4,c:65.4,f:5.8},
+  preslemon:{k:30,p:1.0,c:9.0,f:0.3},     olive_grn:{k:145,p:1.0,c:3.8,f:15.3},
+  lemon:{k:29,p:1.1,c:9.3,f:0.3},         noodle_rice:{k:364,p:6.0,c:80.0,f:0.6},
+  rice_long:{k:365,p:7.1,c:80.0,f:0.7},   potato:{k:77,p:2.0,c:17.5,f:0.1},
+  whitepep:{k:296,p:10.4,c:68.6,f:2.1},   banana_grn:{k:89,p:1.1,c:22.8,f:0.3},
+  sausage_pork:{k:301,p:12.4,c:2.5,f:26.9}, sausage_chk:{k:172,p:14.0,c:3.0,f:11.0},
+  sausage_bf:{k:290,p:13.0,c:3.0,f:25.0},   lamb_grd:{k:282,p:16.6,c:0,f:23.4},
+  lamb_leg:{k:201,p:18.3,c:0,f:13.5},       chicken_grd:{k:143,p:17.4,c:0,f:8.1},
+  mushroom:{k:22,p:3.1,c:3.3,f:0.3},        butter:{k:717,p:0.9,c:0.1,f:81.1},
+  ghee:{k:876,p:0.3,c:0,f:99.5},            milk:{k:61,p:3.2,c:4.8,f:3.3},
+  cheddar:{k:403,p:24.9,c:1.3,f:33.1},      egg:{k:143,p:12.6,c:0.7,f:9.5},
+  stock_beef:{k:4,p:0.6,c:0.3,f:0.1},       stock_chx:{k:4,p:0.6,c:0.3,f:0.1},
+  worcester:{k:78,p:0,c:19.5,f:0},          vinegar_rc:{k:18,p:0,c:0.6,f:0},
+  tomato_pst:{k:82,p:4.3,c:18.9,f:0.5},     pastry_sh:{k:460,p:6.0,c:46.0,f:28.0},
+  pastry_pf:{k:394,p:5.5,c:32.0,f:27.0},    rice_bas:{k:356,p:8.1,c:78.0,f:1.0},
+  carrot:{k:41,p:0.9,c:9.6,f:0.2},          baharat:{k:300,p:11.0,c:55.0,f:8.0},
+  loomi:{k:60,p:2.0,c:15.0,f:1.0},          cardamom:{k:311,p:10.8,c:68.5,f:6.7},
+  clove_sp:{k:274,p:6.0,c:65.5,f:13.0},     bay:{k:313,p:7.6,c:75.0,f:8.4},
+  almond:{k:579,p:21.2,c:21.6,f:49.9},      raisin:{k:299,p:3.1,c:79.2,f:0.5},
+  potato_fl:{k:77,p:2.0,c:17.5,f:0.1}
+};
+
+/* ---------- what actually gets eaten ----------
+   The trap in every recipe calorie count: summing raw ingredients assumes
+   you eat all of them. You do not. A whole chicken's bones leave the
+   plate, aromatics are strained out of a broth and thrown away, frying
+   oil is mostly drained, and khinkali knots are famously not eaten.
+   Counting them inflates the number, sometimes by a third.
+   Fraction of each ingredient's mass actually consumed; default 1.      */
+const EATEN = {
+  pho_ga:{chicken_wh:0.30, onion:0, ginger:0, anise:0, cinnamon:0, coriander_s:0},
+  khinkali:{flour:0.92},
+  tagine:{chicken_wh:0.62},
+  kabsa:{chicken_wh:0.62},
+  kelaguen:{chicken_th:0.70},
+  rundown:{banana_grn:0.65, scotch:0},
+  lomo:{oil_veg:0.35, potato:0.85},
+  bangers:{potato_fl:0.85},
+  phanaeng:{limeleaf:0}
+};
+const EATEN_NOTE = {
+  pho_ga:'The carcass and all the aromatics are strained out and binned, and you eat roughly a third of the bird by weight. Counting the whole chicken and the spices would overstate this bowl by a wide margin.',
+  khinkali:'The knots are not eaten, so about 8% of the dough leaves the plate.',
+  tagine:'Bones are roughly 38% of a whole chicken and do not get eaten.',
+  kabsa:'Same bone allowance as the tagine.',
+  kelaguen:'Thighs are bone-in; the bone is discarded after chopping.',
+  rundown:'Green bananas are boiled in their skins and peeled. The scotch bonnet is removed whole.',
+  lomo:'Most of the frying oil drains off the chips rather than ending up in the dish, and the potatoes are peeled.',
+  bangers:'Potatoes are peeled before mashing.',
+  phanaeng:'Makrut lime leaves perfume the sauce and are picked out, not chewed.'
+};
+
+/* ---------- nutrition maths ----------
+   Reads through effectiveIngs, so a protein swap changes the numbers.   */
+function nutritionOf(r){
+  const per = {k:0, p:0, c:0, f:0};
+  let missing = 0, adjusted = false;
+  effectiveIngs(r).forEach(ing => {
+    const n = NUTR[ing.i];
+    const g = toGrams(ing.i, ing.q, ing.u);          // one batch, unscaled
+    if(!n || g === null){ missing++; return; }
+    const eat = (EATEN[r.id] && EATEN[r.id][ing.i] !== undefined) ? EATEN[r.id][ing.i] : 1;
+    if(eat !== 1) adjusted = true;
+    const mass = g * eat / 100;
+    per.k += n.k * mass; per.p += n.p * mass;
+    per.c += n.c * mass; per.f += n.f * mass;
+  });
+  const s = r.serves || 1;                            // per serving is scale-invariant
+  const out = {k:per.k / s, p:per.p / s, c:per.c / s, f:per.f / s, missing, adjusted};
+  // energy split, from the macros rather than from the kcal figure
+  const ek = out.p * 4 + out.c * 4 + out.f * 9;
+  out.split = ek > 0
+    ? {p:Math.round(out.p * 4 / ek * 100), c:Math.round(out.c * 4 / ek * 100), f:Math.round(out.f * 9 / ek * 100)}
+    : {p:0, c:0, f:0};
+  /* Tags need an absolute threshold as well as an energy share. Judging
+     "low carb" on share alone tags a plate with 54 g of carbohydrate as
+     low-carb whenever the fat is high enough to dominate the energy —
+     true arithmetic, useless advice, and the kind of thing that makes a
+     dieting user stop trusting the app. Both tests must pass. */
+  out.tags = [];
+  if(out.c <= 10 && out.split.c <= 10) out.tags.push('Keto-friendly');
+  else if(out.c <= 30 && out.split.c <= 25) out.tags.push('Low carb');
+  if(out.split.p >= 30) out.tags.push('High protein');
+  if(out.k <= 450) out.tags.push('Under 450 kcal');
+  return out;
+}
 
 /* ---------- sourcing channels ----------
    An ingredient's difficulty is relative to where you are: fish sauce is
@@ -1400,6 +1538,7 @@ function viewAtlas(){
         <div class="foot">
           <span class="pill plain">${esc(r.time)}</span>
           <span class="pill plain">${esc(r.level)}</span>
+          <span class="pill plain num">${Math.round(nutritionOf(r).k)} kcal</span>
           ${state.diet !== 'none' ? (
             st === 'fits' ? `<span class="pill jade">✓ ${esc(d.label)}</span>` :
             st === 'swap' ? `<span class="pill amber">Needs a swap</span>` :
@@ -1433,6 +1572,7 @@ function viewRecipe(){
   const proteinId = proteinIng ? proteinIng.i : null;
   const proteinOpts = (proteinId && !conflictIds.includes(proteinId)) ? cleanSubs(proteinId) : [];
   const tickedHere = effectiveIngs(r).filter(ing => isNeeded(ing.i)).length;
+  const nut = nutritionOf(r);
 
   return `
   <button class="back" id="back">← All dishes</button>
@@ -1445,6 +1585,7 @@ function viewRecipe(){
         <span class="pill plain">Serves ${r.serves * state.servingsMul}</span>
         <span class="pill plain">${esc(r.time)}</span>
         <span class="pill plain">${esc(r.level)}</span>
+        <span class="pill plain num">${Math.round(nut.k)} kcal a serving</span>
         ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} from ${rat.n} cooks</span>` : `<span class="pill amber">No one has cooked this yet</span>`}
       </div>
     </div>
@@ -1513,6 +1654,33 @@ function viewRecipe(){
              <b>${esc(ING[s.to].n)}</b><span>${esc(s.note)}</span></button>`).join('')}
         ` : ''}
       </div>` : ''}
+
+      <div class="panel">
+        <h2>Per serving</h2>
+        <div class="kcal">
+          <span class="kbig num">${Math.round(nut.k)}</span><span class="kunit">kcal</span>
+          <span class="kserves">of ${r.serves} servings${state.servingsMul !== 1 ? ` · unchanged by scaling` : ''}</span>
+        </div>
+        <div class="macros">
+          ${[['Protein','p',nut.p,'var(--jade)'],['Carbs','c',nut.c,'var(--accent)'],['Fat','f',nut.f,'var(--chili)']].map(([lab,k,v,col]) => `
+            <div class="macro">
+              <span class="mlab">${lab}</span>
+              <span class="mval num">${v.toFixed(1)} g</span>
+              <span class="mpct num">${nut.split[k]}%</span>
+            </div>`).join('')}
+        </div>
+        <div class="mbar" role="img" aria-label="Energy split: ${nut.split.p}% protein, ${nut.split.c}% carbohydrate, ${nut.split.f}% fat">
+          <i style="width:${nut.split.p}%;background:var(--jade)"></i>
+          <i style="width:${nut.split.c}%;background:var(--accent)"></i>
+          <i style="width:${nut.split.f}%;background:var(--chili)"></i>
+        </div>
+        <div class="mbarkey">Share of energy — protein, carbohydrate, fat</div>
+        ${nut.tags.length ? `<div class="ntags">${nut.tags.map(t => `<span class="pill jade">${esc(t)}</span>`).join('')}</div>` : ''}
+
+        ${nut.adjusted ? `<div class="nnote"><strong>Adjusted for what you don't eat.</strong> ${esc(EATEN_NOTE[r.id] || '')}</div>` : ''}
+        ${nut.missing ? `<div class="nnote warn">${nut.missing} ingredient${nut.missing > 1 ? 's' : ''} could not be counted — no nutrition row or no gram conversion. The figure above is low by that much.</div>` : ''}
+        <div class="nnote dim">Reference approximations, not sourced values. Production resolves every ingredient against USDA FoodData Central, which is public domain with a free key. Carbohydrate is total, not net — fibre is not tracked yet. Informational, not medical or dietary advice.</div>
+      </div>
 
       <div class="panel">
         <h2>The foundation</h2>
