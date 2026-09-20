@@ -100,10 +100,45 @@ The Atlas filters by region before country, because that is how travel memory is
 organised — people remember *Southeast Asia* or *the Gulf*, not a country list.
 Each region carries a line on what it is known for.
 
-### 6. Region-aware store routing
+### 6. Global sourcing from a derived platform registry
 
-See the commerce section below. Store lists are per market, and the prototype
-ships Saudi Arabia, UAE, US, UK and New Zealand.
+The first version of this hand-curated a store list per country. That does not
+scale past a handful of markets, and the product is global by definition — the
+whole premise is that you ate something abroad and now want it at home, wherever
+home is.
+
+The fix is to invert it. **Most of the populated world is served by about twenty
+platform operators**, so coverage is a property of the platform and a country's
+store list is *derived*:
+
+    storesFor(cc) = localSpecialists[cc] + platforms.filter(p => p.cc.includes(cc))
+
+Adding a country becomes a two-letter code rather than a new list. 24 platforms
+plus 12 local lists currently reach **83 countries**.
+
+The operators that matter: Wolt (DoorDash-owned, Europe), Glovo (Delivery
+Hero-owned, Europe/Africa/LatAm), Bolt Food, Grab and GrabMart (Southeast Asia,
+which acquired foodpanda in 2026), Talabat and HungerStation and InstaShop
+(Delivery Hero, Gulf), Deliveroo, Uber Eats, DoorDash, Instacart, Rappi (LatAm),
+Blinkit and Swiggy (India), Getir (Turkey), Yango, Coupang (Korea), Meituan
+(China), plus Carrefour, Lulu, Amazon and noon as retailers with wide
+multi-country footprints.
+
+Two design consequences worth keeping:
+
+- **Local specialists are layered on only where they beat the platforms.** Salla
+  and Zid in Saudi Arabia, H Mart in the US, Deserter's Bazaar in Tbilisi. Not a
+  full list per country — just the cases where the global option is inadequate.
+- **No delivery coverage is a real state, handled explicitly.** Jamaica and Guam
+  have no platform at all, and 53 of 83 countries have no specialty source. The
+  app says so and gives different advice — look for a diaspora grocer, or go to
+  the market — instead of rendering an empty shelf. Specialty is the category
+  that decides whether the dish tastes right, so silence there is the worst
+  possible answer.
+
+Country coverage is researched but not verified market by market, and platforms
+enter and leave countries constantly. The tier assignments are the durable part;
+treat coverage as a starting point that needs maintenance.
 
 ### 7. Community layer
 
@@ -291,8 +326,15 @@ business or a hobby.
 ## Prototype technical notes
 
 Single self-contained HTML file. No build step, no dependencies. Eleven dishes
-across nine regions, 85 canonical ingredients, five markets, eight diet
-profiles.
+across nine regions, 85 canonical ingredients, eight diet profiles, and 24
+delivery platforms reaching 83 countries.
+
+A consistency suite (not shipped in the file) checks: every recipe ingredient
+exists in the registry and normalizes to grams; every substitution target exists
+and is clean under the diet offering it; every platform's declared country
+coverage resolves to a listed country; every listed country is reachable; and
+every dish country is shoppable-from. Category gaps are reported rather than
+asserted, because they are real — the UI handles them explicitly.
 
 Two runtime capabilities when published as an artifact:
 

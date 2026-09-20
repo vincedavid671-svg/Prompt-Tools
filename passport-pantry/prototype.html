@@ -192,6 +192,8 @@ ul.ings li.swapped .iname em{color:var(--jade)}
 .store b{font-size:13.5px}
 .store .tierrow{display:flex;gap:4px;flex-wrap:wrap}
 .store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+.nostore{margin-top:13px;border:1px dashed var(--line-2);border-radius:8px;padding:11px 13px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.nostore strong{color:var(--ink);display:block;margin-bottom:3px}
 
 /* ---------- foundation & layers ---------- */
 ul.layers{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}
@@ -450,51 +452,186 @@ const TIERS = {
   cart:      {label:'Cart API', cls:'jade'},
   merchant:  {label:'Per-merchant API', cls:'jade'},
   affiliate: {label:'Affiliate links', cls:'amber'},
-  link:      {label:'Deep link', cls:'plain'}
+  link:      {label:'Deep link', cls:'plain'},
+  none:      {label:'No delivery here', cls:'chili'}
 };
-const MARKETS = {
-  SA:{name:'Saudi Arabia', flag:'🇸🇦', stores:[
-    {n:'Nana', t:'Aggregator', tier:'link', d:'Aggregates Tamimi, Danube, Panda and others. The closest structural analogue to Instacart here, but no public shopper API.', for:['fresh','staple']},
-    {n:'Salla merchants', t:'Store platform', tier:'merchant', d:'Saudi e-commerce platform, ~80,000 stores. Merchant API with carts and orders scopes under OAuth — a spice merchant or butcher can install your app.', for:['spec','staple']},
-    {n:'Zid merchants', t:'Store platform', tier:'merchant', d:'Riyadh-based, same model. Open API, strong B2B feature set.', for:['spec','staple']},
-    {n:'Tamimi Markets', t:'Supermarket', tier:'link', d:'Strong on imported and Western goods.', for:['fresh','spec']},
-    {n:'Danube', t:'Supermarket', tier:'link', d:'Wide international range; good for European ingredients.', for:['fresh','spec']},
-    {n:'Panda', t:'Supermarket', tier:'link', d:'Largest domestic chain. Best prices on staples.', for:['fresh','staple']},
-    {n:'Carrefour KSA', t:'Hypermarket', tier:'link', d:'Broad range including South and Southeast Asian ingredients.', for:['fresh','staple','spec']},
-    {n:'Lulu Hypermarket', t:'Hypermarket', tier:'link', d:'The strongest source for Asian and subcontinental specialty items.', for:['spec','fresh']},
-    {n:'Amazon.sa', t:'Marketplace', tier:'affiliate', d:'Has its own affiliate programme at affiliate-program.amazon.sa. Spices, oils, equipment.', for:['staple']},
-    {n:'noon', t:'Marketplace', tier:'affiliate', d:'Documented seller APIs; noon Minutes covers quick grocery.', for:['staple','fresh']},
-    {n:'HungerStation Market', t:'Quick delivery', tier:'link', d:'Fast delivery when one ingredient is missing mid-cook.', for:['fresh']},
-    {n:'Ninja', t:'Quick delivery', tier:'link', d:'Dark-store model, very fast, limited range.', for:['fresh']}
-  ]},
-  AE:{name:'United Arab Emirates', flag:'🇦🇪', stores:[
-    {n:'InstaShop', t:'Aggregator', tier:'link', d:'Partners with Carrefour, Spinneys, Choithrams. Acquired by Talabat in 2026.', for:['fresh','staple']},
-    {n:'Carrefour UAE', t:'Hypermarket', tier:'link', d:'Operated by Majid Al Futtaim. Widest general range.', for:['fresh','staple','spec']},
-    {n:'Lulu Hypermarket', t:'Hypermarket', tier:'link', d:'Best Asian and subcontinental specialty selection.', for:['spec','fresh']},
-    {n:'Spinneys', t:'Supermarket', tier:'link', d:'Premium and Western imports.', for:['fresh','spec']},
-    {n:'Talabat Mart', t:'Quick delivery', tier:'link', d:'Dark-store model. Talabat’s APIs are vendor-side only.', for:['fresh']},
-    {n:'noon Minutes', t:'Quick delivery', tier:'affiliate', d:'noon has documented seller APIs and an OAuth flow for integrators acting for sellers.', for:['fresh','staple']},
-    {n:'Kibsons', t:'Fresh specialist', tier:'link', d:'Produce and meat, subscription-led.', for:['fresh']}
-  ]},
-  US:{name:'United States', flag:'🇺🇸', stores:[
-    {n:'Instacart', t:'Aggregator', tier:'cart', d:'Multi-retailer. Developer Platform builds a hosted shoppable recipe page.', for:['fresh','staple','spec']},
-    {n:'Kroger', t:'Supermarket', tier:'cart', d:'Public Cart API with OAuth — items go into the shopper’s own cart.', for:['fresh','staple']},
-    {n:'Walmart', t:'Supermarket', tier:'affiliate', d:'Affiliate content API, read-only.', for:['fresh','staple']},
-    {n:'Amazon', t:'Marketplace', tier:'affiliate', d:'Shelf-stable goods and equipment. See the Creators API caveat.', for:['staple']},
-    {n:'H Mart / 99 Ranch', t:'Specialty', tier:'link', d:'East and Southeast Asian ingredients, often the only reliable source.', for:['spec']}
-  ]},
-  GB:{name:'United Kingdom', flag:'🇬🇧', stores:[
-    {n:'Tesco', t:'Supermarket', tier:'link', d:'Widest national coverage.', for:['fresh','staple']},
-    {n:'Sainsbury’s', t:'Supermarket', tier:'link', d:'Comparable range and delivery network.', for:['fresh','staple']},
-    {n:'Ocado', t:'Online only', tier:'link', d:'Strong on imported and specialty goods.', for:['fresh','spec']},
-    {n:'Amazon UK', t:'Marketplace', tier:'affiliate', d:'Spices and shelf-stable goods.', for:['staple']}
-  ]},
-  NZ:{name:'New Zealand', flag:'🇳🇿', stores:[
-    {n:'Woolworths NZ', t:'Supermarket', tier:'link', d:'National coverage and delivery.', for:['fresh','staple']},
-    {n:'New World', t:'Supermarket', tier:'link', d:'Broader specialty range in larger stores.', for:['fresh','spec']},
-    {n:'Tai Ping / Lim Chhour', t:'Specialty', tier:'link', d:'Asian grocers in the main centres.', for:['spec']}
-  ]}
+/* ---------- global platform registry ----------
+   The correction that matters most in this file. An earlier version
+   hand-curated a store list per country, which does not scale past a
+   handful of markets. Most of the populated world is served by about
+   twenty platform operators, so coverage is a property of the platform
+   and a country's store list is derived, not authored. Adding a country
+   is then a two-letter code, not a new list.
+
+   Country coverage below is researched but not verified market by
+   market, and platforms enter and leave countries constantly. The
+   `tier` values are the durable part.                                  */
+const PLATFORMS = {
+  wolt:      {n:'Wolt', t:'Food + grocery', tier:'link', for:['fresh'],
+              d:'Owned by DoorDash. Wolt Market carries groceries alongside restaurants.',
+              cc:['GE','FI','SE','DK','NO','DE','PL','CZ','SK','HU','GR','IL','JP','EE','LV','LT','HR','RS','CY','AZ','KZ','MT']},
+  glovo:     {n:'Glovo', t:'Food + grocery', tier:'link', for:['fresh','staple'],
+              d:'Owned by Delivery Hero. Delivers supermarket groceries, including from Carrefour.',
+              cc:['GE','ES','IT','PT','PL','UA','RO','BG','HR','RS','MA','EG','KE','NG','GH','KZ','AM','MD','KG']},
+  boltfood:  {n:'Bolt Food', t:'Food delivery', tier:'link', for:['fresh'],
+              d:'Estonian. Shares the driver fleet with Bolt rides, so it scales fast in a new city.',
+              cc:['GE','EE','LV','LT','PL','CZ','SK','RO','PT','ZA','NG','KE','GH','AZ']},
+  geraeats:  {n:'GeraEats', t:'Food delivery', tier:'link', for:['fresh'],
+              d:'Georgian, launched late 2025 with local support and lower merchant commission.',
+              cc:['GE']},
+  grab:      {n:'Grab / GrabMart', t:'Food + grocery', tier:'link', for:['fresh','staple'],
+              d:'The dominant Southeast Asian super-app. Acquired foodpanda in 2026.',
+              cc:['TH','VN','SG','MY','ID','PH','KH','MM']},
+  foodpanda: {n:'foodpanda', t:'Food + grocery', tier:'link', for:['fresh'],
+              d:'Now Grab-owned. Still the stronger brand in several Asian markets.',
+              cc:['TH','PH','MY','TW','HK','PK','BD','LA','KH']},
+  talabat:   {n:'Talabat', t:'Food + grocery', tier:'link', for:['fresh'],
+              d:'Delivery Hero. Publishes vendor-side APIs only — a shop receives orders, you cannot place one.',
+              cc:['AE','SA','KW','QA','BH','OM','JO','EG','IQ']},
+  hungerst:  {n:'HungerStation', t:'Food + grocery', tier:'link', for:['fresh'],
+              d:'HungerStation Market covers groceries. Vendor-side API via middleware.',
+              cc:['SA','BH']},
+  instashop: {n:'InstaShop', t:'Grocery aggregator', tier:'link', for:['fresh','staple'],
+              d:'Partners with Carrefour, Spinneys and Choithrams. Acquired by Talabat.',
+              cc:['AE','EG','BH','QA']},
+  deliveroo: {n:'Deliveroo', t:'Food delivery', tier:'link', for:['fresh'],
+              d:'Hop stores carry groceries in some markets.',
+              cc:['GB','FR','IT','BE','IE','AE','KW','QA','SG','HK']},
+  ubereats:  {n:'Uber Eats', t:'Food + grocery', tier:'link', for:['fresh'],
+              d:'Grocery partnerships vary widely by city.',
+              cc:['US','CA','GB','FR','ES','PL','JP','TW','AU','NZ','MX','ZA']},
+  doordash:  {n:'DoorDash', t:'Food + grocery', tier:'link', for:['fresh'],
+              d:'Owns Wolt. DashMart carries pantry goods.',
+              cc:['US','CA','AU','NZ','JP','MX']},
+  instacart: {n:'Instacart', t:'Grocery aggregator', tier:'cart', for:['fresh','staple','spec'],
+              d:'Developer Platform generates a hosted shoppable recipe page across nearby retailers.',
+              cc:['US','CA']},
+  rappi:     {n:'Rappi', t:'Food + grocery', tier:'link', for:['fresh','staple'],
+              d:'The Latin American super-app. Strong grocery coverage.',
+              cc:['MX','BR','CO','AR','CL','PE','EC','UY','CR']},
+  blinkit:   {n:'Blinkit / Zepto', t:'Quick grocery', tier:'link', for:['fresh','staple'],
+              d:'Ten-minute grocery. Blinkit is Zomato-owned.',
+              cc:['IN']},
+  swiggy:    {n:'Swiggy Instamart', t:'Quick grocery', tier:'link', for:['fresh'],
+              d:'Grocery arm of Swiggy.', cc:['IN']},
+  getir:     {n:'Getir', t:'Quick grocery', tier:'link', for:['fresh'],
+              d:'Turkish quick-commerce pioneer.', cc:['TR']},
+  yango:     {n:'Yango Deli', t:'Quick grocery', tier:'link', for:['fresh'],
+              d:'Operates across parts of the Middle East, Africa and Central Asia.',
+              cc:['AE','IL','KZ','TR','ZM']},
+  coupang:   {n:'Coupang Eats', t:'Food + grocery', tier:'link', for:['fresh'],
+              d:'Rocket Fresh covers groceries.', cc:['KR']},
+  meituan:   {n:'Meituan', t:'Food + grocery', tier:'link', for:['fresh'],
+              d:'Dominant in mainland China alongside Ele.me.', cc:['CN']},
+  carrefour: {n:'Carrefour', t:'Hypermarket', tier:'link', for:['fresh','staple','spec'],
+              d:'Very wide international range, which makes it a reliable first stop for foreign ingredients.',
+              cc:['SA','AE','FR','ES','IT','PL','RO','BR','AR','TW','KE','EG','MA','JO','QA','KW','GE']},
+  lulu:      {n:'Lulu Hypermarket', t:'Hypermarket', tier:'link', for:['spec','fresh'],
+              d:'The strongest source anywhere in the Gulf for Asian and subcontinental ingredients.',
+              cc:['SA','AE','KW','QA','BH','OM','IN','MY','ID','EG']},
+  amazon:    {n:'Amazon', t:'Marketplace', tier:'affiliate', for:['staple'],
+              d:'Shelf-stable goods, spices and equipment. Each marketplace has its own affiliate programme.',
+              cc:['US','CA','GB','DE','FR','IT','ES','JP','AU','IN','AE','SA','SG','MX','BR','NL','SE','PL','TR','EG']},
+  noon:      {n:'noon', t:'Marketplace', tier:'affiliate', for:['staple','fresh'],
+              d:'Documented seller APIs with an OAuth flow for integrators. noon Minutes covers quick grocery.',
+              cc:['AE','SA','EG']}
 };
+
+/* Local specialists and store platforms, layered on where they matter.
+   This is the only part that needs authoring per country — and only
+   where a local option genuinely beats the global platforms.           */
+const LOCAL = {
+  SA:[
+    {n:'Salla merchants', t:'Store platform', tier:'merchant', for:['spec','staple'],
+     d:'Saudi e-commerce platform, ~80,000 stores. Merchant API with carts and orders scopes under OAuth — a spice merchant or butcher can install your app.'},
+    {n:'Zid merchants', t:'Store platform', tier:'merchant', for:['spec','staple'],
+     d:'Riyadh-based, same model. Open API.'},
+    {n:'Nana', t:'Grocery aggregator', tier:'link', for:['fresh','staple'],
+     d:'Aggregates Tamimi, Danube and Panda. The closest structural analogue to Instacart here.'},
+    {n:'Tamimi Markets', t:'Supermarket', tier:'link', for:['fresh','spec'], d:'Strong on imported and Western goods.'},
+    {n:'Danube', t:'Supermarket', tier:'link', for:['fresh','spec'], d:'Wide international range.'},
+    {n:'Panda', t:'Supermarket', tier:'link', for:['fresh','staple'], d:'Largest domestic chain. Best prices on staples.'},
+    {n:'Ninja', t:'Quick grocery', tier:'link', for:['fresh'], d:'Dark stores, very fast, limited range.'}
+  ],
+  GE:[
+    {n:'Agrohub', t:'Supermarket', tier:'link', for:['fresh','spec'], d:'Tbilisi grocery with a broader imported range.'},
+    {n:'Deserter’s Bazaar', t:'Market', tier:'link', for:['fresh','spec'],
+     d:'The Tbilisi produce and spice market. Where blue fenugreek and proper Georgian spice blends actually come from — no app, and worth the trip.'}
+  ],
+  AE:[
+    {n:'Spinneys', t:'Supermarket', tier:'link', for:['fresh','spec'], d:'Premium and Western imports.'},
+    {n:'Kibsons', t:'Fresh specialist', tier:'link', for:['fresh'], d:'Produce and meat, subscription-led.'}
+  ],
+  US:[
+    {n:'Kroger', t:'Supermarket', tier:'cart', for:['fresh','staple'],
+     d:'Public Cart API with OAuth — items go into the shopper’s own cart.'},
+    {n:'Walmart', t:'Supermarket', tier:'affiliate', for:['fresh','staple'], d:'Affiliate content API, read-only.'},
+    {n:'H Mart / 99 Ranch', t:'Specialty', tier:'link', for:['spec'],
+     d:'East and Southeast Asian ingredients, often the only reliable source.'}
+  ],
+  GB:[
+    {n:'Tesco', t:'Supermarket', tier:'link', for:['fresh','staple'], d:'Widest national coverage.'},
+    {n:'Ocado', t:'Online only', tier:'link', for:['fresh','spec'], d:'Strong on imported and specialty goods.'}
+  ],
+  NZ:[
+    {n:'Woolworths NZ', t:'Supermarket', tier:'link', for:['fresh','staple'], d:'National coverage and delivery.'},
+    {n:'New World', t:'Supermarket', tier:'link', for:['fresh','spec'], d:'Broader specialty range in larger stores.'}
+  ],
+  TH:[{n:'Tops / Gourmet Market', t:'Supermarket', tier:'link', for:['fresh','spec'], d:'Bangkok supermarkets with imported goods.'}],
+  VN:[{n:'Bách Hóa Xanh', t:'Supermarket', tier:'link', for:['fresh'], d:'Widest domestic grocery footprint.'}],
+  IN:[{n:'BigBasket', t:'Grocery', tier:'link', for:['fresh','staple'], d:'Tata-owned, national scheduled delivery.'}],
+  PH:[{n:'Landers / S&R', t:'Warehouse', tier:'link', for:['staple','spec'], d:'Imported and bulk goods.'}],
+  /* Two places with no delivery platform coverage at all. Worth handling
+     honestly rather than hiding — a user here needs different advice, not
+     an empty screen, and telling them to go to the market is the correct
+     answer for exactly the ingredients these cuisines need. */
+  JM:[{n:'Local supermarkets and the market', t:'In person', tier:'none', for:['fresh','staple','spec'],
+       d:'No major delivery platform operates here. Scotch bonnet, thyme, pimento and provisions come from the market, and will be fresher and cheaper than anything shipped.'}],
+  GU:[{n:'Local stores and the fiesta network', t:'In person', tier:'none', for:['fresh','staple','spec'],
+       d:"No delivery platform operates on island. Fresh grated coconut and donne' sali are not retail products here so much as things people have — ask."}]
+};
+
+const COUNTRIES = {
+  SA:{n:'Saudi Arabia', f:'🇸🇦'}, GE:{n:'Georgia', f:'🇬🇪'}, AE:{n:'United Arab Emirates', f:'🇦🇪'},
+  US:{n:'United States', f:'🇺🇸'}, GB:{n:'United Kingdom', f:'🇬🇧'}, NZ:{n:'New Zealand', f:'🇳🇿'},
+  TH:{n:'Thailand', f:'🇹🇭'}, VN:{n:'Vietnam', f:'🇻🇳'}, PH:{n:'Philippines', f:'🇵🇭'},
+  IN:{n:'India', f:'🇮🇳'}, TR:{n:'Turkey', f:'🇹🇷'}, DE:{n:'Germany', f:'🇩🇪'},
+  FR:{n:'France', f:'🇫🇷'}, ES:{n:'Spain', f:'🇪🇸'}, PL:{n:'Poland', f:'🇵🇱'},
+  JP:{n:'Japan', f:'🇯🇵'}, KR:{n:'South Korea', f:'🇰🇷'}, SG:{n:'Singapore', f:'🇸🇬'},
+  MY:{n:'Malaysia', f:'🇲🇾'}, ID:{n:'Indonesia', f:'🇮🇩'}, AU:{n:'Australia', f:'🇦🇺'},
+  MX:{n:'Mexico', f:'🇲🇽'}, BR:{n:'Brazil', f:'🇧🇷'}, PE:{n:'Peru', f:'🇵🇪'},
+  EG:{n:'Egypt', f:'🇪🇬'}, MA:{n:'Morocco', f:'🇲🇦'}, NG:{n:'Nigeria', f:'🇳🇬'},
+  KE:{n:'Kenya', f:'🇰🇪'}, ZA:{n:'South Africa', f:'🇿🇦'}, KW:{n:'Kuwait', f:'🇰🇼'},
+  QA:{n:'Qatar', f:'🇶🇦'}, CN:{n:'China', f:'🇨🇳'}, CA:{n:'Canada', f:'🇨🇦'},
+  KZ:{n:'Kazakhstan', f:'🇰🇿'}, HK:{n:'Hong Kong', f:'🇭🇰'},
+  FI:{n:'Finland', f:'🇫🇮'}, SE:{n:'Sweden', f:'🇸🇪'}, DK:{n:'Denmark', f:'🇩🇰'},
+  NO:{n:'Norway', f:'🇳🇴'}, CZ:{n:'Czechia', f:'🇨🇿'}, SK:{n:'Slovakia', f:'🇸🇰'},
+  HU:{n:'Hungary', f:'🇭🇺'}, GR:{n:'Greece', f:'🇬🇷'}, IL:{n:'Israel', f:'🇮🇱'},
+  EE:{n:'Estonia', f:'🇪🇪'}, LV:{n:'Latvia', f:'🇱🇻'}, LT:{n:'Lithuania', f:'🇱🇹'},
+  HR:{n:'Croatia', f:'🇭🇷'}, RS:{n:'Serbia', f:'🇷🇸'}, CY:{n:'Cyprus', f:'🇨🇾'},
+  AZ:{n:'Azerbaijan', f:'🇦🇿'}, MT:{n:'Malta', f:'🇲🇹'}, IT:{n:'Italy', f:'🇮🇹'},
+  PT:{n:'Portugal', f:'🇵🇹'}, UA:{n:'Ukraine', f:'🇺🇦'}, RO:{n:'Romania', f:'🇷🇴'},
+  BG:{n:'Bulgaria', f:'🇧🇬'}, GH:{n:'Ghana', f:'🇬🇭'}, AM:{n:'Armenia', f:'🇦🇲'},
+  MD:{n:'Moldova', f:'🇲🇩'}, KG:{n:'Kyrgyzstan', f:'🇰🇬'}, KH:{n:'Cambodia', f:'🇰🇭'},
+  MM:{n:'Myanmar', f:'🇲🇲'}, TW:{n:'Taiwan', f:'🇹🇼'}, PK:{n:'Pakistan', f:'🇵🇰'},
+  BD:{n:'Bangladesh', f:'🇧🇩'}, LA:{n:'Laos', f:'🇱🇦'}, BH:{n:'Bahrain', f:'🇧🇭'},
+  OM:{n:'Oman', f:'🇴🇲'}, JO:{n:'Jordan', f:'🇯🇴'}, IQ:{n:'Iraq', f:'🇮🇶'},
+  BE:{n:'Belgium', f:'🇧🇪'}, IE:{n:'Ireland', f:'🇮🇪'}, CO:{n:'Colombia', f:'🇨🇴'},
+  AR:{n:'Argentina', f:'🇦🇷'}, CL:{n:'Chile', f:'🇨🇱'}, EC:{n:'Ecuador', f:'🇪🇨'},
+  UY:{n:'Uruguay', f:'🇺🇾'}, CR:{n:'Costa Rica', f:'🇨🇷'}, ZM:{n:'Zambia', f:'🇿🇲'},
+  NL:{n:'Netherlands', f:'🇳🇱'}, JM:{n:'Jamaica', f:'🇯🇲'}, GU:{n:'Guam', f:'🇬🇺'}
+};
+
+/* A country's store list is derived from platform coverage plus locals. */
+function storesFor(cc){
+  const global = Object.values(PLATFORMS).filter(p => p.cc.includes(cc));
+  return [...(LOCAL[cc] || []), ...global];
+}
+/* Countries the registry can actually serve — no empty screens. */
+const SERVED = Object.keys(COUNTRIES)
+  .filter(cc => storesFor(cc).length)
+  .sort((a, b) => COUNTRIES[a].n.localeCompare(COUNTRIES[b].n));
+
 
 
 /* ---------- recipes ---------- */
@@ -1057,7 +1194,7 @@ function viewAtlas(){
     <label class="pref">
       <span class="eyebrow">Shopping from</span>
       <select id="marketsel">
-        ${Object.keys(MARKETS).map(k => `<option value="${k}" ${state.market === k ? 'selected' : ''}>${MARKETS[k].flag} ${esc(MARKETS[k].name)}</option>`).join('')}
+        ${SERVED.map(k => `<option value="${k}" ${state.market === k ? 'selected' : ''}>${COUNTRIES[k].f} ${esc(COUNTRIES[k].n)}</option>`).join('')}
       </select>
     </label>
   </div>
@@ -1301,7 +1438,8 @@ function viewPantry(){
 
 function viewList(){
   const rows = buildList();
-  const mkt = MARKETS[state.market];
+  const mkt = COUNTRIES[state.market];
+  const stores = storesFor(state.market);
   const groups = [
     {k:'fresh',  label:'Fresh — grocery delivery', hint:'Produce, meat and dairy, delivered same day where available'},
     {k:'staple', label:'Shelf stable — buy the large size once', hint:'Spices, oils, sauces, rice. Worth stocking properly'},
@@ -1314,7 +1452,7 @@ function viewList(){
     <label class="pref">
       <span class="eyebrow">Shopping from</span>
       <select id="marketsel">
-        ${Object.keys(MARKETS).map(k => `<option value="${k}" ${state.market === k ? 'selected' : ''}>${MARKETS[k].flag} ${esc(MARKETS[k].name)}</option>`).join('')}
+        ${SERVED.map(k => `<option value="${k}" ${state.market === k ? 'selected' : ''}>${COUNTRIES[k].f} ${esc(COUNTRIES[k].n)}</option>`).join('')}
       </select>
     </label>
   </div>
@@ -1333,17 +1471,25 @@ function viewList(){
           <span style="flex:1">${esc(ING[it.id].n)}${it.unresolved.length ? `<div style="font-size:11px;color:var(--chili)">plus ${esc(it.unresolved.join(', '))} — no gram conversion</div>` : ''}</span>
         </li>`).join('')}
       </ul>
+      ${!stores.filter(s => s.for.includes(g.k)).length ? `
+      <div class="nostore">
+        <strong>No ${esc(g.k === 'spec' ? 'specialty' : g.k)} source known in ${esc(mkt.n)}.</strong>
+        ${g.k === 'spec'
+          ? 'This is the honest answer for most countries, and it is the category that decides whether the dish tastes right. Look for a diaspora grocer — the community that cooks this food will have one — or mail-order from a specialist abroad.'
+          : 'The registry has no platform covering this category here. Worth checking locally; coverage changes fast.'}
+      </div>` : `
       <div class="stores">
-        ${mkt.stores.filter(s => s.for.includes(g.k)).map(s => `
-          <a class="store" href="https://duckduckgo.com/?q=${encodeURIComponent(s.n + ' ' + mkt.name + ' online grocery')}" target="_blank" rel="noopener noreferrer">
+        ${stores.filter(s => s.for.includes(g.k)).map(s => `
+          <a class="store" href="https://duckduckgo.com/?q=${encodeURIComponent(s.n + ' ' + mkt.n + ' online grocery')}" target="_blank" rel="noopener noreferrer">
             <b>${esc(s.n)}</b>
             <span class="tierrow"><span class="pill ${TIERS[s.tier].cls}">${esc(TIERS[s.tier].label)}</span><span class="pill plain">${esc(s.t)}</span></span>
             <span class="sd">${esc(s.d)}</span>
           </a>`).join('')}
-      </div>
+      </div>`}
     </div>`;
   }).join('')}
-  <div class="notice" style="margin-top:18px"><strong>What the badges mean.</strong> Saudi and Gulf platforms do publish real, well-documented APIs — Talabat, Jahez, noon, HungerStation all have developer portals. Nearly all of them are <em>vendor-side</em>: they let a shop receive and fulfil orders placed in the platform's own app, which is the opposite direction from what this app needs. The exceptions worth building on are Salla and Zid, where a merchant can authorise your app and you can then build carts against their catalogue. Everything marked deep link opens the store and you finish there. The app never holds your store credentials in any tier.</div>`;
+  <div class="notice" style="margin-top:18px"><strong>How this list is built.</strong> These ${stores.length} destinations for ${esc(mkt.n)} are derived, not hand-written: ${Object.keys(PLATFORMS).length} platform operators each declare which countries they serve, and local specialists are layered on only where they beat the global options. Adding a country is a two-letter code. ${SERVED.length} countries are served today.</div>
+  <div class="notice" style="margin-top:10px"><strong>What the badges mean.</strong> Platforms across the Gulf and Asia do publish real, well-documented APIs — Talabat, Jahez, noon and HungerStation all have developer portals. Nearly all are <em>vendor-side</em>: they let a shop receive and fulfil orders placed in the platform's own app, the opposite direction from what this app needs. The exceptions worth building on are Salla and Zid, where a merchant authorises your app and you can then build real carts against their catalogue. Deep link means the app opens the store and you finish there. It never holds your store credentials in any tier.</div>`;
 }
 
 function render(){
