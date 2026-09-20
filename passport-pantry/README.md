@@ -133,14 +133,31 @@ exactly the kind of thing that makes a dieting user stop trusting an app. Both
 tests now have to pass: keto requires ≤10 g *and* ≤10% of energy; low carb
 requires ≤30 g *and* ≤25%.
 
-Honest limits, all stated in the UI:
+**Provenance is tracked per value.** `fdc` on a `NUTR` row is the switch and the
+only thing separating a sourced number from a guess:
 
-- The per-100g table holds **reference approximations, not sourced values.**
-  Production resolves every ingredient against USDA FoodData Central — CC0 public
-  domain, free API key, 1,000 requests an hour — rather than shipping numbers in
-  source. Each row has a place for its FDC ID.
-- Carbohydrate is **total, not net.** Fibre is not tracked, so keto users doing
-  net-carb maths need to adjust.
+| Row | App behaviour |
+|---|---|
+| Has `fdc` | USDA-sourced; traceable at `fdc.nal.usda.gov/food-details/<id>` |
+| No `fdc` | Counted as an approximation and labelled as one on every screen |
+
+Each recipe shows *"N of M values resolved from USDA FoodData Central"*, and the
+daily-budget disclaimer rewrites itself once the table is complete. Run
+`node tools/fdc-resolve.mjs --key YOUR_KEY` to do that — see `tools/README.md`.
+**As committed, the table is entirely approximations: no row carries an FDC id,
+because inventing one would be a fabricated citation in a health context.**
+
+Carbohydrate is **total** until the resolve brings fibre with it; **net carbs**
+then appear wherever every counted ingredient has a fibre figure, and the keto and
+low-carb tags switch to using the net number.
+
+Some ingredients have no USDA entry at all — scotch bonnet, donne' sali, makrut
+lime leaf, palm sugar, baharat, ají amarillo. The closest available food is used
+and **flagged on the recipe as a proxy**, because a cited number that quietly
+describes a different food is worse than an admitted estimate. A test keeps the
+app's proxy list and the resolver's in step.
+
+Remaining honest limits:
 - Cooking losses beyond the yield map are not modelled: water evaporating from a
   reduction concentrates nothing nutritionally but changes portion size, and oil
   absorbed by frying is estimated rather than measured.
@@ -416,7 +433,7 @@ unverified. The tier assignments are the part worth trusting; the URLs are not.
 
 | Need | Source | Terms |
 |---|---|---|
-| Nutrition, calories, macros | USDA FoodData Central | CC0 public domain, free key, 1,000 req/hr — **not yet wired up; values are approximations** |
+| Nutrition, calories, macros | USDA FoodData Central | CC0 public domain, free key, 1,000 req/hr — **resolver written (`tools/fdc-resolve.mjs`); run it to replace the approximations** |
 | Grocery cart | Instacart Developer Platform (`/idp/v1/products/recipe`) | Partner approval required |
 | Grocery cart, direct | Kroger Cart API | OAuth2 authorization code, user authorizes |
 | Product links | Walmart affiliate / content provider API | Read-only, drives traffic out |
@@ -442,8 +459,10 @@ partner APIs or deep links; the user checks out in their own account.
   sources.
 - Cart buttons are disabled — no partner credentials are wired up.
 - The unit conversion table covers only the ingredients these eight recipes use.
-- Nutrition values are reference approximations rather than USDA-sourced, and
-  fibre (so net carbs) is not tracked.
+- Nutrition values are still approximations: the FoodData Central resolver is
+  written and tested but has not been run, because `api.nal.usda.gov` is blocked
+  by the egress policy of the environment this was built in. One command with a
+  free key fixes it, and the app flips to sourced with no other change.
 - Store links open a web search rather than a verified retailer URL, since
   deep-link formats have not been confirmed per retailer. The integration tier
   shown against each store is researched; the link is not.
@@ -473,9 +492,9 @@ Saudi Arabia. Instacart and Kroger last, as a US-only enhancement rather than a
 global dependency.
 
 **Later — scale content**
-Contributor programme for regional cooks, YouTube variation indexing, and
-replacing the approximate nutrition table with resolved FoodData Central rows
-keyed by FDC ID — including fibre, so net carbs become possible.
+Contributor programme for regional cooks, and YouTube variation indexing. The
+FoodData Central resolve is no longer a later item — it is one command, and it
+gates shipping the calorie budget to real users.
 
 ---
 

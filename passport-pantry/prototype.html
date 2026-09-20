@@ -192,6 +192,17 @@ ul.ings li.swapped .iname em{color:var(--jade)}
 .store b{font-size:13.5px}
 .store .tierrow{display:flex;gap:4px;flex-wrap:wrap}
 .store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+/* ---------- provenance ---------- */
+.prov{display:flex;flex-direction:column;gap:6px;margin-top:12px;padding:10px 11px;border-radius:8px;
+  background:var(--surface-2);font-size:11.5px;line-height:1.5;color:var(--ink-2)}
+.prov.ok{background:var(--jade-soft);color:var(--jade)}
+.prov.none{background:var(--accent-soft);color:var(--accent-ink)}
+.provbar{display:block;height:4px;border-radius:2px;background:var(--sunk);overflow:hidden}
+.prov.ok .provbar{background:rgba(0,0,0,.12)}
+.provbar i{display:block;height:100%;border-radius:2px;background:currentColor}
+.prov code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;
+  background:rgba(0,0,0,.08);padding:1px 4px;border-radius:3px}
+
 /* ---------- daily budget ---------- */
 .budget{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-top:18px;
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
@@ -711,13 +722,23 @@ const COUNTRIES = {
 };
 
 /* ---------- nutrition, per 100 g ----------
-   kcal, protein, carbohydrate, fat. `fdc` is the FoodData Central ID that
-   should replace each row: USDA FDC is CC0 public domain with a free key,
-   so production resolves every one of these from the real database rather
-   than carrying numbers in the source. Until then these are reference
-   approximations and the UI labels them as such — nobody should make a
-   medical decision on a hardcoded table.
-   Fibre is not tracked, so carbohydrate here is total, not net.         */
+   kcal, protein, carbohydrate, fat, and optionally `fib` (fibre) and
+   `fdc` (the FoodData Central id).
+
+   `fdc` is the provenance switch and the only thing that distinguishes a
+   sourced value from a guess. A row WITH an fdc id was resolved from USDA
+   FoodData Central — CC0 public domain — and can be cited and checked at
+   https://fdc.nal.usda.gov/food-details/<id>. A row WITHOUT one is a
+   reference approximation, and the app says so on every screen that uses
+   it rather than presenting both as equivalent.
+
+   Run `node tools/fdc-resolve.mjs --key YOUR_KEY` to replace this block
+   with resolved values. That script is the integration: nutrient values
+   for kosher salt do not change, so they are fetched once at build time
+   and committed, not requested per page view.
+
+   Net carbohydrate needs fibre, so it is shown only where every counted
+   ingredient in a recipe carries `fib`.                                  */
 const NUTR = {
   flour:{k:364,p:10.3,c:76.3,f:1.0},      water:{k:0,p:0,c:0,f:0},
   salt:{k:0,p:0,c:0,f:0},                 pepper:{k:251,p:10.4,c:63.9,f:3.3},
@@ -830,6 +851,13 @@ function macroTargets(pr){
   return {p:Math.round(t * fw.p / 100 / 4), c:Math.round(t * fw.c / 100 / 4), f:Math.round(t * fw.f / 100 / 9)};
 }
 
+/* How much of the whole table is sourced, for the day-level disclaimer. */
+function tableProvenance(){
+  const ids = Object.keys(NUTR);
+  const sourced = ids.filter(i => NUTR[i].fdc).length;
+  return {total:ids.length, sourced, all:sourced === ids.length, none:sourced === 0};
+}
+
 const todayKey = () => new Date().toISOString().slice(0, 10);
 function dayEntries(){ return state.day[state.date] || []; }
 function dayTotals(){
@@ -846,6 +874,28 @@ function fitsToday(r){
   if(k <= left + 150) return 'close';
   return 'over';
 }
+
+/* ---------- proxy matches ----------
+   Ingredients where the closest USDA food is a stand-in rather than the
+   thing itself. Kept in step with PROXY_NOTE in tools/fdc-resolve.mjs, and
+   surfaced in the UI so a sourced value is not mistaken for an exact one.
+   A cited number that quietly describes a different food is worse than an
+   admitted estimate. */
+const NUTR_PROXY = {
+  scotch:'generic hot chilli — USDA has no scotch bonnet',
+  donne:"generic hot chilli — USDA has no donne' sali",
+  sugar_palm:'granulated sugar — real palm sugar carries trace minerals',
+  sugar_rock:'granulated sucrose',
+  limeleaf:'lime peel — no makrut lime leaf entry, and it adds negligible mass',
+  loomi:'lime peel — no dried lime entry, and it is mostly not eaten',
+  preslemon:'lemon peel — real preserved lemon is far higher in sodium',
+  baharat:'curry powder as a mixed-spice proxy',
+  paste_pnng:'generic curry paste — formulations vary enormously',
+  paste_aji:'canned hot chilli — no ají amarillo entry',
+  rice_bas:'generic long-grain white rice',
+  shaoxing:'generic cooking wine',
+  mackerel:'salted before desalting — soaking and boiling cut the sodium sharply'
+};
 
 /* ---------- what actually gets eaten ----------
    The trap in every recipe calorie count: summing raw ingredients assumes
@@ -880,20 +930,33 @@ const EATEN_NOTE = {
 /* ---------- nutrition maths ----------
    Reads through effectiveIngs, so a protein swap changes the numbers.   */
 function nutritionOf(r){
-  const per = {k:0, p:0, c:0, f:0};
-  let missing = 0, adjusted = false;
+  const per = {k:0, p:0, c:0, f:0, fib:0};
+  let missing = 0, adjusted = false, counted = 0, sourced = 0, fibAll = true;
+  const proxies = [];
   effectiveIngs(r).forEach(ing => {
     const n = NUTR[ing.i];
     const g = toGrams(ing.i, ing.q, ing.u);          // one batch, unscaled
     if(!n || g === null){ missing++; return; }
     const eat = (EATEN[r.id] && EATEN[r.id][ing.i] !== undefined) ? EATEN[r.id][ing.i] : 1;
     if(eat !== 1) adjusted = true;
+    // Provenance is counted on ingredients that actually reach the plate;
+    // something with an eaten fraction of zero cannot skew the figures.
+    if(eat > 0){
+      counted++;
+      if(n.fdc) sourced++;
+      if(n.fib === undefined || n.fib === null) fibAll = false;
+      if(NUTR_PROXY[ing.i]) proxies.push(ing.i);
+    }
     const mass = g * eat / 100;
     per.k += n.k * mass; per.p += n.p * mass;
     per.c += n.c * mass; per.f += n.f * mass;
+    if(n.fib) per.fib += n.fib * mass;
   });
   const s = r.serves || 1;                            // per serving is scale-invariant
-  const out = {k:per.k / s, p:per.p / s, c:per.c / s, f:per.f / s, missing, adjusted};
+  const out = {k:per.k / s, p:per.p / s, c:per.c / s, f:per.f / s,
+               fib:fibAll ? per.fib / s : null, missing, adjusted,
+               counted, sourced, proxies,
+               net:fibAll ? Math.max(0, (per.c - per.fib) / s) : null};
   // energy split, from the macros rather than from the kcal figure
   const ek = out.p * 4 + out.c * 4 + out.f * 9;
   out.split = ek > 0
@@ -905,8 +968,9 @@ function nutritionOf(r){
      true arithmetic, useless advice, and the kind of thing that makes a
      dieting user stop trusting the app. Both tests must pass. */
   out.tags = [];
-  if(out.c <= 10 && out.split.c <= 10) out.tags.push('Keto-friendly');
-  else if(out.c <= 30 && out.split.c <= 25) out.tags.push('Low carb');
+  const carbForTags = out.net !== null ? out.net : out.c;   // net where known
+  if(carbForTags <= 10 && out.split.c <= 10) out.tags.push('Keto-friendly');
+  else if(carbForTags <= 30 && out.split.c <= 25) out.tags.push('Low carb');
   if(out.split.p >= 30) out.tags.push('High protein');
   if(out.k <= 450) out.tags.push('Under 450 kcal');
   return out;
@@ -1852,9 +1916,25 @@ function viewRecipe(){
         </div>
         <div class="nnote dim" style="margin-top:6px">${Math.round(remainingKcal())} kcal left today — ${fitsToday(r) === 'fits' ? 'a serving fits' : fitsToday(r) === 'close' ? 'a serving is just over' : 'a full serving is over budget'}.</div>
 
+        ${nut.net !== null ? `<div class="nnote"><strong>Net carbohydrate ${nut.net.toFixed(1)} g</strong> — total ${nut.c.toFixed(1)} g less ${nut.fib.toFixed(1)} g fibre. The keto and low-carb tags above use the net figure.</div>` : ''}
         ${nut.adjusted ? `<div class="nnote"><strong>Adjusted for what you don't eat.</strong> ${esc(EATEN_NOTE[r.id] || '')}</div>` : ''}
         ${nut.missing ? `<div class="nnote warn">${nut.missing} ingredient${nut.missing > 1 ? 's' : ''} could not be counted — no nutrition row or no gram conversion. The figure above is low by that much.</div>` : ''}
-        <div class="nnote dim">Reference approximations, not sourced values. Production resolves every ingredient against USDA FoodData Central, which is public domain with a free key. Carbohydrate is total, not net — fibre is not tracked yet. Informational, not medical or dietary advice.</div>
+        <div class="prov ${nut.sourced === nut.counted ? 'ok' : nut.sourced ? 'part' : 'none'}">
+          <span class="provbar"><i style="width:${nut.counted ? nut.sourced / nut.counted * 100 : 0}%"></i></span>
+          <span class="provtxt">
+            ${nut.sourced === nut.counted
+              ? `All ${nut.counted} values resolved from USDA FoodData Central.`
+              : nut.sourced
+                ? `${nut.sourced} of ${nut.counted} values resolved from USDA FoodData Central; the rest are approximations.`
+                : `None of these ${nut.counted} values are USDA-sourced yet — all are reference approximations.`}
+            ${nut.sourced < nut.counted ? ` Run <code>tools/fdc-resolve.mjs</code> with a free API key to replace them.` : ''}
+          </span>
+        </div>
+        ${nut.proxies.length ? `<div class="nnote">
+          <strong>Closest match, not exact:</strong>
+          ${nut.proxies.map(i => `${esc(ING[i].n)} — ${esc(NUTR_PROXY[i])}`).join('; ')}.
+        </div>` : ''}
+        <div class="nnote dim">${nut.net === null ? 'Carbohydrate is total, not net — fibre is not available for every ingredient here. ' : ''}Informational, not medical or dietary advice.</div>
       </div>
 
       <div class="panel">
@@ -2078,7 +2158,10 @@ function viewToday(){
         </div>`
       : `<div class="empty">Nothing in the catalogue fits what is left. A smaller portion of something will — the servings control on any dish scales it.</div>`}
 
-  <div class="notice" style="margin-top:20px"><strong>Built on approximate nutrition data.</strong> The ingredient values behind these figures are reference approximations, not USDA-sourced, so a day's total carries that error compounded across everything you logged. Useful for direction and habit; not accurate enough to manage a medical condition on. Informational only, not dietary or medical advice.</div>`;
+  ${(() => { const tp = tableProvenance(); return tp.all
+    ? `<div class="notice" style="margin-top:20px"><strong>Built on USDA FoodData Central.</strong> All ${tp.total} ingredient values are resolved from the public-domain USDA database and each carries its FDC id, so any figure here can be traced back to its source record. Cooking losses beyond the yield corrections are still estimated, and where an ingredient has no USDA entry the closest available food is used and flagged on the recipe. Informational, not dietary or medical advice.</div>`
+    : `<div class="notice" style="margin-top:20px"><strong>${tp.none ? 'Built on approximate nutrition data.' : `Only ${tp.sourced} of ${tp.total} ingredient values are USDA-sourced.`}</strong> A day's total compounds that error across everything you logged. Useful for direction and habit; not accurate enough to manage a medical condition on. Run <code>node tools/fdc-resolve.mjs --key YOUR_KEY</code> to replace the table with resolved USDA values — the key is free and the data is public domain. Informational only, not dietary or medical advice.</div>`;
+  })()}`;
 }
 
 function viewList(){
