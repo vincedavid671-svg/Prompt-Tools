@@ -153,6 +153,46 @@ ol.steps b{display:block;font-weight:700;font-size:12px;letter-spacing:.04em;tex
 .sugg button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px;font-size:12px;color:var(--ink-2)}
 .answer{background:var(--surface-2);border-radius:8px;padding:11px 13px;font-size:13.5px;line-height:1.55;white-space:pre-wrap}
 
+/* ---------- preference selects ---------- */
+.prefs{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.pref{display:flex;flex-direction:column;gap:4px}
+.pref select{
+  border:1px solid var(--line-2);background:var(--surface);color:var(--ink);
+  border-radius:8px;padding:7px 10px;font-size:13px;font-weight:600;min-width:170px;
+}
+.pref select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.regnote{margin:10px 0 0;font-size:13.5px;color:var(--ink-2);max-width:62ch;font-style:italic}
+
+/* ---------- swaps ---------- */
+ul.ings li.swapped .iname{color:var(--jade)}
+ul.ings li.swapped .iname em{color:var(--jade)}
+.dietflag{border-radius:8px;padding:9px 11px;font-size:13px;margin-top:9px;line-height:1.45}
+.dietflag.chili{background:var(--chili-soft);color:var(--chili)}
+.dietflag.jade{background:var(--jade-soft);color:var(--jade)}
+.dietflag.amber{background:var(--accent-soft);color:var(--accent-ink)}
+.swapblock{margin-top:13px;border-top:1px solid var(--line);padding-top:11px}
+.swaphead{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.swapintro{font-size:13px;color:var(--ink-2);margin:4px 0 8px}
+.swapopt{
+  display:block;width:100%;text-align:left;border:1px solid var(--line);
+  background:var(--surface);border-radius:8px;padding:9px 11px;margin-top:6px;
+}
+.swapopt:hover{border-color:var(--jade);background:var(--jade-soft)}
+.swapopt b{display:block;font-size:13.5px}
+.swapopt span{display:block;font-size:12px;color:var(--ink-2);line-height:1.45;margin-top:2px}
+.swapnone{font-size:12.5px;color:var(--ink-2);margin:4px 0 0;line-height:1.45}
+
+/* ---------- stores ---------- */
+.stores{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:13px}
+.store{
+  border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-decoration:none;
+  color:inherit;display:flex;flex-direction:column;gap:3px;background:var(--paper);
+}
+.store:hover{border-color:var(--accent);background:var(--accent-soft)}
+.store b{font-size:13.5px}
+.store .pill{align-self:flex-start}
+.store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+
 /* ---------- foundation & layers ---------- */
 ul.layers{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}
 ul.layers li{padding:9px 0;border-top:1px solid var(--line);font-size:13px;line-height:1.5}
@@ -280,8 +320,164 @@ const ING = {
   rice_long:  {n:'Long-grain rice',          buy:'staple', conv:{g:1, cup:185}},
   potato:     {n:'Potatoes',                 buy:'fresh',  conv:{g:1, piece:170}},
   whitepep:   {n:'Ground white pepper',      buy:'staple', conv:{g:1, tsp:2.4}},
-  banana_grn: {n:'Green bananas',            buy:'spec',   conv:{g:1, piece:150}}
+  banana_grn: {n:'Green bananas',            buy:'spec',   conv:{g:1, piece:150}},
+  /* added for the UK / NZ / Saudi dishes and for substitutions */
+  sausage_pork:{n:'Pork sausages',           buy:'fresh',  conv:{g:1, piece:65}},
+  sausage_chk:{n:'Chicken sausages',         buy:'fresh',  conv:{g:1, piece:60}},
+  sausage_bf: {n:'Beef sausages',            buy:'fresh',  conv:{g:1, piece:65}},
+  lamb_grd:   {n:'Ground lamb',              buy:'fresh',  conv:{g:1}},
+  lamb_leg:   {n:'Leg of lamb',              buy:'fresh',  conv:{g:1}},
+  chicken_grd:{n:'Ground chicken',           buy:'fresh',  conv:{g:1}},
+  mushroom:   {n:'Mushrooms',                buy:'fresh',  conv:{g:1, piece:20}},
+  butter:     {n:'Butter',                   buy:'fresh',  conv:{g:1, tbsp:14, cup:227}},
+  ghee:       {n:'Ghee',                     buy:'staple', conv:{g:1, tbsp:13}},
+  milk:       {n:'Whole milk',               buy:'fresh',  conv:{ml:1, g:1.03, cup:244}},
+  cheddar:    {n:'Sharp cheddar',            buy:'fresh',  conv:{g:1, cup:113}},
+  egg:        {n:'Egg',                      buy:'fresh',  conv:{g:1, piece:50}},
+  stock_beef: {n:'Beef stock',               buy:'staple', conv:{ml:1, g:1, cup:237}},
+  stock_chx:  {n:'Chicken stock',            buy:'staple', conv:{ml:1, g:1, cup:237}},
+  worcester:  {n:'Worcestershire sauce',     buy:'staple', conv:{ml:1, g:1.1, tbsp:16}},
+  vinegar_rc: {n:'Rice vinegar',             buy:'staple', conv:{ml:1, g:1, tbsp:15}},
+  tomato_pst: {n:'Tomato paste',             buy:'staple', conv:{g:1, tbsp:16}},
+  pastry_sh:  {n:'Shortcrust pastry',        buy:'fresh',  conv:{g:1}},
+  pastry_pf:  {n:'Puff pastry',              buy:'fresh',  conv:{g:1}},
+  rice_bas:   {n:'Basmati rice',             buy:'staple', conv:{g:1, cup:180}},
+  carrot:     {n:'Carrot',                   buy:'fresh',  conv:{g:1, piece:60}},
+  baharat:    {n:'Kabsa spice blend (baharat)', buy:'spec', conv:{g:1, tbsp:8, tsp:2.7}},
+  loomi:      {n:'Loomi (dried black lime)', buy:'spec',   conv:{g:1, piece:8}},
+  cardamom:   {n:'Green cardamom pods',      buy:'staple', conv:{g:1, piece:0.2, tsp:2}},
+  clove_sp:   {n:'Whole cloves',             buy:'staple', conv:{g:1, piece:0.07, tsp:2.1}},
+  bay:        {n:'Bay leaves',               buy:'staple', conv:{g:1, piece:0.2}},
+  almond:     {n:'Slivered almonds',         buy:'staple', conv:{g:1, tbsp:7}},
+  raisin:     {n:'Raisins',                  buy:'staple', conv:{g:1, tbsp:10}},
+  potato_fl:  {n:'Floury potatoes',          buy:'fresh',  conv:{g:1, piece:180}}
 };
+
+/* ---------- dietary flags ----------
+   Kept as a side map so the ingredient registry stays about measurement.
+   'alcohol_derived' is deliberately separate from 'alcohol': most halal
+   authorities accept vinegar made from wine because fermentation
+   transforms it, but plenty of people still avoid it. That is a warning,
+   not a conflict, and the app should not decide it for anyone.          */
+const FLAGS = {
+  pork_grd:['meat','pork'], sausage_pork:['meat','pork'],
+  beef_grd:['meat','beef'], beef_loin:['meat','beef'], stock_beef:['meat','beef'],
+  sausage_bf:['meat','beef'],
+  lamb_grd:['meat'], lamb_leg:['meat'], chicken_grd:['meat'],
+  chicken_wh:['meat'], chicken_th:['meat'], stock_chx:['meat'], sausage_chk:['meat'],
+  mackerel:['fish'], fishsauce:['fish'], worcester:['fish'],
+  butter:['dairy'], milk:['dairy'], cheddar:['dairy'], ghee:['dairy'],
+  egg:['egg'],
+  shaoxing:['alcohol'], vinegar_rw:['alcohol_derived']
+};
+const flagsOf = id => FLAGS[id] || [];
+
+/* ---------- diet profiles ---------- */
+const DIETS = {
+  none:   {label:'No restriction', avoid:[], warn:[]},
+  halal:  {label:'Halal', avoid:['pork','alcohol'], warn:['alcohol_derived'],
+           note:'The app can only check ingredients. Whether meat is halal-slaughtered depends on where you buy it, not on the recipe.'},
+  kosher: {label:'Kosher', avoid:['pork','shellfish'], warn:['dairy'],
+           note:'Meat and dairy must also not be combined, and certification covers equipment as well as ingredients.'},
+  nopork: {label:'No pork', avoid:['pork'], warn:[]},
+  nobeef: {label:'No beef', avoid:['beef'], warn:[]},
+  pesc:   {label:'Pescatarian', avoid:['meat'], warn:[]},
+  veg:    {label:'Vegetarian', avoid:['meat','fish'], warn:[]},
+  vegan:  {label:'Vegan', avoid:['meat','fish','dairy','egg'], warn:[]}
+};
+
+/* ---------- substitutions ----------
+   Every note says what you lose. A swap that pretends to be free is how
+   people end up disappointed with a dish they were told would work.     */
+const SUBS = {
+  pork_grd:[
+    {to:'lamb_grd',    note:'Closest in fat content. Pushes the dish toward its highland version, which is a real regional style, not a compromise.'},
+    {to:'beef_grd',    note:'Leaner. Add a spoonful of oil — the pork fat was doing work you will otherwise miss.'},
+    {to:'chicken_grd', note:'Much leaner and milder. Needs extra fat and noticeably more seasoning.'},
+    {to:'mushroom',    note:'Chopped fine and browned hard first. A genuine alternative, though the texture is softer.'}],
+  sausage_pork:[
+    {to:'sausage_chk', note:'Widely available and behaves the same in the pan. Milder, so lean harder on the onion gravy.'},
+    {to:'sausage_bf',  note:'Firmer and more assertive. Suits the gravy well and holds its shape better.'}],
+  beef_grd:[
+    {to:'lamb_grd',    note:'Richer and slightly gamey. Traditional in the mountain versions.'},
+    {to:'chicken_grd', note:'Leaner. Add fat and season harder.'}],
+  beef_loin:[
+    {to:'lamb_leg',    note:'Sliced the same way. Cooks slightly faster and takes spice well.'},
+    {to:'chicken_th',  note:'Thigh, not breast — breast dries out at this heat. Sear just as hard.'}],
+  stock_beef:[{to:'stock_chx', note:'Lighter. Reduce it a little further to make up the body.'}],
+  mackerel:[{to:'chicken_th', note:'A real departure, but the coconut custard carries chicken well. No soaking needed.'}],
+  shaoxing:[
+    {to:'stock_chx',  note:'The standard non-alcoholic swap. Loses the fermented edge; nothing else replaces it exactly.'},
+    {to:'vinegar_rc', note:'Use half the amount. Sharper and less round, but it keeps some acidity in play.'}],
+  vinegar_rw:[{to:'vinegar_rc', note:'Milder. Add a squeeze of lime to bring the sharpness back up.'}],
+  worcester:[{to:'soy', note:'Worcestershire contains anchovy. Soy gives the same savoury depth without fish.'}],
+  butter:[{to:'ghee', note:'Nearly interchangeable here, and it takes more heat before it burns.'}],
+  fishsauce:[{to:'soy', note:'Different, not equivalent — you lose the funk that defines the dish. Add a pinch of salt.'}]
+};
+
+/* ---------- regions ---------- */
+const REGION_OF = {
+  Georgia:'Caucasus', China:'Asia', Vietnam:'Asia', Thailand:'Asia',
+  Guam:'Pacific Islands', Jamaica:'Caribbean', Morocco:'North Africa',
+  Peru:'Latin America', 'United Kingdom':'Europe', 'New Zealand':'Oceania',
+  'Saudi Arabia':'Middle East'
+};
+const REGION_NOTE = {
+  'Middle East':'Rice cooked in the broth of the meat it is served with. Dried limes, baharat, charcoal, and generous platters built for sharing.',
+  'Asia':'Fermented salt in every kitchen — fish sauce, soy, shrimp paste. Technique carries more weight here than ingredient count.',
+  'Europe':'Stock, fat and time. The pub and household plate: one protein, one starch, and a sauce that took longer than either.',
+  'Caucasus':'Walnut, herb and sour fruit. Bread and dumpling traditions that predate most national borders in the region.',
+  'Caribbean':'Coconut reduced until it breaks, scotch bonnet for perfume before heat, and provisions — the starches that feed the plate.',
+  'North Africa':'Slow, nearly dry cooking under a cone. Preserved lemon and olive on one side, dried fruit and honey on the other.',
+  'Latin America':'Chilli as flavour rather than heat alone, and in Peru a century of Cantonese technique layered onto local produce.',
+  'Pacific Islands':'Fire and acid. Grilled protein chopped by hand, dressed with citrus while warm, finished with fresh coconut.',
+  'Oceania':'Pastry, mince and the pie as a national form. British inheritance reworked around local meat.'
+};
+
+/* ---------- regional grocery markets ----------
+   Outside the US there is essentially no partner cart API. These are
+   deep-link destinations, not integrations. The store list is the
+   useful part; every link must be verified before launch.              */
+const MARKETS = {
+  SA:{name:'Saudi Arabia', flag:'🇸🇦', stores:[
+    {n:'Nana', t:'Aggregator', d:'Aggregates Tamimi, Danube, Panda and others. Closest thing to an Instacart analogue here.', for:['fresh','staple']},
+    {n:'Tamimi Markets', t:'Supermarket', d:'Strong on imported and Western goods.', for:['fresh','spec']},
+    {n:'Danube', t:'Supermarket', d:'Wide international range; good for European ingredients.', for:['fresh','spec']},
+    {n:'Panda', t:'Supermarket', d:'Largest domestic chain. Best prices on staples.', for:['fresh','staple']},
+    {n:'Carrefour KSA', t:'Hypermarket', d:'Broad range including South and Southeast Asian ingredients.', for:['fresh','staple','spec']},
+    {n:'Lulu Hypermarket', t:'Hypermarket', d:'The strongest source for Asian and subcontinental specialty items.', for:['spec','fresh']},
+    {n:'Amazon.sa', t:'Marketplace', d:'Shelf-stable goods, spices and equipment.', for:['staple']},
+    {n:'HungerStation Market', t:'Quick delivery', d:'Fast delivery when a single ingredient is missing mid-cook.', for:['fresh']}
+  ]},
+  AE:{name:'United Arab Emirates', flag:'🇦🇪', stores:[
+    {n:'InstaShop', t:'Aggregator', d:'Partners with Carrefour, Spinneys, Choithrams and others. Acquired by Talabat.', for:['fresh','staple']},
+    {n:'Carrefour UAE', t:'Hypermarket', d:'Operated by Majid Al Futtaim. Widest general range.', for:['fresh','staple','spec']},
+    {n:'Lulu Hypermarket', t:'Hypermarket', d:'Best Asian and subcontinental specialty selection.', for:['spec','fresh']},
+    {n:'Spinneys', t:'Supermarket', d:'Premium and Western imports.', for:['fresh','spec']},
+    {n:'Talabat Mart', t:'Quick delivery', d:'Dark-store model, very fast, limited range.', for:['fresh']},
+    {n:'Noon Minutes', t:'Quick delivery', d:'Same model as above; noon.com covers shelf-stable goods.', for:['fresh','staple']},
+    {n:'Kibsons', t:'Fresh specialist', d:'Produce and meat, subscription-led.', for:['fresh']}
+  ]},
+  US:{name:'United States', flag:'🇺🇸', stores:[
+    {n:'Instacart', t:'Aggregator', d:'Multi-retailer. The one platform with a real recipe-to-cart developer API.', for:['fresh','staple','spec']},
+    {n:'Kroger', t:'Supermarket', d:'Public Cart API with OAuth — items can be added to the shopper’s own cart.', for:['fresh','staple']},
+    {n:'Walmart', t:'Supermarket', d:'Affiliate content API, read-only.', for:['fresh','staple']},
+    {n:'Amazon', t:'Marketplace', d:'Shelf-stable goods and equipment. See the Creators API caveat.', for:['staple']},
+    {n:'H Mart / 99 Ranch', t:'Specialty', d:'East and Southeast Asian ingredients, often the only reliable source.', for:['spec']}
+  ]},
+  GB:{name:'United Kingdom', flag:'🇬🇧', stores:[
+    {n:'Tesco', t:'Supermarket', d:'Widest national coverage.', for:['fresh','staple']},
+    {n:'Sainsbury’s', t:'Supermarket', d:'Comparable range and delivery network.', for:['fresh','staple']},
+    {n:'Ocado', t:'Online only', d:'Strong on imported and specialty goods.', for:['fresh','spec']},
+    {n:'Amazon UK', t:'Marketplace', d:'Spices and shelf-stable goods.', for:['staple']}
+  ]},
+  NZ:{name:'New Zealand', flag:'🇳🇿', stores:[
+    {n:'Woolworths NZ', t:'Supermarket', d:'National coverage and delivery.', for:['fresh','staple']},
+    {n:'New World', t:'Supermarket', d:'Broader specialty range in larger stores.', for:['fresh','spec']},
+    {n:'Tai Ping / Lim Chhour', t:'Specialty', d:'Asian grocers in the main centres.', for:['spec']}
+  ]}
+};
+
 
 /* ---------- recipes ---------- */
 const R = [
@@ -456,6 +652,77 @@ const R = [
     {h:'Combine', t:'Return the beef, add the tomato wedges and the fries, and toss twice. Any more and the fries go soft. Cilantro off the heat.'},
     {h:'Serve', t:'Steamed white rice alongside, never underneath.'}
   ]
+},
+{
+  id:'kabsa', country:'Saudi Arabia', flag:'🇸🇦', dish:'Chicken Kabsa', native:'كبسة دجاج',
+  region:'Najd — the central region, and the national dish',
+  blurb:'The rice is the point. Chicken is poached in a spiced broth, that broth cooks the rice, and the bird goes back under heat to crisp. Nothing is cooked in plain water.',
+  serves:6, time:'1 h 30 m', level:'Medium',
+  ings:[
+    {i:'chicken_wh', q:1, u:'piece'}, {i:'rice_bas', q:500, u:'g'},
+    {i:'onion', q:2, u:'piece'}, {i:'garlic', q:4, u:'clove'},
+    {i:'tomato', q:3, u:'piece'}, {i:'tomato_pst', q:2, u:'tbsp'},
+    {i:'carrot', q:1, u:'piece'}, {i:'baharat', q:2, u:'tbsp'},
+    {i:'loomi', q:2, u:'piece'}, {i:'cinnamon', q:1, u:'piece'},
+    {i:'cardamom', q:6, u:'piece'}, {i:'clove_sp', q:4, u:'piece'},
+    {i:'bay', q:2, u:'piece'}, {i:'ghee', q:3, u:'tbsp'},
+    {i:'almond', q:2, u:'tbsp'}, {i:'raisin', q:2, u:'tbsp'}
+  ],
+  steps:[
+    {h:'Rinse the rice', t:'Wash the basmati until the water runs clear, then soak 20 minutes and drain. Skipping this gives you a sticky kabsa, which is the most common fault.'},
+    {h:'Brown', t:'Melt the ghee and brown the chicken pieces on all sides, then lift them out. Soften the chopped onion in the same fat until golden, 8 minutes, and add the garlic.', heat:'Medium-high for the chicken, medium for the onion.'},
+    {h:'Build the broth', t:'Add tomato paste and cook it out for a minute, then the chopped tomato, grated carrot, baharat, pierced loomi, cinnamon, cardamom, cloves and bay.'},
+    {h:'Poach', t:'Return the chicken, cover with about 1.2 litres of water, and simmer covered 35 to 40 minutes until cooked through. Lift the chicken out and keep it.', heat:'Low, barely bubbling. Boiling toughens the breast before the thigh is done.'},
+    {h:'Measure', t:'Strain the broth and measure it — you want 1.5 times the volume of your drained rice. Too much broth is the second most common fault.'},
+    {h:'Rice', t:'Bring the measured broth back to a boil, add the rice, boil 3 minutes uncovered, then cover and drop to the lowest heat for 15 minutes. Do not lift the lid.', heat:'Lowest setting, with a diffuser if you have one. Rest 10 minutes off the heat, still covered.'},
+    {h:'Crisp the chicken', t:'While the rice rests, put the chicken under a hot grill or in a very hot oven for 10 minutes until the skin browns and tightens.', heat:'Grill on high, or 220 °C / 425 °F.'},
+    {h:'Serve', t:'Fork the rice through, pile it on a platter with the chicken on top, and scatter the almonds and raisins you have fried briefly in a little ghee. Daqqus — a tomato and chilli sauce — on the side.'}
+  ]
+},
+{
+  id:'bangers', country:'United Kingdom', flag:'🇬🇧', dish:'Bangers and Mash', native:'Bangers and mash',
+  region:'Pub and household standard across England',
+  blurb:'Three simple things that are each usually done badly: sausages cooked too fast, mash worked into glue, and gravy out of a packet. Fix all three and it is a serious plate of food.',
+  serves:4, time:'50 m', level:'Easy',
+  ings:[
+    {i:'sausage_pork', q:8, u:'piece'}, {i:'potato_fl', q:1000, u:'g'},
+    {i:'butter', q:100, u:'g'}, {i:'milk', q:120, u:'ml'},
+    {i:'onion', q:2, u:'piece'}, {i:'flour', q:2, u:'tbsp'},
+    {i:'stock_beef', q:500, u:'ml'}, {i:'worcester', q:1, u:'tbsp'},
+    {i:'thyme', q:2, u:'tsp'}, {i:'oil_veg', q:1, u:'tbsp'}
+  ],
+  steps:[
+    {h:'Sausages, slowly', t:'Into a cold pan with the oil, then bring the heat up to medium-low and cook 20 to 25 minutes, turning often. Never prick them.', heat:'Medium-low the whole way. High heat splits the skins and drives the fat out — that is the "banger" the name refers to.'},
+    {h:'Potatoes', t:'Peel, cut to even pieces, and start them in cold salted water. Bring to a boil and simmer until a knife slides through with no resistance, about 20 minutes.'},
+    {h:'Onion gravy', t:'In a second pan, cook the thinly sliced onion in a knob of butter until genuinely brown and sweet — 15 minutes, not 5. This is the whole flavour of the gravy.', heat:'Medium-low, stirring occasionally. Rushing it gives you brown onions that still taste raw.'},
+    {h:'Thicken', t:'Stir the flour into the onions and cook 2 minutes, then add the stock a little at a time, whisking. Worcestershire sauce and thyme in. Simmer until it coats a spoon.'},
+    {h:'Mash', t:'Drain the potatoes and let them steam dry in the pan for a minute. Rice or mash them, then beat in the warm milk and the butter. Stop as soon as it is smooth — worked mash turns gluey.', heat:'Warm the milk first. Cold milk into hot potato makes a dense mash.'},
+    {h:'Serve', t:'Mash, sausages leaning on it, gravy over the top. Peas if you want them.'}
+  ]
+},
+{
+  id:'mincepie', country:'New Zealand', flag:'🇳🇿', dish:'Mince and Cheese Pie', native:'Mince and cheese pie',
+  region:'Nationwide — the bakery and service-station standard',
+  blurb:'The filling has to be a thick sliceable gravy, not a stew. If it runs when you cut the pie, it was not reduced far enough.',
+  serves:6, time:'2 h', level:'Medium',
+  ings:[
+    {i:'beef_grd', q:700, u:'g'}, {i:'onion', q:1, u:'piece'},
+    {i:'garlic', q:3, u:'clove'}, {i:'flour', q:2, u:'tbsp'},
+    {i:'stock_beef', q:400, u:'ml'}, {i:'worcester', q:2, u:'tbsp'},
+    {i:'tomato_pst', q:1, u:'tbsp'}, {i:'pastry_sh', q:400, u:'g'},
+    {i:'pastry_pf', q:300, u:'g'}, {i:'cheddar', q:200, u:'g'},
+    {i:'egg', q:1, u:'piece'}, {i:'oil_veg', q:1, u:'tbsp'}
+  ],
+  steps:[
+    {h:'Brown hard', t:'Get the pan properly hot and brown the mince in two batches, breaking it up only after a crust has formed. Grey mince makes a grey pie.', heat:'High. Crowding the pan drops the temperature and it will steam instead.'},
+    {h:'Aromatics', t:'Soften the diced onion and garlic in the same pan, scraping up everything stuck to the base.'},
+    {h:'Gravy', t:'Stir in the flour and tomato paste, cook 2 minutes, then add stock and Worcestershire. Simmer 30 to 40 minutes until it is thick enough to hold a channel when you drag a spoon through.', heat:'Low, uncovered. This step cannot be shortened — it is what separates a pie from a stew in pastry.'},
+    {h:'Cool completely', t:'Spread the filling on a tray and chill it. Warm filling melts the shortcrust base before it can set, and you get a soggy bottom.'},
+    {h:'Line', t:'Line the tins with shortcrust and blind bake at 200 °C / 400 °F for 12 minutes until the base is dry and pale gold.'},
+    {h:'Fill', t:'Cold filling in, grated cheddar over the top, puff pastry lid on. Seal the edges, cut a steam vent, and brush with beaten egg.'},
+    {h:'Bake', t:'200 °C / 400 °F for 25 to 30 minutes until the lid is deep gold and risen.', heat:'If the lid browns before the base is done, drop to 180 °C / 350 °F and cover loosely with foil.'},
+    {h:'Serve', t:'Rest 10 minutes or the filling will run. Tomato sauce on top is not optional here.'}
+  ]
 }
 ];
 
@@ -530,6 +797,30 @@ lomo:{
     {w:'Chili', o:'Ají amarillo paste is the common route; fresh ají is brighter and much hotter.'},
     {w:'Acid', o:'Red wine vinegar is traditional. Some Lima kitchens finish with a splash of pisco instead.'},
     {w:'Starch', o:'Fries go in the wok, rice goes beside it. Both, always — this trips up first-timers.'}
+  ]},
+kabsa:{
+  foundation:'Chicken browned, then poached in a spiced broth; that broth — measured, not guessed — cooks the rice; the bird goes back under fierce heat to crisp. Nothing touches plain water.',
+  layers:[
+    {w:'Protein', o:'Chicken is everyday. Lamb makes it closer to a celebration dish; camel appears at large gatherings in some regions.'},
+    {w:'Spice', o:'Every household’s baharat differs. Loomi is the non-negotiable part — its sourness is what makes kabsa taste like kabsa.'},
+    {w:'Top', o:'Fried almond and raisin is the Najdi finish. The Hejaz leans on pine nut, and some skip the garnish entirely.'},
+    {w:'Sauce', o:'Daqqus — blitzed tomato with chilli and garlic — on the side. Not stirred through.'}
+  ]},
+bangers:{
+  foundation:'Sausages cooked slowly enough that the skins never split, mash that stops being worked the moment it is smooth, and an onion gravy built on genuinely browned onions and real stock.',
+  layers:[
+    {w:'Sausage', o:'Cumberland and Lincolnshire are the classics. Chicken and beef sausages work identically and are the standard swap where pork is not eaten.'},
+    {w:'Mash', o:'Butter and milk is the floor. Cream, mustard or a beaten-in egg yolk all have their households.'},
+    {w:'Gravy', o:'Beef stock is standard; a splash of stout is common in pubs and makes it darker and more bitter.'},
+    {w:'Green', o:'Peas are traditional. Some insist on nothing at all.'}
+  ]},
+mincepie:{
+  foundation:'Mince browned hard for crust, then reduced to a gravy thick enough to slice. Cold filling into a blind-baked shortcrust base, cheese, puff lid.',
+  layers:[
+    {w:'Cheese', o:'Sharp cheddar is standard. Some bakeries use a processed slice, which melts more evenly and is genuinely preferred by many.'},
+    {w:'Base', o:'Shortcrust below and puff above is the classic construction. All-puff is faster and structurally worse.'},
+    {w:'Depth', o:'Worcestershire and tomato paste is the everyday version. A spoonful of Marmite is a common bakery secret.'},
+    {w:'Size', o:'Individual pies are the national form. A family-sized pie needs a longer bake and a firmer filling still.'}
   ]}
 };
 
@@ -573,7 +864,8 @@ const EXAMPLE_PANTRY = {
 
 /* ---------- state ---------- */
 const state = {
-  view:'atlas', dishId:null, servingsMul:1, filter:'all',
+  view:'atlas', dishId:null, servingsMul:1, filter:'all', regionFilter:'all',
+  diet:'none', market:'SA', swaps:{},
   pantry:JSON.parse(JSON.stringify(EXAMPLE_PANTRY)),
   pantryIsExample:true,
   cooked:[],           // {id, dishId, rating, note, at}
@@ -619,6 +911,48 @@ async function flushWholePantry(){
   for(const id of Object.keys(state.pantry)) await savePantryItem(id);
 }
 
+/* ---------- diet engine ----------
+   effectiveIng() is the single place the swap is applied. Everything
+   downstream — quantities, pantry coverage, the shopping list — reads
+   through it, so a swap propagates without any of them knowing about
+   diets at all.                                                        */
+function effectiveIng(recipeId, ing){
+  const sw = state.swaps[recipeId] && state.swaps[recipeId][ing.i];
+  return sw ? {...ing, i:sw, swappedFrom:ing.i} : ing;
+}
+function effectiveIngs(r){ return r.ings.map(ing => effectiveIng(r.id, ing)); }
+
+function dietCheck(r){
+  const d = DIETS[state.diet];
+  const conflicts = [], warnings = [];
+  if(!d || (!d.avoid.length && !d.warn.length)) return {conflicts, warnings, ok:true};
+  effectiveIngs(r).forEach(ing => {
+    const f = flagsOf(ing.i);
+    const bad = d.avoid.filter(a => f.includes(a));
+    const warn = d.warn.filter(a => f.includes(a));
+    if(bad.length) conflicts.push({ing, why:bad});
+    else if(warn.length) warnings.push({ing, why:warn});
+  });
+  return {conflicts, warnings, ok:conflicts.length === 0};
+}
+/* A dish is rescuable when every conflict has at least one substitution
+   that is itself clean under the active diet. */
+function cleanSubs(ingId){
+  const d = DIETS[state.diet];
+  return (SUBS[ingId] || []).filter(s => !flagsOf(s.to).some(f => d.avoid.includes(f)));
+}
+function dishStatus(r){
+  const {conflicts} = dietCheck(r);
+  if(!conflicts.length) return 'fits';
+  return conflicts.every(c => cleanSubs(c.ing.i).length) ? 'swap' : 'no';
+}
+function applySwap(recipeId, from, to){
+  state.swaps[recipeId] = state.swaps[recipeId] || {};
+  state.swaps[recipeId][from] = to;
+  render();
+}
+function clearSwaps(recipeId){ delete state.swaps[recipeId]; render(); }
+
 /* ---------- pantry mechanics ---------- */
 function stockOf(id){ return state.pantry[id] ? state.pantry[id].left : 0; }
 function needOf(recipe, ing){ return toGrams(ing.i, ing.q * state.servingsMul, ing.u); }
@@ -632,7 +966,7 @@ function coverage(recipe, ing){
 }
 async function cookDish(recipe, rating, note){
   // Purchase-anchored depletion: subtract what the recipe consumed, floor at 0.
-  recipe.ings.forEach(ing => {
+  effectiveIngs(recipe).forEach(ing => {
     const need = needOf(recipe, ing);
     if(need === null) return;
     const p = state.pantry[ing.i];
@@ -654,7 +988,7 @@ function buildList(){
   const need = {};
   state.planned.forEach(did => {
     const r = byId(did); if(!r) return;
-    r.ings.forEach(ing => {
+    effectiveIngs(r).forEach(ing => {
       const g = toGrams(ing.i, ing.q, ing.u);
       if(g === null){
         need[ing.i] = need[ing.i] || {g:0, unresolved:[]};
@@ -680,8 +1014,12 @@ function buildList(){
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function viewAtlas(){
-  const countries = [...new Set(R.map(r => r.country))];
-  const shown = state.filter === 'all' ? R : R.filter(r => r.country === state.filter);
+  const regions = [...new Set(R.map(r => REGION_OF[r.country]))].sort();
+  const inRegion = state.regionFilter === 'all' ? R : R.filter(r => REGION_OF[r.country] === state.regionFilter);
+  const countries = [...new Set(inRegion.map(r => r.country))].sort();
+  const shown = state.filter === 'all' ? inRegion : inRegion.filter(r => r.country === state.filter);
+  const d = DIETS[state.diet];
+
   return `
   <div class="atlas-head">
     <div>
@@ -689,15 +1027,43 @@ function viewAtlas(){
       <h1 class="title">Cook it the way you<br>actually ate it.</h1>
     </div>
   </div>
-  <p class="lede">Pick the country, then the dish. Every recipe carries its region, the technique that makes it work, and a shopping list that already knows what is in your kitchen.</p>
-  <hr class="rule">
-  <div class="filters">
-    <button class="chip" data-filter="all" aria-pressed="${state.filter === 'all'}">All ${R.length} dishes</button>
-    ${countries.map(c => `<button class="chip" data-filter="${esc(c)}" aria-pressed="${state.filter === c}">${esc(c)}</button>`).join('')}
+  <p class="lede">Start with the part of the world you have been to. Every recipe carries the technique that makes it work, a protein you can change, and a shopping list routed to stores that actually deliver where you are.</p>
+
+  <div class="prefs">
+    <label class="pref">
+      <span class="eyebrow">Diet</span>
+      <select id="dietsel">
+        ${Object.keys(DIETS).map(k => `<option value="${k}" ${state.diet === k ? 'selected' : ''}>${esc(DIETS[k].label)}</option>`).join('')}
+      </select>
+    </label>
+    <label class="pref">
+      <span class="eyebrow">Shopping from</span>
+      <select id="marketsel">
+        ${Object.keys(MARKETS).map(k => `<option value="${k}" ${state.market === k ? 'selected' : ''}>${MARKETS[k].flag} ${esc(MARKETS[k].name)}</option>`).join('')}
+      </select>
+    </label>
   </div>
-  <div class="grid">
+  ${d.note ? `<div class="notice" style="margin-top:10px">${esc(d.note)}</div>` : ''}
+
+  <hr class="rule">
+  <div class="eyebrow">Region</div>
+  <div class="filters" style="margin-top:7px">
+    <button class="chip" data-region="all" aria-pressed="${state.regionFilter === 'all'}">Everywhere</button>
+    ${regions.map(rg => `<button class="chip" data-region="${esc(rg)}" aria-pressed="${state.regionFilter === rg}">${esc(rg)}</button>`).join('')}
+  </div>
+  ${state.regionFilter !== 'all' && REGION_NOTE[state.regionFilter]
+    ? `<p class="regnote">${esc(REGION_NOTE[state.regionFilter])}</p>` : ''}
+
+  ${countries.length > 1 ? `<div class="eyebrow" style="margin-top:14px">Country</div>
+  <div class="filters" style="margin-top:7px">
+    <button class="chip" data-filter="all" aria-pressed="${state.filter === 'all'}">All ${inRegion.length}</button>
+    ${countries.map(c => `<button class="chip" data-filter="${esc(c)}" aria-pressed="${state.filter === c}">${esc(c)}</button>`).join('')}
+  </div>` : ''}
+
+  <div class="grid" style="margin-top:16px">
     ${shown.map(r => {
       const rat = ratingFor(r.id);
+      const st = dishStatus(r);
       return `<button class="dish" data-dish="${r.id}">
         <div class="where"><span aria-hidden="true">${r.flag}</span>${esc(r.country)}</div>
         <h3>${esc(r.dish)}</h3>
@@ -706,6 +1072,10 @@ function viewAtlas(){
         <div class="foot">
           <span class="pill plain">${esc(r.time)}</span>
           <span class="pill plain">${esc(r.level)}</span>
+          ${state.diet !== 'none' ? (
+            st === 'fits' ? `<span class="pill jade">✓ ${esc(d.label)}</span>` :
+            st === 'swap' ? `<span class="pill amber">Needs a swap</span>` :
+                            `<span class="pill chili">Doesn't fit</span>`) : ''}
           ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} · ${rat.n} cooked</span>` : `<span class="pill amber">Draft · untested</span>`}
         </div>
       </button>`;
@@ -728,6 +1098,13 @@ function viewRecipe(){
   const planned = state.planned.includes(r.id);
   const ytQuery = `${r.dish} ${r.native} recipe`;
   const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQuery);
+  const diet = dietCheck(r);
+  // The protein is the first meat or fish in the recipe; its alternatives
+  // come from the same table the diet engine uses.
+  const conflictIds = diet.conflicts.map(c => c.ing.i);
+  const proteinIng = effectiveIngs(r).find(ing => flagsOf(ing.i).some(f => f === 'meat' || f === 'fish'));
+  const proteinId = proteinIng ? proteinIng.i : null;
+  const proteinOpts = (proteinId && !conflictIds.includes(proteinId)) ? cleanSubs(proteinId) : [];
 
   return `
   <button class="back" id="back">← All dishes</button>
@@ -757,17 +1134,45 @@ function viewRecipe(){
           <button id="mup" aria-label="More servings">+</button>
         </div>
         <ul class="ings">
-          ${r.ings.map(ing => {
+          ${effectiveIngs(r).map(ing => {
             const cov = coverage(r, ing);
             const g = needOf(r, ing);
-            return `<li>
+            return `<li${ing.swappedFrom ? ' class="swapped"' : ''}>
               <span class="qty num">${fmtIng(ing.q * state.servingsMul, ing.u)}</span>
-              <span class="iname">${esc(ING[ing.i].n)}<em>${g === null ? 'no gram conversion defined' : '≈ ' + fmtG(g)}</em></span>
+              <span class="iname">${esc(ING[ing.i].n)}<em>${ing.swappedFrom ? 'swapped from ' + esc(ING[ing.swappedFrom].n) + ' · ' : ''}${g === null ? 'no gram conversion defined' : '≈ ' + fmtG(g)}</em></span>
               <span class="stock ${cov.cls}">${esc(cov.label)}</span>
             </li>`;
           }).join('')}
         </ul>
+        ${Object.keys(state.swaps[r.id] || {}).length ? `<button class="mini" id="clearswaps" style="margin-top:10px">Undo swaps</button>` : ''}
       </div>
+
+      ${diet.conflicts.length || diet.warnings.length || proteinOpts.length ? `
+      <div class="panel">
+        <h2>Protein &amp; diet</h2>
+        ${diet.conflicts.length ? `
+          <div class="dietflag chili">
+            <strong>${esc(DIETS[state.diet].label)}:</strong> ${diet.conflicts.length} ingredient${diet.conflicts.length > 1 ? 's' : ''} to change.
+          </div>
+          ${diet.conflicts.map(c => `
+            <div class="swapblock">
+              <div class="swaphead">${esc(ING[c.ing.i].n)} <span class="pill chili">${c.why.map(esc).join(', ')}</span></div>
+              ${cleanSubs(c.ing.i).length
+                ? cleanSubs(c.ing.i).map(s => `<button class="swapopt" data-swapfrom="${c.ing.i}" data-swapto="${s.to}">
+                     <b>${esc(ING[s.to].n)}</b><span>${esc(s.note)}</span></button>`).join('')
+                : `<p class="swapnone">No substitution in the table fits this profile. This dish is built around the ingredient — better to choose another.</p>`}
+            </div>`).join('')}
+        ` : state.diet !== 'none' ? `<div class="dietflag jade"><strong>${esc(DIETS[state.diet].label)}:</strong> no conflicts in this recipe.</div>` : ''}
+
+        ${diet.warnings.map(w => `<div class="dietflag amber"><strong>Check:</strong> ${esc(ING[w.ing.i].n)} — ${esc(w.why.join(', ').replace('alcohol_derived','made from wine; fermentation transforms it, and practice varies').replace('dairy','served alongside meat in this dish'))}.</div>`).join('')}
+
+        ${proteinOpts.length ? `
+          <div class="eyebrow" style="margin-top:14px">Change the protein</div>
+          <p class="swapintro">${esc(ING[proteinId].n)} is a layer, not the foundation. These all work:</p>
+          ${proteinOpts.map(s => `<button class="swapopt" data-swapfrom="${proteinId}" data-swapto="${s.to}">
+             <b>${esc(ING[s.to].n)}</b><span>${esc(s.note)}</span></button>`).join('')}
+        ` : ''}
+      </div>` : ''}
 
       <div class="panel">
         <h2>The foundation</h2>
@@ -878,14 +1283,23 @@ function viewPantry(){
 
 function viewList(){
   const rows = buildList();
+  const mkt = MARKETS[state.market];
   const groups = [
-    {k:'fresh',  label:'Fresh — grocery delivery', hint:'Instacart or Kroger cart, matched against stores near you'},
-    {k:'staple', label:'Shelf stable — mail order', hint:'Amazon or a spice merchant; buy the large size once'},
-    {k:'spec',   label:'Specialty — diaspora market', hint:'Hardest to source. The app should name a real shop, not a guess'}
+    {k:'fresh',  label:'Fresh — grocery delivery', hint:'Produce, meat and dairy, delivered same day where available'},
+    {k:'staple', label:'Shelf stable — buy the large size once', hint:'Spices, oils, sauces, rice. Worth stocking properly'},
+    {k:'spec',   label:'Specialty — the hard ones', hint:'The ingredients that decide whether the dish tastes right'}
   ];
   return `
   <div class="eyebrow">Recipes on deck minus what you already have</div>
   <h1 class="title" style="margin:6px 0 10px">Shopping</h1>
+  <div class="prefs" style="margin-bottom:14px">
+    <label class="pref">
+      <span class="eyebrow">Shopping from</span>
+      <select id="marketsel">
+        ${Object.keys(MARKETS).map(k => `<option value="${k}" ${state.market === k ? 'selected' : ''}>${MARKETS[k].flag} ${esc(MARKETS[k].name)}</option>`).join('')}
+      </select>
+    </label>
+  </div>
   ${state.planned.length ? `<p class="lede">For: ${state.planned.map(d => esc(byId(d).dish)).join(', ')}.</p>` : ''}
   ${!state.planned.length ? `<div class="empty">Nothing queued yet. Open a dish and add it to your shopping list.</div>` : ''}
   ${state.planned.length && !rows.length ? `<div class="empty">Your pantry already covers everything on the list.</div>` : ''}
@@ -901,10 +1315,16 @@ function viewList(){
           <span style="flex:1">${esc(ING[it.id].n)}${it.unresolved.length ? `<div style="font-size:11px;color:var(--chili)">plus ${esc(it.unresolved.join(', '))} — no gram conversion</div>` : ''}</span>
         </li>`).join('')}
       </ul>
-      <button class="btn" style="margin-top:12px" disabled>Send to cart — not connected in prototype</button>
+      <div class="stores">
+        ${mkt.stores.filter(s => s.for.includes(g.k)).map(s => `
+          <a class="store" href="https://duckduckgo.com/?q=${encodeURIComponent(s.n + ' ' + mkt.name + ' online grocery')}" target="_blank" rel="noopener noreferrer">
+            <b>${esc(s.n)}</b><span class="pill plain">${esc(s.t)}</span>
+            <span class="sd">${esc(s.d)}</span>
+          </a>`).join('')}
+      </div>
     </div>`;
   }).join('')}
-  <div class="notice" style="margin-top:18px"><strong>Why the cart buttons are dead.</strong> Real carts need approved partner access: an Instacart Developer Platform key, a Kroger OAuth app, or an Amazon Associates account. None are wired up here, and the app will never hold your store credentials — you check out in your own account.</div>`;
+  <div class="notice" style="margin-top:18px"><strong>Why these are links, not carts.</strong> Only the US has a real recipe-to-cart API ecosystem — Instacart and Kroger. In ${esc(mkt.name)} and most of the world there is no partner cart API, so the app routes you to the store and you finish there. It never holds your store credentials either way.</div>`;
 }
 
 function render(){
@@ -936,6 +1356,14 @@ el.addEventListener('click', async e => {
 
   const chip = t.closest('[data-filter]');
   if(chip){ state.filter = chip.dataset.filter; render(); return; }
+
+  const rg = t.closest('[data-region]');
+  if(rg){ state.regionFilter = rg.dataset.region; state.filter = 'all'; render(); return; }
+
+  const sw = t.closest('[data-swapto]');
+  if(sw){ applySwap(state.dishId, sw.dataset.swapfrom, sw.dataset.swapto); return; }
+
+  if(t.id === 'clearswaps'){ clearSwaps(state.dishId); return; }
 
   const dish = t.closest('[data-dish]');
   if(dish){ state.dishId = dish.dataset.dish; state.servingsMul = 1; state.coachAnswer = ''; pendingStars = 0; render(); return; }
@@ -980,6 +1408,11 @@ el.addEventListener('click', async e => {
     if(inp && inp.value.trim()) runCoach(inp.value.trim());
     return;
   }
+});
+
+el.addEventListener('change', e => {
+  if(e.target.id === 'dietsel'){ state.diet = e.target.value; render(); }
+  if(e.target.id === 'marketsel'){ state.market = e.target.value; render(); }
 });
 
 el.addEventListener('keydown', e => {

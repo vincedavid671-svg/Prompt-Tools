@@ -22,7 +22,7 @@ already knows what is in their cupboard → an estimate of what is left afterwar
 
 ---
 
-## Four mechanics, all demonstrated in the prototype
+## Seven mechanics, all demonstrated in the prototype
 
 ### 1. Foundation and layers
 
@@ -70,7 +70,42 @@ The design that survives:
 - **Present estimates as estimates.** "≈ 210 g left" with one-tap correction,
   never a ledger claiming precision it does not have.
 
-### 4. Community layer
+### 4. Protein and dietary swaps
+
+Religion and preference decide the protein long before taste does. The diet
+engine holds eight profiles — halal, kosher, no pork, no beef, pescatarian,
+vegetarian, vegan, none — as flag sets, and every ingredient carries flags in a
+side map so the ingredient registry stays about measurement.
+
+Three design decisions worth keeping:
+
+- **`alcohol_derived` is separate from `alcohol`.** Most halal authorities accept
+  vinegar made from wine because fermentation transforms it; plenty of people
+  still avoid it. That is a warning, not a conflict, and the app does not decide
+  it for anyone.
+- **The app states its own limit.** It can check ingredients. It cannot tell you
+  whether meat was halal-slaughtered — that depends on where you buy it. The
+  halal profile says so on screen.
+- **Every substitution says what you lose.** "Leaner, add a spoonful of oil —
+  the pork fat was doing work you will otherwise miss." A swap presented as free
+  is how people end up disappointed.
+
+Swaps resolve in one function, `effectiveIng()`. Quantities, pantry coverage and
+the shopping list all read through it, so a swap propagates without any of them
+knowing diets exist.
+
+### 5. Region browsing
+
+The Atlas filters by region before country, because that is how travel memory is
+organised — people remember *Southeast Asia* or *the Gulf*, not a country list.
+Each region carries a line on what it is known for.
+
+### 6. Region-aware store routing
+
+See the commerce section below. Store lists are per market, and the prototype
+ships Saudi Arabia, UAE, US, UK and New Zealand.
+
+### 7. Community layer
 
 Ratings and notes from people who actually cooked the dish, stored per-dish.
 This is original user content, owned outright, and it is the only realistic way
@@ -113,6 +148,36 @@ pre-resolve videos per dish rather than searching per user request.
 
 ## Data sources
 
+### Commerce is not a global problem with one answer
+
+The first draft of this spec assumed Instacart and Kroger. That is a US answer,
+and it does not port.
+
+**Outside the United States there is essentially no partner cart API.** The Gulf
+market is retailer apps (Carrefour, Lulu, Panda, Danube, Tamimi) plus
+aggregators (Nana, Talabat Mart, Ninja, HungerStation Market, Noon Minutes,
+InstaShop) — none of which publish a recipe-to-cart developer API. Nana is the
+closest structural analogue to Instacart in Saudi Arabia because it aggregates
+multiple supermarkets, but it is not an integration target today.
+
+So the architecture is **deep links, with cart integration as a US-only
+enhancement** — and that inverts the roadmap in a useful way:
+
+| | US | Everywhere else |
+|---|---|---|
+| Cart integration | Instacart, Kroger | None available |
+| Launch blocker | Partner approval | None |
+| User experience | Items land in cart | One extra tap, same result |
+
+International launch is *easier* than US launch, because nothing waits on a
+partner agreement. Build deep links first; they work in every market including
+the US, and cart APIs become an upgrade for one market rather than a dependency
+for all of them.
+
+Store coverage in the prototype is illustrative. Every link must be verified per
+market before launch, and the list should be maintained per country rather than
+inferred.
+
 | Need | Source | Terms |
 |---|---|---|
 | Nutrition, calories, macros | USDA FoodData Central | CC0 public domain, free key, 1,000 req/hr |
@@ -139,7 +204,13 @@ partner APIs or deep links; the user checks out in their own account.
   sources.
 - Cart buttons are disabled — no partner credentials are wired up.
 - The unit conversion table covers only the ingredients these eight recipes use.
-- No nutrition or diet features yet.
+- Nutrition and calorie data are not wired up; the diet engine covers
+  religious and preference restrictions only, not macros.
+- Store links open a web search rather than a verified retailer URL, since
+  deep-link formats have not been confirmed per retailer.
+- The diet engine checks ingredients only. Certification — halal slaughter,
+  kosher supervision — is out of scope for an app and is stated as such in
+  the UI.
 - No YouTube API integration; the video panel links to a real YouTube search and
   documents what the built version does instead.
 
@@ -148,7 +219,7 @@ partner APIs or deep links; the user checks out in their own account.
 ## Roadmap
 
 **Now — validate**
-Does the foundation-and-layers framing actually help someone cook better? Eight
+Does the foundation-and-layers framing actually help someone cook better? Eleven
 dishes is enough to find out. If it does not, nothing else matters.
 
 **Next — make the ledger real**
@@ -156,9 +227,9 @@ Extend the conversion table, add barcode scan for purchase anchoring, correction
 flow, low-stock surfacing.
 
 **Then — commerce**
-Instacart partner application first (lowest friction, widest retailer reach).
-Kroger OAuth second. Amazon last, once referral volume clears the Creators API
-threshold.
+Verified deep links per market first — they work everywhere and block on nothing.
+Instacart partner application second, as a US-only enhancement. Kroger OAuth
+third. Amazon last, once referral volume clears the Creators API threshold.
 
 **Later — scale content**
 Contributor programme for regional cooks, YouTube variation indexing, nutrition
@@ -181,7 +252,9 @@ business or a hobby.
 
 ## Prototype technical notes
 
-Single self-contained HTML file. No build step, no dependencies.
+Single self-contained HTML file. No build step, no dependencies. Eleven dishes
+across nine regions, 85 canonical ingredients, five markets, eight diet
+profiles.
 
 Two runtime capabilities when published as an artifact:
 
