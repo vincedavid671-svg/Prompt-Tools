@@ -1,0 +1,1038 @@
+<title>Passport Pantry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --paper:#F6F5F1; --surface:#FFFFFF; --surface-2:#EDEBE3; --sunk:#E4E1D7;
+  --ink:#1B211E; --ink-2:#4C554F; --ink-3:#7E877F;
+  --line:#DBD7CC; --line-2:#C7C2B4;
+  --accent:#B35A0E; --accent-ink:#8A450A; --accent-soft:#F4E5D3;
+  --jade:#2E6B5E; --jade-soft:#DEEBE6;
+  --chili:#9E2B20; --chili-soft:#F6E1DD; --on-accent:#FFFFFF;
+  --display:'Fraunces',Georgia,'Times New Roman',serif;
+  --body:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#111614; --surface:#191F1C; --surface-2:#222A26; --sunk:#0D1210;
+    --ink:#EDEAE0; --ink-2:#A6B0AA; --ink-3:#77817B;
+    --line:#2C3531; --line-2:#3B4641;
+    --accent:#E08B3C; --accent-ink:#F0AC6C; --accent-soft:#3A2915;
+    --jade:#6FBFA8; --jade-soft:#1B322C;
+    --chili:#E0786A; --chili-soft:#371F1B; --on-accent:#17120A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111614; --surface:#191F1C; --surface-2:#222A26; --sunk:#0D1210;
+  --ink:#EDEAE0; --ink-2:#A6B0AA; --ink-3:#77817B;
+  --line:#2C3531; --line-2:#3B4641;
+  --accent:#E08B3C; --accent-ink:#F0AC6C; --accent-soft:#3A2915;
+  --jade:#6FBFA8; --jade-soft:#1B322C;
+  --chili:#E0786A; --chili-soft:#371F1B; --on-accent:#17120A;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--body); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+h1,h2,h3{margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- shell ---------- */
+.shell{display:flex;flex-direction:column;min-height:100%}
+header.bar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.bar-in{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:9px;margin-right:auto}
+.brand b{font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:-.01em}
+.brand span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+nav.tabs{display:flex;gap:2px;background:var(--surface-2);padding:3px;border-radius:999px}
+nav.tabs button{
+  border:0;background:transparent;border-radius:999px;padding:6px 14px;
+  font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;
+}
+nav.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.09)}
+nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+main{flex:1;max-width:1080px;width:100%;margin:0 auto;padding-block:22px 64px;padding-left:16px;padding-right:16px}
+
+/* ---------- generic ---------- */
+.eyebrow{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.lede{color:var(--ink-2);max-width:62ch}
+.rule{height:1px;background:var(--line);border:0;margin:22px 0}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.amber{background:var(--accent-soft);color:var(--accent-ink)}
+.pill.jade{background:var(--jade-soft);color:var(--jade)}
+.pill.chili{background:var(--chili-soft);color:var(--chili)}
+.pill.plain{background:var(--surface-2);color:var(--ink-2)}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r);padding:8px 14px;font-size:13px;font-weight:600}
+.btn:hover{border-color:var(--ink-3)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.notice{border:1px dashed var(--line-2);border-radius:var(--r);padding:11px 13px;font-size:12.5px;color:var(--ink-2);background:var(--surface)}
+
+/* ---------- atlas ---------- */
+.atlas-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+h1.title{font-family:var(--display);font-size:clamp(28px,5vw,40px);font-weight:600;letter-spacing:-.02em;line-height:1.08}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px}
+.dish{
+  text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);
+  padding:14px 15px;display:flex;flex-direction:column;gap:7px;
+}
+.dish:hover{border-color:var(--ink-3)}
+.dish .where{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink)}
+.dish h3{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.01em}
+.dish .native{font-size:12.5px;color:var(--ink-3);margin-top:-4px}
+.dish p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.45}
+.dish .foot{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+
+/* ---------- recipe ---------- */
+.back{border:0;background:transparent;padding:0;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:14px}
+.back:hover{color:var(--accent-ink)}
+.rhead{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;justify-content:space-between}
+.rmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:26px;margin-top:22px}
+@media (max-width:760px){.cols{grid-template-columns:1fr;gap:20px}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.panel + .panel{margin-top:12px}
+.panel h2{font-family:var(--display);font-size:17px;font-weight:600;margin-bottom:2px}
+.scaler{display:flex;align-items:center;gap:8px;margin:12px 0 4px}
+.scaler button{width:28px;height:28px;border-radius:7px;border:1px solid var(--line-2);background:var(--surface-2);font-weight:700;line-height:1}
+.scaler .val{font-weight:700;min-width:74px;text-align:center;font-size:13px}
+ul.ings{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}
+ul.ings li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid var(--line)}
+ul.ings li:first-child{border-top:0}
+.qty{flex:0 0 96px;font-weight:600;font-size:13.5px}
+.iname{flex:1;font-size:13.5px}
+.iname em{font-style:normal;color:var(--ink-3);font-size:12px;display:block}
+.stock{flex:0 0 auto;font-size:11px;font-weight:700}
+.stock.ok{color:var(--jade)}
+.stock.low{color:var(--accent-ink)}
+.stock.none{color:var(--ink-3)}
+ol.steps{margin:10px 0 0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:14px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:12px;font-size:14px;line-height:1.55}
+ol.steps li::before{
+  content:counter(s);font-family:var(--display);font-weight:600;font-size:13px;
+  color:var(--accent-ink);background:var(--accent-soft);border-radius:50%;
+  width:26px;height:26px;display:grid;place-items:center;
+}
+ol.steps b{display:block;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+.heat{font-size:12px;color:var(--ink-2);margin-top:3px}
+.attrib{border-left:3px solid var(--line-2);padding:2px 0 2px 12px;font-size:12.5px;color:var(--ink-2)}
+
+/* ---------- cooked / ratings ---------- */
+.stars{display:flex;gap:3px}
+.stars button{border:0;background:transparent;padding:2px;font-size:17px;line-height:1;color:var(--line-2)}
+.stars button[data-on="1"]{color:var(--accent)}
+.note{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:8px 10px;font-size:13px;resize:vertical;min-height:58px;margin-top:8px}
+.log{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
+.log li{border-top:1px solid var(--line);padding-top:9px;font-size:13px}
+.log .meta{font-size:11px;color:var(--ink-3);display:flex;gap:8px;align-items:center}
+
+/* ---------- coach ---------- */
+.coach{display:flex;flex-direction:column;gap:9px}
+.coach .row{display:flex;gap:7px}
+.coach input{flex:1;border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:9px 11px;font-size:13.5px}
+.coach input:focus-visible{outline:2px solid var(--accent);outline-offset:-1px}
+.sugg{display:flex;gap:6px;flex-wrap:wrap}
+.sugg button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px;font-size:12px;color:var(--ink-2)}
+.answer{background:var(--surface-2);border-radius:8px;padding:11px 13px;font-size:13.5px;line-height:1.55;white-space:pre-wrap}
+
+/* ---------- foundation & layers ---------- */
+ul.layers{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}
+ul.layers li{padding:9px 0;border-top:1px solid var(--line);font-size:13px;line-height:1.5}
+ul.layers li:first-child{border-top:0}
+ul.layers b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:2px}
+ul.layers span{color:var(--ink-2)}
+
+/* ---------- video plan ---------- */
+.ytplan{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.ytplan ol{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.ytplan ol b{color:var(--ink)}
+.ytplan .warn{margin:12px 0 0;font-size:12px;color:var(--ink-2);background:var(--chili-soft);border-radius:8px;padding:9px 11px;line-height:1.5}
+.ytplan code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;background:var(--surface-2);padding:1px 4px;border-radius:4px}
+
+/* ---------- pantry ---------- */
+table.pantry{width:100%;border-collapse:collapse;font-size:13.5px}
+table.pantry th{text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:0 8px 8px 0;font-weight:700}
+table.pantry td{padding:9px 8px 9px 0;border-top:1px solid var(--line);vertical-align:middle}
+table.pantry td:last-child,table.pantry th:last-child{padding-right:0;text-align:right}
+.meter{height:5px;border-radius:3px;background:var(--sunk);overflow:hidden;margin-top:5px;max-width:170px}
+.meter i{display:block;height:100%;border-radius:3px;background:var(--jade)}
+.meter i.low{background:var(--accent)}
+.meter i.out{background:var(--chili)}
+.tbl-wrap{overflow-x:auto}
+.mini{border:1px solid var(--line-2);background:var(--surface);border-radius:7px;padding:3px 9px;font-size:12px;font-weight:600}
+
+/* ---------- list ---------- */
+.lgroup{margin-top:16px}
+.lgroup h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+ul.buy{list-style:none;margin:9px 0 0;padding:0}
+ul.buy li{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}
+ul.buy li span.q{flex:0 0 92px;font-weight:600}
+.empty{color:var(--ink-3);font-size:13.5px;padding:14px 0}
+footer.foot{border-top:1px solid var(--line);margin-top:34px;padding-top:14px;font-size:11.5px;color:var(--ink-3);line-height:1.6}
+</style>
+
+<div class="shell">
+  <header class="bar">
+    <div class="bar-in">
+      <div class="brand"><b>Passport Pantry</b><span>Prototype</span></div>
+      <nav class="tabs" role="tablist" id="tabs">
+        <button role="tab" data-view="atlas" aria-selected="true">Atlas</button>
+        <button role="tab" data-view="pantry" aria-selected="false">Pantry</button>
+        <button role="tab" data-view="list" aria-selected="false">Shopping</button>
+      </nav>
+    </div>
+  </header>
+  <main id="main"></main>
+</div>
+
+<script>
+/* =======================================================================
+   Passport Pantry — clickable prototype
+   Demonstrates four mechanics:
+     1. Country -> dish catalog with provenance + attribution slots
+     2. Ingredient normalization (native units -> grams) — the hard core
+     3. Purchase-anchored pantry ledger with inferred depletion
+     4. Cook-and-rate community layer + AI cooking coach
+   Recipe method text is original, written for this prototype and NOT
+   kitchen-tested. Attribution slots are deliberately empty rather than
+   filled with invented sources.
+   ======================================================================= */
+
+/* ---------- canonical ingredient registry ----------
+   `conv` maps a native recipe unit to grams. A missing key means the
+   conversion is genuinely undefined — the UI then shows the gap instead
+   of inventing a number. This is the table that decides whether the
+   pantry ledger is trustworthy. `buy` routes the shopping list:
+   'staple' -> shelf-stable, mail-order friendly
+   'fresh'  -> grocery delivery
+   'spec'   -> specialty / diaspora market, hardest to source          */
+const ING = {
+  flour:      {n:'All-purpose flour',        buy:'staple', conv:{g:1, cup:125, tbsp:8}},
+  water:      {n:'Water',                    buy:'fresh',  conv:{ml:1, g:1, cup:237}},
+  salt:       {n:'Kosher salt',              buy:'staple', conv:{g:1, tsp:4.8, tbsp:14.4, cup:230}},
+  pepper:     {n:'Black peppercorns',        buy:'staple', conv:{g:1, tsp:2.9, tbsp:8.7}},
+  beef_grd:   {n:'Ground beef, 20% fat',     buy:'fresh',  conv:{g:1}},
+  pork_grd:   {n:'Ground pork, fatty',       buy:'fresh',  conv:{g:1}},
+  beef_loin:  {n:'Beef sirloin',             buy:'fresh',  conv:{g:1}},
+  chicken_wh: {n:'Whole chicken',            buy:'fresh',  conv:{g:1, piece:1600}},
+  chicken_th: {n:'Chicken thighs, bone-in',  buy:'fresh',  conv:{g:1, piece:150}},
+  mackerel:   {n:'Salted mackerel',          buy:'spec',   conv:{g:1}},
+  onion:      {n:'Yellow onion',             buy:'fresh',  conv:{g:1, piece:170}},
+  onion_red:  {n:'Red onion',                buy:'fresh',  conv:{g:1, piece:160}},
+  scallion:   {n:'Green onion',              buy:'fresh',  conv:{g:1, bunch:100, piece:15}},
+  garlic:     {n:'Garlic',                   buy:'fresh',  conv:{g:1, clove:5, piece:45}},
+  ginger:     {n:'Fresh ginger',             buy:'fresh',  conv:{g:1, tbsp:6}},
+  cilantro:   {n:'Cilantro',                 buy:'fresh',  conv:{g:1, bunch:60}},
+  chives_g:   {n:'Garlic chives',            buy:'spec',   conv:{g:1, bunch:100}},
+  tomato:     {n:'Tomato',                   buy:'fresh',  conv:{g:1, piece:120}},
+  pepper_bell:{n:'Bell pepper',              buy:'fresh',  conv:{g:1, piece:150}},
+  thyme:      {n:'Fresh thyme',              buy:'fresh',  conv:{g:1, bunch:25, tsp:1}},
+  scotch:     {n:"Scotch bonnet pepper",     buy:'spec',   conv:{g:1, piece:8}},
+  donne:      {n:"Donne' sali (boonie pepper)", buy:'spec', conv:{g:1, piece:1}},
+  chili_dry:  {n:'Dried red chili',          buy:'spec',   conv:{g:1, piece:2}},
+  basil_thai: {n:'Thai basil',               buy:'spec',   conv:{g:1, bunch:40}},
+  limeleaf:   {n:'Makrut lime leaves',       buy:'spec',   conv:{g:1, piece:0.4}},
+  soy:        {n:'Light soy sauce',          buy:'staple', conv:{ml:1, g:1.1, tbsp:16, tsp:5.3}},
+  shaoxing:   {n:'Shaoxing wine',            buy:'spec',   conv:{ml:1, g:1, tbsp:15}},
+  vinegar_rw: {n:'Red wine vinegar',         buy:'staple', conv:{ml:1, g:1, tbsp:15}},
+  sesame_oil: {n:'Toasted sesame oil',       buy:'staple', conv:{ml:1, g:0.92, tbsp:13.6, tsp:4.5}},
+  oil_veg:    {n:'Neutral cooking oil',      buy:'staple', conv:{ml:1, g:0.92, tbsp:13.6, cup:218}},
+  oil_olive:  {n:'Olive oil',                buy:'staple', conv:{ml:1, g:0.91, tbsp:13.5}},
+  fishsauce:  {n:'Fish sauce',               buy:'spec',   conv:{ml:1, g:1.2, tbsp:18, tsp:6}},
+  sugar_palm: {n:'Palm sugar',               buy:'spec',   conv:{g:1, tbsp:15}},
+  sugar_rock: {n:'Rock sugar',               buy:'spec',   conv:{g:1}},
+  coconut_ck: {n:'Coconut cream',            buy:'staple', conv:{ml:1, g:1, cup:237}},
+  coconut_mk: {n:'Coconut milk',             buy:'staple', conv:{ml:1, g:1, cup:237}},
+  coconut_fr: {n:'Fresh grated coconut',     buy:'spec',   conv:{g:1, cup:80}},
+  peanut:     {n:'Roasted peanuts',          buy:'staple', conv:{g:1, tbsp:9}},
+  paste_pnng: {n:'Phanaeng curry paste',     buy:'spec',   conv:{g:1, tbsp:16}},
+  paste_aji:  {n:'Ají amarillo paste',       buy:'spec',   conv:{g:1, tbsp:16}},
+  fenugreek:  {n:'Blue fenugreek (utskho suneli)', buy:'spec', conv:{g:1, tsp:2.2}},
+  anise:      {n:'Star anise',               buy:'staple', conv:{g:1, piece:1.5}},
+  cinnamon:   {n:'Cinnamon stick',           buy:'staple', conv:{g:1, piece:3}},
+  coriander_s:{n:'Coriander seed',           buy:'staple', conv:{g:1, tbsp:5, tsp:1.7}},
+  allspice:   {n:'Pimento (allspice) berries', buy:'staple', conv:{g:1, piece:0.08, tsp:2}},
+  turmeric:   {n:'Ground turmeric',          buy:'staple', conv:{g:1, tsp:3}},
+  ginger_g:   {n:'Ground ginger',            buy:'staple', conv:{g:1, tsp:1.8}},
+  saffron:    {n:'Saffron threads',          buy:'spec',   conv:{g:1}},
+  preslemon:  {n:'Preserved lemon',          buy:'spec',   conv:{g:1, piece:45}},
+  olive_grn:  {n:'Green olives, cracked',    buy:'staple', conv:{g:1, cup:135}},
+  lemon:      {n:'Lemon',                    buy:'fresh',  conv:{g:1, piece:100, ml:1}},
+  noodle_rice:{n:'Flat rice noodles, dried', buy:'staple', conv:{g:1}},
+  rice_long:  {n:'Long-grain rice',          buy:'staple', conv:{g:1, cup:185}},
+  potato:     {n:'Potatoes',                 buy:'fresh',  conv:{g:1, piece:170}},
+  whitepep:   {n:'Ground white pepper',      buy:'staple', conv:{g:1, tsp:2.4}},
+  banana_grn: {n:'Green bananas',            buy:'spec',   conv:{g:1, piece:150}}
+};
+
+/* ---------- recipes ---------- */
+const R = [
+{
+  id:'khinkali', country:'Georgia', flag:'🇬🇪', dish:'Khinkali', native:'ხინკალი',
+  region:'Pshavi / Mtiulet-Gudamaqari highlands, now nationwide',
+  blurb:'Pleated soup dumpling. The broth is not added — it renders out of the filling as it cooks, which is why the filling goes in loose and wet.',
+  serves:4, time:'2 h', level:'Hard',
+  ings:[
+    {i:'flour', q:500, u:'g'}, {i:'water', q:290, u:'ml'}, {i:'salt', q:2, u:'tsp'},
+    {i:'beef_grd', q:300, u:'g'}, {i:'pork_grd', q:200, u:'g'},
+    {i:'onion', q:1, u:'piece'}, {i:'garlic', q:3, u:'clove'},
+    {i:'cilantro', q:0.5, u:'bunch'}, {i:'fenugreek', q:1, u:'tsp'},
+    {i:'chili_dry', q:1, u:'piece'}, {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Dough', t:'Mix flour and salt, add the water in three additions, knead 10 minutes until smooth and stiff. Cover and rest 40 minutes — the gluten has to relax or the dough tears at the pleat.'},
+    {h:'Filling', t:'Grate the onion and garlic rather than chopping; you want their liquid. Combine with both meats, chopped cilantro, blue fenugreek, crushed chili, and pepper.', heat:'Keep everything refrigerator-cold. Warm fat smears instead of staying suspended.'},
+    {h:'Loosen', t:'Beat in ice water a spoonful at a time until the filling is soft enough to slump off a spoon. This water becomes the broth inside the dumpling.'},
+    {h:'Roll', t:'Cut the dough into 40 g pieces, roll each to a 12 cm round about 2 mm thick. Keep the centre slightly thicker — it carries the weight of the filling.'},
+    {h:'Pleat', t:'Cup a round in your palm, add a heaped spoon of filling, and fold pleats around the rim one over the next, 18 to 20 of them, turning as you go. Twist the top knot tight and pinch off any long tail.'},
+    {h:'Boil', t:'Bring a wide pot of well-salted water to a rolling boil. Stir a vortex, slide in 6 to 8 khinkali, and nudge them off the base. They sink, then float.', heat:'High heat, uncovered. Roughly 7 minutes after they surface.'},
+    {h:'Serve', t:'Lift out with a slotted spoon, shake off the water, crack black pepper over the top. Hold by the knot, bite the side, drink the broth first. The knot is not eaten.'}
+  ]
+},
+{
+  id:'jiaozi', country:'China', flag:'🇨🇳', dish:'Pork & Chive Jiaozi', native:'韭菜猪肉饺子',
+  region:'Northern China — the wheat belt, where dumplings replace rice',
+  blurb:'The everyday northern dumpling. Hot water in the dough is the whole trick: it kills some gluten and gives a soft, pliable wrapper instead of a chewy one.',
+  serves:4, time:'1 h 30 m', level:'Medium',
+  ings:[
+    {i:'flour', q:400, u:'g'}, {i:'water', q:240, u:'ml'},
+    {i:'pork_grd', q:400, u:'g'}, {i:'chives_g', q:200, u:'g'},
+    {i:'ginger', q:2, u:'tbsp'}, {i:'soy', q:2, u:'tbsp'},
+    {i:'shaoxing', q:1, u:'tbsp'}, {i:'sesame_oil', q:1, u:'tbsp'},
+    {i:'whitepep', q:0.5, u:'tsp'}, {i:'salt', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Dough', t:'Pour just-boiled water over the flour while stirring with chopsticks. When cool enough to handle, knead 8 minutes to a smooth ball. Rest covered 30 minutes.', heat:'Water at roughly 90 °C / 195 °F, not a full rolling boil.'},
+    {h:'Filling', t:'Stir the pork one direction only with soy, Shaoxing, grated ginger, white pepper and salt until it turns sticky and pastelike. Direction matters — it aligns the protein and holds the juice.'},
+    {h:'Chives last', t:'Chop the garlic chives finely, toss with the sesame oil to coat, then fold into the pork. The oil seals the cut edges so the chives do not weep water into the filling.'},
+    {h:'Wrappers', t:'Roll the dough into a 3 cm log, cut 10 g pieces, press flat and roll each to an 8 cm round — thinner at the edge, thicker at the centre.'},
+    {h:'Fold', t:'A spoon of filling, fold in half, and make three or four pleats on the near side only, pressing each against the flat far side. Seal the whole rim.'},
+    {h:'Boil', t:'Drop into boiling water. When it returns to a boil, add a cup of cold water. Repeat that twice. After the third time they are done — about 8 minutes total.', heat:'The cold-water trick keeps the wrapper from bursting before the pork cooks.'},
+    {h:'Serve', t:'Black vinegar with slivered ginger. Chili oil if you want it.'}
+  ]
+},
+{
+  id:'pho_ga', country:'Vietnam', flag:'🇻🇳', dish:'Phở Gà', native:'Phở gà',
+  region:'Hanoi style — clearer and less sweet than the southern version',
+  blurb:'Chicken phở. A clear broth is not an accident: it comes from parboiling the bird, charring the aromatics, and never letting the pot reach a rolling boil.',
+  serves:4, time:'2 h', level:'Medium',
+  ings:[
+    {i:'chicken_wh', q:1, u:'piece'}, {i:'onion', q:2, u:'piece'},
+    {i:'ginger', q:80, u:'g'}, {i:'anise', q:4, u:'piece'},
+    {i:'cinnamon', q:1, u:'piece'}, {i:'coriander_s', q:1, u:'tbsp'},
+    {i:'fishsauce', q:60, u:'ml'}, {i:'sugar_rock', q:20, u:'g'},
+    {i:'salt', q:1, u:'tbsp'}, {i:'noodle_rice', q:400, u:'g'},
+    {i:'scallion', q:1, u:'bunch'}, {i:'cilantro', q:1, u:'bunch'}
+  ],
+  steps:[
+    {h:'Clean the bird', t:'Cover the chicken with cold water, bring to a boil, and boil hard for 3 minutes. Drain, rinse the bird and scrub the pot. Everything that would cloud the broth leaves here.'},
+    {h:'Char', t:'Halve the onions and the unpeeled ginger and blacken the cut faces directly over a gas flame or under a broiler until they smell sweet and smoky, about 8 minutes. Rinse off the loose char.', heat:'Direct flame, or broiler at maximum with the rack 10 cm from the element.'},
+    {h:'Toast', t:'Dry-toast the star anise, cinnamon and coriander seed in a pan until fragrant, under a minute. Tie them in cloth or a tea ball.'},
+    {h:'Simmer', t:'Return the chicken to the clean pot with 4 litres of fresh water, the charred aromatics and the spice bundle. Bring up slowly and hold at a bare simmer.', heat:'Surface should barely tremble — roughly 85 °C / 185 °F. A boil emulsifies the fat and turns the broth grey.'},
+    {h:'Pull the chicken', t:'After 45 minutes lift the chicken out and cool it in ice water for 10 minutes — this firms the skin. Shred the meat, return the carcass to the pot, and simmer another 45 minutes.'},
+    {h:'Season', t:'Strain. Season with fish sauce, rock sugar and salt. Taste hot, and season it slightly stronger than comfortable — the noodles will dilute it.'},
+    {h:'Assemble', t:'Soften the rice noodles in hot water, drain well, and divide between bowls. Top with shredded chicken, scallion and cilantro, then ladle the boiling broth over to heat everything through.'}
+  ]
+},
+{
+  id:'phanaeng', country:'Thailand', flag:'🇹🇭', dish:'Phanaeng Curry', native:'พะแนง',
+  region:'Central Thai. Named for Penang island, but this is a Thai dish, not a Malaysian one.',
+  blurb:'The thickest and sweetest of the Thai curries, finished with ground peanut. It is meant to coat the meat, not pool around it — barely any liquid at the end.',
+  serves:4, time:'45 m', level:'Easy',
+  ings:[
+    {i:'paste_pnng', q:4, u:'tbsp'}, {i:'coconut_ck', q:400, u:'ml'},
+    {i:'beef_loin', q:500, u:'g'}, {i:'fishsauce', q:2, u:'tbsp'},
+    {i:'sugar_palm', q:1.5, u:'tbsp'}, {i:'limeleaf', q:5, u:'piece'},
+    {i:'peanut', q:2, u:'tbsp'}, {i:'basil_thai', q:0.5, u:'bunch'},
+    {i:'chili_dry', q:2, u:'piece'}
+  ],
+  steps:[
+    {h:'Crack the cream', t:'Heat half the coconut cream in a wide pan over medium until it splits and clear oil pools at the edges, 5 to 8 minutes. Do not stir much.', heat:'Medium. If it never splits, the carton has emulsifiers — add a spoon of neutral oil and carry on.'},
+    {h:'Fry the paste', t:'Add the curry paste to the separated oil and fry, pressing and turning, until it darkens and smells roasted rather than raw — 3 to 4 minutes.'},
+    {h:'Meat', t:'Slice the beef thinly against the grain and turn it through the paste until it is coated and just sealed.'},
+    {h:'Season', t:'Add the remaining coconut cream, the fish sauce and the palm sugar. Simmer 10 to 15 minutes until the sauce clings to a spoon.', heat:'Low. A hard boil here will make the cream grainy.'},
+    {h:'Finish', t:'Stir in the ground roasted peanuts. Taste — it should read salty, then sweet, then hot, in that order. Adjust with fish sauce or sugar.'},
+    {h:'Serve', t:'Off the heat, fold through torn makrut lime leaves and Thai basil, and scatter slivered chili over the top. With jasmine rice.'}
+  ]
+},
+{
+  id:'kelaguen', country:'Guam', flag:'🇬🇺', dish:'Chicken Kelaguen', native:"Kelaguen månnok",
+  region:'Chamorro. A fiesta staple across the Marianas.',
+  blurb:'Grilled chicken chopped fine and dressed with lemon, fresh coconut and hot pepper. Closer to a ceviche in structure than to a salad — the acid does as much work as the fire.',
+  serves:6, time:'1 h', level:'Easy',
+  ings:[
+    {i:'chicken_th', q:900, u:'g'}, {i:'lemon', q:180, u:'ml'},
+    {i:'coconut_fr', q:150, u:'g'}, {i:'scallion', q:1, u:'bunch'},
+    {i:'donne', q:6, u:'piece'}, {i:'salt', q:2, u:'tsp'}
+  ],
+  steps:[
+    {h:'Grill', t:'Salt the thighs and grill over charcoal until well charred outside and just cooked through, about 20 minutes, turning. The smoke is a primary flavour here, not a garnish.', heat:'Medium charcoal, roughly 180–200 °C / 350–400 °F at the grate.'},
+    {h:'Rest and chop', t:'Rest 10 minutes, then pull the meat and chop it fine with a knife. Do not use a food processor — kelaguen should have texture.'},
+    {h:'Dress', t:'Toss the warm chicken with the lemon juice and salt. Let it sit 15 minutes; the meat absorbs the acid while it is still warm.'},
+    {h:'Fold', t:'Fold in the freshly grated coconut, sliced green onion and crushed donne\' sali. Taste and push the lemon and heat further than feels reasonable — it flattens as it chills.'},
+    {h:'Serve', t:'At room temperature or cool, with titiyas or red rice. It keeps two days refrigerated and is better on the second.'}
+  ]
+},
+{
+  id:'rundown', country:'Jamaica', flag:'🇯🇲', dish:'Rundown', native:'Run Dung',
+  region:'Coastal Jamaica',
+  blurb:'Coconut milk cooked down until it breaks into oil and custard, then fish simmered in it. The name is the method — you run the milk down.',
+  serves:4, time:'1 h 15 m', level:'Medium',
+  ings:[
+    {i:'mackerel', q:500, u:'g'}, {i:'coconut_mk', q:800, u:'ml'},
+    {i:'onion', q:1, u:'piece'}, {i:'garlic', q:4, u:'clove'},
+    {i:'thyme', q:4, u:'tsp'}, {i:'scotch', q:1, u:'piece'},
+    {i:'tomato', q:2, u:'piece'}, {i:'pepper_bell', q:1, u:'piece'},
+    {i:'allspice', q:6, u:'piece'}, {i:'banana_grn', q:4, u:'piece'}
+  ],
+  steps:[
+    {h:'De-salt', t:'Soak the salted mackerel overnight, changing the water twice, then boil 10 minutes and drain. Taste a flake — if it is still aggressive, boil again in fresh water.'},
+    {h:'Run it down', t:'Simmer the coconut milk in a heavy pot, stirring now and then, until it separates into clear oil and a thick beige custard, 20 to 30 minutes. This is the step the dish is named for.', heat:'Medium-low, uncovered. It will look wrong just before it looks right.'},
+    {h:'Aromatics', t:'Into the custard go sliced onion, garlic, thyme, crushed pimento berries and the whole scotch bonnet. Cook 5 minutes.', heat:'Leave the pepper whole and unpierced for perfume without full heat — pierce it if you want the heat.'},
+    {h:'Fish', t:'Flake the fish, removing bones, and fold it in with the chopped tomato and bell pepper. Simmer 10 minutes until everything is coated and the oil rises.'},
+    {h:'Sides', t:'Boil the green bananas in their skins, split, 15 to 20 minutes, and peel. Spinners — hand-rolled flour dumplings — go in the same pot if you want them.'},
+    {h:'Serve', t:'Remove the scotch bonnet before it bursts. Spoon the rundown over the bananas.'}
+  ]
+},
+{
+  id:'tagine', country:'Morocco', flag:'🇲🇦', dish:'Chicken Tagine', native:'طاجين الدجاج',
+  region:'Fès–Meknès style, with preserved lemon and cracked green olives',
+  blurb:'Almost no added water. The tagine\'s cone returns the chicken\'s own moisture to the pot, so the sauce concentrates instead of diluting.',
+  serves:4, time:'1 h 45 m', level:'Medium',
+  ings:[
+    {i:'chicken_wh', q:1, u:'piece'}, {i:'onion', q:2, u:'piece'},
+    {i:'garlic', q:4, u:'clove'}, {i:'ginger_g', q:1, u:'tsp'},
+    {i:'turmeric', q:1, u:'tsp'}, {i:'saffron', q:0.2, u:'g'},
+    {i:'preslemon', q:1, u:'piece'}, {i:'olive_grn', q:150, u:'g'},
+    {i:'oil_olive', q:3, u:'tbsp'}, {i:'cilantro', q:1, u:'bunch'},
+    {i:'pepper', q:1, u:'tsp'}, {i:'salt', q:2, u:'tsp'}
+  ],
+  steps:[
+    {h:'Marinate', t:'Joint the chicken into 8 pieces. Rub with crushed garlic, ground ginger, turmeric, pepper, salt, olive oil and the saffron bloomed in a spoon of warm water. Rest at least 1 hour.'},
+    {h:'Base', t:'Spread thickly sliced onion across the bottom of the tagine or a heavy casserole — it is the rack that keeps the chicken off direct heat.'},
+    {h:'Layer', t:'Arrange the chicken skin up on the onions, scrape in every bit of the marinade, and add just 120 ml of water. No more.'},
+    {h:'Slow cook', t:'Cover and cook very gently 1 hour, until the chicken pulls from the bone and the onions have collapsed into sauce.', heat:'Lowest burner setting with a diffuser, or a 160 °C / 325 °F oven. A clay tagine must start cold and warm with the burner — thermal shock cracks it.'},
+    {h:'Lemon and olives', t:'Rinse the preserved lemon, discard the pulp, slice the rind into strips. Add with the olives and cook 15 minutes more, uncovered if the sauce needs reducing.'},
+    {h:'Serve', t:'Chopped cilantro over the top. Bread, not couscous — couscous is a Friday dish.'}
+  ]
+},
+{
+  id:'lomo', country:'Peru', flag:'🇵🇪', dish:'Lomo Saltado', native:'Lomo saltado',
+  region:'Lima. Chifa cooking — Cantonese technique on Peruvian ingredients.',
+  blurb:'A wok stir-fry that arrives with french fries in it and rice beside it. Both starches are correct and both are traditional.',
+  serves:4, time:'40 m', level:'Easy',
+  ings:[
+    {i:'beef_loin', q:500, u:'g'}, {i:'onion_red', q:1, u:'piece'},
+    {i:'tomato', q:2, u:'piece'}, {i:'paste_aji', q:1, u:'tbsp'},
+    {i:'soy', q:3, u:'tbsp'}, {i:'vinegar_rw', q:2, u:'tbsp'},
+    {i:'garlic', q:3, u:'clove'}, {i:'cilantro', q:0.5, u:'bunch'},
+    {i:'potato', q:600, u:'g'}, {i:'rice_long', q:300, u:'g'},
+    {i:'oil_veg', q:3, u:'tbsp'}
+  ],
+  steps:[
+    {h:'Fries first', t:'Cut the potatoes thick, fry until golden and drain. Have them ready before the wok goes on — they get folded in at the very end and must still be crisp.'},
+    {h:'Dry the beef', t:'Cut the sirloin into finger-thick strips and pat them thoroughly dry. Salt and pepper. Wet meat steams and the dish is lost at this step.'},
+    {h:'Sear', t:'Get the wok smoking, add oil, and sear the beef in two batches without moving it for the first 30 seconds. Remove.', heat:'Highest heat your burner has. Overcrowding drops the temperature and you will braise instead of sear.'},
+    {h:'Aromatics', t:'Same wok: onion wedges 30 seconds, then garlic and ají amarillo paste for another 30. The onion should stay crunchy at the centre.'},
+    {h:'Deglaze', t:'Soy sauce and red wine vinegar straight onto the hot metal — it should hiss hard and reduce almost instantly.'},
+    {h:'Combine', t:'Return the beef, add the tomato wedges and the fries, and toss twice. Any more and the fries go soft. Cilantro off the heat.'},
+    {h:'Serve', t:'Steamed white rice alongside, never underneath.'}
+  ]
+}
+];
+
+/* ---------- foundation & layers ----------
+   Every dish has a small set of non-negotiables that make it that dish,
+   and a larger set of variables that every cook, region and household
+   moves around. Separating them is what lets the app index other
+   people's versions without republishing any of them: the foundation is
+   our own canonical description of an uncopyrightable technique, and
+   each creator's video is a variation pointed at it.                   */
+const CRAFT = {
+khinkali:{
+  foundation:'A stiff unleavened wheat dough, a raw filling loosened with liquid so it makes its own broth, and a pleated seal strong enough to hold it. Filling that goes in cooked or dry is not khinkali.',
+  layers:[
+    {w:'Meat', o:'Beef and pork is the town standard. Lamb in the Pshavi and Tusheti highlands. Mushroom, potato or cheese for kalakuri.'},
+    {w:'Herb', o:'Cilantro everywhere. Blue fenugreek is the highland marker — its absence makes a noticeably flatter dumpling.'},
+    {w:'Liquid', o:'Ice water is standard; cold broth is richer; some add a spoon of rendered fat.'},
+    {w:'Pleats', o:'Eighteen to twenty is competent. Twenty-eight and up is a cook showing off, and it is noticed.'}
+  ]},
+jiaozi:{
+  foundation:'Hot-water dough for a soft wrapper, pork stirred one direction until it turns sticky, and a vegetable oiled before mixing so it cannot weep. Boiled — pan-fried is guotie, a different dish.',
+  layers:[
+    {w:'Vegetable', o:'Garlic chives, napa cabbage, celery, fennel frond. Each changes how much water you must manage.'},
+    {w:'Protein', o:'Pork; pork and shrimp; lamb and cumin in the northwest; egg and chive for a meatless version.'},
+    {w:'Cooking', o:'Boiled is jiaozi, pan-fried is guotie, steamed is zhengjiao. Same parcel, three dishes.'},
+    {w:'Dip', o:'Black vinegar with slivered ginger is the northern default. Chili oil is a southern habit.'}
+  ]},
+pho_ga:{
+  foundation:'Parboil and rinse the bird, char the onion and ginger, toast the spices, and never let the pot boil. Clarity is the dish, not a bonus.',
+  layers:[
+    {w:'Bird', o:'A supermarket chicken works. An old laying hen gives far more body and is what a phở shop uses.'},
+    {w:'Spice', o:'Star anise and cinnamon are the floor. Cardamom, clove, fennel and coriander are house decisions.'},
+    {w:'Region', o:'Hanoi runs clear and restrained with scallion only. Saigon is sweeter, with a herb plate, hoisin and sriracha.'},
+    {w:'Noodle', o:'Fresh phở noodles if you can get them; dried is the common compromise and needs a shorter soak than the packet says.'}
+  ]},
+phanaeng:{
+  foundation:'Split the coconut cream to free its oil, fry the paste in that oil until it darkens and smells roasted, then reduce until the sauce coats the meat. Ground peanut at the end.',
+  layers:[
+    {w:'Protein', o:'Beef is traditional. Chicken, pork, duck and firm tofu are all standard now.'},
+    {w:'Paste', o:'Pounded fresh is a different dish from canned. If using canned, fry it longer than you think.'},
+    {w:'Sweetness', o:'Palm sugar level is the single biggest difference between two cooks making this.'},
+    {w:'Finish', o:'Makrut lime leaf is not optional. Thai basil is.'}
+  ]},
+kelaguen:{
+  foundation:'Charcoal-grilled protein chopped by hand, dressed with citrus while still warm, then fresh coconut and hot pepper folded through. The smoke and the acid do equal work.',
+  layers:[
+    {w:'Protein', o:'Chicken, beef, shrimp, Spam, or raw fish for kelaguen guihan — each changes how long the citrus needs.'},
+    {w:'Citrus', o:'Calamansi on island. Lemon is the standard off-island substitute and is slightly less floral.'},
+    {w:'Coconut', o:'Freshly grated is the marker of a good kelaguen. Frozen grated is an honest compromise; desiccated is not.'},
+    {w:'Heat', o:"Donne' sali defines it. Thai bird chili is the closest substitute and still falls short."}
+  ]},
+rundown:{
+  foundation:'Coconut milk reduced until it breaks into clear oil and thick custard, then fish folded into that custard. If the milk never breaks, the dish has not been made.',
+  layers:[
+    {w:'Fish', o:'Salted mackerel is classic. Fresh snapper or jackfish makes a lighter, less traditional version.'},
+    {w:'Heat', o:'Whole unpierced scotch bonnet gives perfume. Pierced gives heat. This is a deliberate choice, not an accident.'},
+    {w:'Sides', o:'Green banana, boiled spinners, yam or roasted breadfruit. The starch is regional.'},
+    {w:'Pimento', o:'Whole berries crushed at the pot, or ground. Whole holds up better through the long reduction.'}
+  ]},
+tagine:{
+  foundation:'Marinated chicken laid over a raft of sliced onion, barely any added water, and very low sustained heat under a cone that returns the moisture to the pot.',
+  layers:[
+    {w:'Sour', o:'Preserved lemon and olives is the m’qualli direction — sharp, saffron-yellow.'},
+    {w:'Sweet', o:'Prunes, apricot and honey push it toward mrouzia. The two directions are not combined.'},
+    {w:'Fat', o:'Olive oil is everyday. Smen — aged fermented butter — is the celebratory version and tastes nothing alike.'},
+    {w:'Spice', o:'Ginger, turmeric and saffron are the base. Whether ras el hanout joins them is a household signature.'}
+  ]},
+lomo:{
+  foundation:'A wok hot enough to sear dry beef in batches, deglazed with soy and vinegar so it hisses, and everything tossed only twice at the end so the fries stay crisp.',
+  layers:[
+    {w:'Protein', o:'Sirloin is standard. Chicken makes it pollo saltado, which is its own named dish.'},
+    {w:'Chili', o:'Ají amarillo paste is the common route; fresh ají is brighter and much hotter.'},
+    {w:'Acid', o:'Red wine vinegar is traditional. Some Lima kitchens finish with a splash of pisco instead.'},
+    {w:'Starch', o:'Fries go in the wok, rice goes beside it. Both, always — this trips up first-timers.'}
+  ]}
+};
+
+/* ---------- unit normalization ---------- */
+function toGrams(id, qty, unit){
+  const c = ING[id] && ING[id].conv;
+  if(!c || c[unit] === undefined) return null;   // undefined, not guessed
+  return qty * c[unit];
+}
+function fmtQty(q){
+  if(q >= 100) return String(Math.round(q));
+  if(q >= 10)  return String(Math.round(q * 10) / 10);
+  return String(Math.round(q * 100) / 100);
+}
+function fmtG(g){
+  if(g === null) return '—';
+  if(g >= 1000) return fmtQty(g / 1000) + ' kg';
+  return Math.round(g) + ' g';
+}
+const UNIT_LABEL = {g:'g', ml:'ml', tsp:'tsp', tbsp:'tbsp', cup:'cup', piece:'', clove:'clove', bunch:'bunch'};
+function fmtIng(q, u){
+  const n = fmtQty(q);
+  if(u === 'piece') return n;
+  if(u === 'clove') return n + (q === 1 ? ' clove' : ' cloves');
+  if(u === 'bunch') return n + (q === 1 ? ' bunch' : ' bunches');
+  if(u === 'cup')   return n + (q === 1 ? ' cup' : ' cups');
+  return n + ' ' + UNIT_LABEL[u];
+}
+
+/* ---------- example opening stock (replaced the moment the viewer edits) ---------- */
+const EXAMPLE_PANTRY = {
+  flour:{bought:2000, left:1350}, salt:{bought:1360, left:900},
+  soy:{bought:500, left:180}, sesame_oil:{bought:250, left:95},
+  oil_veg:{bought:1000, left:640}, fishsauce:{bought:700, left:210},
+  coconut_mk:{bought:800, left:800}, peanut:{bought:340, left:300},
+  anise:{bought:30, left:22}, cinnamon:{bought:25, left:19},
+  coriander_s:{bought:50, left:41}, turmeric:{bought:60, left:47},
+  rice_long:{bought:2000, left:1100}, pepper:{bought:100, left:64},
+  whitepep:{bought:50, left:44}, olive_grn:{bought:340, left:340}
+};
+
+/* ---------- state ---------- */
+const state = {
+  view:'atlas', dishId:null, servingsMul:1, filter:'all',
+  pantry:JSON.parse(JSON.stringify(EXAMPLE_PANTRY)),
+  pantryIsExample:true,
+  cooked:[],           // {id, dishId, rating, note, at}
+  planned:[],          // dish ids queued for shopping
+  db:null, sample:null, coachAnswer:'', coachBusy:false
+};
+const byId = id => R.find(r => r.id === id);
+const el = document.getElementById('main');
+
+/* ---------- storage (db capability, degrades cleanly) ---------- */
+async function initCaps(){
+  try{
+    state.db = await window.claude?.use?.('db') ?? null;
+  }catch(e){ state.db = null; }
+  try{
+    state.sample = await window.claude?.use?.('sample') ?? null;
+  }catch(e){ state.sample = null; }
+
+  if(state.db){
+    try{
+      state.db.collection('pantry').onSnapshot(docs => {
+        if(!docs || !docs.length) return;
+        const next = {};
+        docs.forEach(d => { next[d.id] = {bought:d.bought, left:d.left}; });
+        state.pantry = next; state.pantryIsExample = false; render();
+      });
+      state.db.collection('cooked').orderBy('at','desc').limit(60).onSnapshot(docs => {
+        state.cooked = (docs || []).map(d => ({id:d.id, ...d}));
+        render();
+      });
+    }catch(e){ /* subscription unavailable; stay local */ }
+  }
+  render();
+}
+async function savePantryItem(id){
+  const p = state.pantry[id];
+  if(!state.db || !p) return;
+  try{ await state.db.doc('pantry/' + id).set({bought:p.bought, left:p.left, at:Date.now()}); }
+  catch(e){ /* read-only viewer */ }
+}
+async function flushWholePantry(){
+  if(!state.db) return;
+  for(const id of Object.keys(state.pantry)) await savePantryItem(id);
+}
+
+/* ---------- pantry mechanics ---------- */
+function stockOf(id){ return state.pantry[id] ? state.pantry[id].left : 0; }
+function needOf(recipe, ing){ return toGrams(ing.i, ing.q * state.servingsMul, ing.u); }
+function coverage(recipe, ing){
+  const need = needOf(recipe, ing);
+  if(need === null) return {cls:'none', label:'not tracked', need:null, have:stockOf(ing.i)};
+  const have = stockOf(ing.i);
+  if(have <= 0) return {cls:'none', label:'none', need, have};
+  if(have >= need) return {cls:'ok', label:fmtG(have) + ' on hand', need, have};
+  return {cls:'low', label:'only ' + fmtG(have), need, have};
+}
+async function cookDish(recipe, rating, note){
+  // Purchase-anchored depletion: subtract what the recipe consumed, floor at 0.
+  recipe.ings.forEach(ing => {
+    const need = needOf(recipe, ing);
+    if(need === null) return;
+    const p = state.pantry[ing.i];
+    if(!p) return;
+    p.left = Math.max(0, p.left - need);
+  });
+  state.pantryIsExample = false;
+  const entry = {dishId:recipe.id, rating, note:note || '', at:Date.now()};
+  state.cooked = [{id:'local-' + Date.now(), ...entry}, ...state.cooked];
+  render();
+  if(state.db){
+    try{ await state.db.collection('cooked').add(entry); }catch(e){}
+    await flushWholePantry();
+  }
+}
+
+/* ---------- shopping list ---------- */
+function buildList(){
+  const need = {};
+  state.planned.forEach(did => {
+    const r = byId(did); if(!r) return;
+    r.ings.forEach(ing => {
+      const g = toGrams(ing.i, ing.q, ing.u);
+      if(g === null){
+        need[ing.i] = need[ing.i] || {g:0, unresolved:[]};
+        need[ing.i].unresolved.push(fmtIng(ing.q, ing.u));
+      }else{
+        need[ing.i] = need[ing.i] || {g:0, unresolved:[]};
+        need[ing.i].g += g;
+      }
+    });
+  });
+  const rows = [];
+  Object.keys(need).forEach(id => {
+    const have = stockOf(id);
+    const short = need[id].g - have;
+    if(short > 0 || need[id].unresolved.length){
+      rows.push({id, short:Math.max(0, short), unresolved:need[id].unresolved, buy:ING[id].buy});
+    }
+  });
+  return rows;
+}
+
+/* ---------- rendering ---------- */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function viewAtlas(){
+  const countries = [...new Set(R.map(r => r.country))];
+  const shown = state.filter === 'all' ? R : R.filter(r => r.country === state.filter);
+  return `
+  <div class="atlas-head">
+    <div>
+      <div class="eyebrow">The dish you keep thinking about</div>
+      <h1 class="title">Cook it the way you<br>actually ate it.</h1>
+    </div>
+  </div>
+  <p class="lede">Pick the country, then the dish. Every recipe carries its region, the technique that makes it work, and a shopping list that already knows what is in your kitchen.</p>
+  <hr class="rule">
+  <div class="filters">
+    <button class="chip" data-filter="all" aria-pressed="${state.filter === 'all'}">All ${R.length} dishes</button>
+    ${countries.map(c => `<button class="chip" data-filter="${esc(c)}" aria-pressed="${state.filter === c}">${esc(c)}</button>`).join('')}
+  </div>
+  <div class="grid">
+    ${shown.map(r => {
+      const rat = ratingFor(r.id);
+      return `<button class="dish" data-dish="${r.id}">
+        <div class="where"><span aria-hidden="true">${r.flag}</span>${esc(r.country)}</div>
+        <h3>${esc(r.dish)}</h3>
+        <div class="native">${esc(r.native)}</div>
+        <p>${esc(r.blurb)}</p>
+        <div class="foot">
+          <span class="pill plain">${esc(r.time)}</span>
+          <span class="pill plain">${esc(r.level)}</span>
+          ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} · ${rat.n} cooked</span>` : `<span class="pill amber">Draft · untested</span>`}
+        </div>
+      </button>`;
+    }).join('')}
+  </div>`;
+}
+
+function ratingFor(dishId){
+  const rs = state.cooked.filter(c => c.dishId === dishId && c.rating > 0);
+  if(!rs.length) return {n:0, avg:0};
+  return {n:rs.length, avg:rs.reduce((a, b) => a + b.rating, 0) / rs.length};
+}
+
+function viewRecipe(){
+  const r = byId(state.dishId);
+  if(!r) return viewAtlas();
+  const rat = ratingFor(r.id);
+  const craft = CRAFT[r.id];
+  const logs = state.cooked.filter(c => c.dishId === r.id).slice(0, 8);
+  const planned = state.planned.includes(r.id);
+  const ytQuery = `${r.dish} ${r.native} recipe`;
+  const ytUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQuery);
+
+  return `
+  <button class="back" id="back">← All dishes</button>
+  <div class="rhead">
+    <div>
+      <div class="where eyebrow" style="color:var(--accent-ink)">${r.flag} ${esc(r.country)}</div>
+      <h1 class="title" style="margin-top:4px">${esc(r.dish)}</h1>
+      <div style="color:var(--ink-3);font-size:14px">${esc(r.native)} · ${esc(r.region)}</div>
+      <div class="rmeta">
+        <span class="pill plain">Serves ${r.serves * state.servingsMul}</span>
+        <span class="pill plain">${esc(r.time)}</span>
+        <span class="pill plain">${esc(r.level)}</span>
+        ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} from ${rat.n} cooks</span>` : `<span class="pill amber">No one has cooked this yet</span>`}
+      </div>
+    </div>
+    <button class="btn ${planned ? '' : 'primary'}" id="plan">${planned ? '✓ On shopping list' : 'Add to shopping list'}</button>
+  </div>
+  <p class="lede" style="margin-top:16px">${esc(r.blurb)}</p>
+
+  <div class="cols">
+    <div>
+      <div class="panel">
+        <h2>Ingredients</h2>
+        <div class="scaler">
+          <button id="mdown" aria-label="Fewer servings">−</button>
+          <span class="val num">${r.serves * state.servingsMul} servings</span>
+          <button id="mup" aria-label="More servings">+</button>
+        </div>
+        <ul class="ings">
+          ${r.ings.map(ing => {
+            const cov = coverage(r, ing);
+            const g = needOf(r, ing);
+            return `<li>
+              <span class="qty num">${fmtIng(ing.q * state.servingsMul, ing.u)}</span>
+              <span class="iname">${esc(ING[ing.i].n)}<em>${g === null ? 'no gram conversion defined' : '≈ ' + fmtG(g)}</em></span>
+              <span class="stock ${cov.cls}">${esc(cov.label)}</span>
+            </li>`;
+          }).join('')}
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h2>The foundation</h2>
+        <p style="font-size:13.5px;color:var(--ink-2);margin:6px 0 0;line-height:1.55">${esc(craft.foundation)}</p>
+        <div class="eyebrow" style="margin-top:16px">What people change</div>
+        <ul class="layers">
+          ${craft.layers.map(l => `<li><b>${esc(l.w)}</b><span>${esc(l.o)}</span></li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h2>Source</h2>
+        <div class="attrib" style="margin-top:8px">
+          <strong>No source attached.</strong> The foundation and method above were written for this prototype and have not been kitchen-tested. In production this slot carries the original author, a link back, and the date someone who actually cooked it signed off.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>I cooked this</h2>
+        <p style="font-size:13px;color:var(--ink-2);margin:4px 0 0">Logging a cook subtracts these ingredients from your pantry.</p>
+        <div class="stars" id="stars" role="group" aria-label="Rating">
+          ${[1,2,3,4,5].map(i => `<button data-star="${i}" data-on="0" aria-label="${i} star${i > 1 ? 's' : ''}">★</button>`).join('')}
+        </div>
+        <textarea class="note" id="note" placeholder="What you'd change next time — substitutions, heat, timing…"></textarea>
+        <button class="btn primary" id="cook" style="margin-top:9px">Log this cook</button>
+        ${logs.length ? `<ul class="log">${logs.map(c => `<li>
+          <div class="meta"><span style="color:var(--accent)">${'★'.repeat(c.rating || 0)}</span><span>${new Date(c.at).toLocaleDateString()}</span></div>
+          ${c.note ? `<div>${esc(c.note)}</div>` : '<div style="color:var(--ink-3)">No note</div>'}
+        </li>`).join('')}</ul>` : ''}
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Method</h2>
+        <ol class="steps">
+          ${r.steps.map(s => `<li><div><b>${esc(s.h)}</b>${esc(s.t)}${s.heat ? `<div class="heat">🔥 ${esc(s.heat)}</div>` : ''}</div></li>`).join('')}
+        </ol>
+      </div>
+
+      <div class="panel">
+        <h2>Ask the kitchen coach</h2>
+        <p style="font-size:13px;color:var(--ink-2);margin:4px 0 10px">It knows this recipe, your servings, and what your pantry says you have.</p>
+        <div class="coach">
+          <div class="sugg">
+            <button data-ask="My dough is too sticky to pleat. What now?">Dough too sticky</button>
+            <button data-ask="I can't find one of these ingredients. What can I substitute without ruining it?">Substitutions</button>
+            <button data-ask="What's the most common way people get this dish wrong?">Common mistakes</button>
+            <button data-ask="What should this look and smell like when it's done?">Doneness cues</button>
+          </div>
+          <div class="row">
+            <input id="ask" placeholder="Ask anything about cooking this…" autocomplete="off">
+            <button class="btn primary" id="asksend">Ask</button>
+          </div>
+          <div id="answer" class="answer" ${state.coachAnswer ? '' : 'hidden'}>${esc(state.coachAnswer)}</div>
+          <div id="coachoff" class="notice" ${state.sample ? 'hidden' : ''}>The coach needs the published page and your approval to reach Claude. It is unavailable in this view.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Watch it made</h2>
+        <p style="font-size:13px;color:var(--ink-2);margin:4px 0 12px">Seeing the dough come together beats reading about it. Cooks who watched a version first report better results than cooks who only read.</p>
+        <a class="btn primary" href="${ytUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">Search YouTube for ${esc(r.dish)} →</a>
+        <div class="ytplan">
+          <div class="eyebrow">What the built version does instead</div>
+          <ol>
+            <li><b>Finds real videos</b> through the YouTube Data API — title, channel, thumbnail, view count, publish date. Sanctioned, free, quota-limited.</li>
+            <li><b>Plays them in the official embed</b>, so the creator keeps the view and the ad revenue. This is explicitly permitted and it is why the relationship stays friendly.</li>
+            <li><b>Reads the description</b>, which is where most cooking channels put their full ingredient list, and parses it into the structured format this page uses.</li>
+            <li><b>Tags each one against the foundation above</b> — "this cook uses lamb, pleats 24, skips the fenugreek" — so you can compare approaches instead of picking one at random.</li>
+          </ol>
+          <p class="warn">Not doing: pulling transcripts. <code>captions.download</code> only works on videos you own, and the workaround libraries that scrape the internal endpoint violate YouTube's developer policies. Description text and metadata are the legitimate surface.</p>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewPantry(){
+  const ids = Object.keys(state.pantry).sort((a, b) => ING[a].n.localeCompare(ING[b].n));
+  return `
+  <div class="eyebrow">Inferred from what you bought and what you cooked</div>
+  <h1 class="title" style="margin:6px 0 10px">Pantry</h1>
+  <p class="lede">These are estimates, not measurements. The app anchors on the size you purchased and subtracts what each logged cook used. Correct any line and the estimate resets from there.</p>
+  ${state.pantryIsExample ? `<div class="notice" style="margin-top:14px">⚠︎ Showing <strong>example stock</strong> so the screen is not empty. It is replaced the first time you log a cook or edit a quantity.</div>` : ''}
+  <div class="panel" style="margin-top:16px">
+    <div class="tbl-wrap">
+      <table class="pantry">
+        <thead><tr><th>Ingredient</th><th>Bought</th><th>Estimated left</th><th></th></tr></thead>
+        <tbody>
+        ${ids.map(id => {
+          const p = state.pantry[id];
+          const pct = p.bought > 0 ? Math.max(0, Math.min(100, (p.left / p.bought) * 100)) : 0;
+          const cls = pct <= 0 ? 'out' : pct < 25 ? 'low' : '';
+          return `<tr>
+            <td><strong>${esc(ING[id].n)}</strong><div style="font-size:11px;color:var(--ink-3)">${ING[id].buy === 'spec' ? 'specialty market' : ING[id].buy === 'fresh' ? 'fresh · grocery' : 'shelf stable'}</div></td>
+            <td class="num">${fmtG(p.bought)}</td>
+            <td class="num">${fmtG(p.left)}<div class="meter"><i class="${cls}" style="width:${pct}%"></i></div></td>
+            <td><button class="mini" data-refill="${id}">Refill</button></td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="notice" style="margin-top:14px"><strong>Known gap.</strong> Ingredients with no gram conversion (a "bunch" of thyme, a "pinch") cannot be tracked here. That conversion table is the single hardest piece of engineering in this product and it is only partly filled in.</div>`;
+}
+
+function viewList(){
+  const rows = buildList();
+  const groups = [
+    {k:'fresh',  label:'Fresh — grocery delivery', hint:'Instacart or Kroger cart, matched against stores near you'},
+    {k:'staple', label:'Shelf stable — mail order', hint:'Amazon or a spice merchant; buy the large size once'},
+    {k:'spec',   label:'Specialty — diaspora market', hint:'Hardest to source. The app should name a real shop, not a guess'}
+  ];
+  return `
+  <div class="eyebrow">Recipes on deck minus what you already have</div>
+  <h1 class="title" style="margin:6px 0 10px">Shopping</h1>
+  ${state.planned.length ? `<p class="lede">For: ${state.planned.map(d => esc(byId(d).dish)).join(', ')}.</p>` : ''}
+  ${!state.planned.length ? `<div class="empty">Nothing queued yet. Open a dish and add it to your shopping list.</div>` : ''}
+  ${state.planned.length && !rows.length ? `<div class="empty">Your pantry already covers everything on the list.</div>` : ''}
+  ${groups.map(g => {
+    const items = rows.filter(r => r.buy === g.k);
+    if(!items.length) return '';
+    return `<div class="lgroup panel">
+      <h3>${esc(g.label)} <span class="pill ${g.k === 'spec' ? 'chili' : g.k === 'fresh' ? 'jade' : 'amber'}">${items.length}</span></h3>
+      <div style="font-size:12px;color:var(--ink-3);margin-top:2px">${esc(g.hint)}</div>
+      <ul class="buy">
+        ${items.map(it => `<li>
+          <span class="q num">${it.short > 0 ? fmtG(it.short) : '—'}</span>
+          <span style="flex:1">${esc(ING[it.id].n)}${it.unresolved.length ? `<div style="font-size:11px;color:var(--chili)">plus ${esc(it.unresolved.join(', '))} — no gram conversion</div>` : ''}</span>
+        </li>`).join('')}
+      </ul>
+      <button class="btn" style="margin-top:12px" disabled>Send to cart — not connected in prototype</button>
+    </div>`;
+  }).join('')}
+  <div class="notice" style="margin-top:18px"><strong>Why the cart buttons are dead.</strong> Real carts need approved partner access: an Instacart Developer Platform key, a Kroger OAuth app, or an Amazon Associates account. None are wired up here, and the app will never hold your store credentials — you check out in your own account.</div>`;
+}
+
+function render(){
+  el.innerHTML =
+    state.view === 'atlas'  ? (state.dishId ? viewRecipe() : viewAtlas()) :
+    state.view === 'pantry' ? viewPantry() :
+                              viewList();
+  document.querySelectorAll('#tabs button').forEach(b =>
+    b.setAttribute('aria-selected', String(b.dataset.view === state.view)));
+  el.querySelector('#answer') && restoreStars();
+  window.scrollTo({top:0});
+}
+let pendingStars = 0;
+function restoreStars(){
+  el.querySelectorAll('#stars button').forEach(b =>
+    b.dataset.on = Number(b.dataset.star) <= pendingStars ? '1' : '0');
+}
+
+/* ---------- events ---------- */
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-view]'); if(!b) return;
+  state.view = b.dataset.view;
+  if(state.view === 'atlas') state.dishId = null;
+  render();
+});
+
+el.addEventListener('click', async e => {
+  const t = e.target;
+
+  const chip = t.closest('[data-filter]');
+  if(chip){ state.filter = chip.dataset.filter; render(); return; }
+
+  const dish = t.closest('[data-dish]');
+  if(dish){ state.dishId = dish.dataset.dish; state.servingsMul = 1; state.coachAnswer = ''; pendingStars = 0; render(); return; }
+
+  if(t.id === 'back'){ state.dishId = null; render(); return; }
+  if(t.id === 'mup'){ state.servingsMul = Math.min(4, state.servingsMul + 0.5); render(); return; }
+  if(t.id === 'mdown'){ state.servingsMul = Math.max(0.5, state.servingsMul - 0.5); render(); return; }
+
+  if(t.id === 'plan'){
+    const id = state.dishId;
+    state.planned = state.planned.includes(id) ? state.planned.filter(x => x !== id) : [...state.planned, id];
+    render(); return;
+  }
+
+  const star = t.closest('[data-star]');
+  if(star){ pendingStars = Number(star.dataset.star); restoreStars(); return; }
+
+  if(t.id === 'cook'){
+    const r = byId(state.dishId);
+    const note = (el.querySelector('#note') || {}).value || '';
+    const rating = pendingStars;
+    pendingStars = 0;
+    await cookDish(r, rating, note);
+    return;
+  }
+
+  const refill = t.closest('[data-refill]');
+  if(refill){
+    const id = refill.dataset.refill;
+    const p = state.pantry[id];
+    p.left = p.bought;
+    state.pantryIsExample = false;
+    render();
+    savePantryItem(id);
+    return;
+  }
+
+  const ask = t.closest('[data-ask]');
+  if(ask){ runCoach(ask.dataset.ask); return; }
+  if(t.id === 'asksend'){
+    const inp = el.querySelector('#ask');
+    if(inp && inp.value.trim()) runCoach(inp.value.trim());
+    return;
+  }
+});
+
+el.addEventListener('keydown', e => {
+  if(e.target.id === 'ask' && e.key === 'Enter'){
+    e.preventDefault();
+    if(e.target.value.trim()) runCoach(e.target.value.trim());
+  }
+});
+
+/* ---------- coach ---------- */
+async function runCoach(question){
+  const r = byId(state.dishId); if(!r) return;
+  const box = el.querySelector('#answer');
+  const off = el.querySelector('#coachoff');
+  if(!state.sample){ if(off) off.hidden = false; return; }
+  if(state.coachBusy) return;
+  state.coachBusy = true;
+  if(box){ box.hidden = false; box.textContent = 'Thinking…'; }
+
+  const pantryLine = r.ings.map(ing => {
+    const cov = coverage(r, ing);
+    return `${ING[ing.i].n}: needs ${fmtG(needOf(r, ing))}, pantry has ${fmtG(cov.have)}`;
+  }).join('\n');
+
+  const prompt =
+`You are a cooking coach helping someone make ${r.dish} (${r.native}) from ${r.country} — ${r.region}.
+They are cooking for ${r.serves * state.servingsMul} people.
+
+The method they are following:
+${r.steps.map((s, i) => `${i + 1}. ${s.h}: ${s.t}${s.heat ? ' [' + s.heat + ']' : ''}`).join('\n')}
+
+Their pantry against this recipe:
+${pantryLine}
+
+Their question: ${question}
+
+Answer in under 140 words. Be specific about temperatures, times and visual cues. If they are missing something, say what actually substitutes and what that costs in flavour. Do not restate the whole recipe. No preamble.`;
+
+  try{
+    await state.sample(prompt, {
+      modelTier:'default',
+      onText:({text}) => { state.coachAnswer = text; if(box) box.textContent = text; }
+    });
+  }catch(err){
+    const msg = err && err.code === 'not_granted'
+      ? 'The coach needs your approval to reach Claude. Reload and allow it to try again.'
+      : 'The coach could not answer just now. Try again in a moment.';
+    state.coachAnswer = msg;
+    if(box) box.textContent = msg;
+  }
+  state.coachBusy = false;
+}
+
+render();
+initCaps();
+</script>
