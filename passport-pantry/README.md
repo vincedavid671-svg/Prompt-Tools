@@ -148,35 +148,68 @@ pre-resolve videos per dish rather than searching per user request.
 
 ## Data sources
 
-### Commerce is not a global problem with one answer
+### Commerce: the APIs exist, they just point the wrong way
 
-The first draft of this spec assumed Instacart and Kroger. That is a US answer,
-and it does not port.
+An earlier draft of this spec said there was "essentially no partner cart API"
+outside the United States. That was wrong, and wrong in a way worth recording.
 
-**Outside the United States there is essentially no partner cart API.** The Gulf
-market is retailer apps (Carrefour, Lulu, Panda, Danube, Tamimi) plus
-aggregators (Nana, Talabat Mart, Ninja, HungerStation Market, Noon Minutes,
-InstaShop) — none of which publish a recipe-to-cart developer API. Nana is the
-closest structural analogue to Instacart in Saudi Arabia because it aggregates
-multiple supermarkets, but it is not an integration target today.
+Saudi and Gulf platforms publish real, well-documented developer APIs. Talabat
+has both a developer portal and a separate POS integration portal, plus Delivery
+Hero's Q-Commerce Partner API. Jahez runs an integration portal and issues API
+keys per restaurant. noon publishes API documentation covering catalogue, orders,
+fulfilment and event notifications, with an OAuth 2.0 flow for integrators.
+HungerStation integrates through middleware. Grubtech alone centralises Talabat,
+Careem, noon, KeeTa and HungerStation across 28 markets.
 
-So the architecture is **deep links, with cart integration as a US-only
-enhancement** — and that inverts the roadmap in a useful way:
+**The problem is direction, not existence.** Every one of those APIs is
+vendor-side: it lets a shop or restaurant receive, manage and fulfil orders that
+customers place in the platform's own app. None of them lets a third-party
+consumer app build a basket or place an order for a shopper. That is the opposite
+of what this product needs, and no amount of partner onboarding turns one into
+the other.
 
-| | US | Everywhere else |
+So the model is four tiers, and the tier is a property of each store:
+
+| Tier | Meaning | Examples |
 |---|---|---|
-| Cart integration | Instacart, Kroger | None available |
-| Launch blocker | Partner approval | None |
-| User experience | Items land in cart | One extra tap, same result |
+| `cart` | A documented API puts items in a shopper's cart | Instacart, Kroger (US only) |
+| `merchant` | An API exists, authorised **per merchant** rather than per shopper | Salla, Zid (Saudi) |
+| `affiliate` | Product links with commission, no cart | Amazon.sa, Amazon US, noon, Walmart |
+| `link` | Deep link only — the API that exists is vendor-side | Nana, Talabat Mart, Carrefour, Lulu, Panda, Danube, Tamimi, HungerStation, Ninja |
 
-International launch is *easier* than US launch, because nothing waits on a
-partner agreement. Build deep links first; they work in every market including
-the US, and cart APIs become an upgrade for one market rather than a dependency
-for all of them.
+**Salla and Zid are the real finding for Saudi Arabia.** Salla is a Saudi
+e-commerce platform with roughly 80,000 active stores — locally described as the
+Shopify of the Middle East — offering a Merchant REST API, an OAuth 2.0 Partners
+authorisation service with scopes including `carts.read` and `orders.read_write`,
+and signed webhooks. Zid is the Riyadh-based equivalent with an open API.
 
-Store coverage in the prototype is illustrative. Every link must be verified per
-market before launch, and the list should be maintained per country rather than
-inferred.
+That is the closest thing in the Kingdom to what Instacart's developer platform
+gives you in the US, with one structural difference that shapes the product:
+**authorisation is granted per merchant, not per shopper.** A spice merchant,
+butcher or specialty importer running on Salla can install your app, and from
+then on you can build real carts against their catalogue. It does not give you
+the hypermarkets, but specialty sourcing is exactly where users need the most
+help — the `spec` category in the shopping list is the hardest one to satisfy and
+the one where a generic deep link helps least.
+
+**Amazon.sa has its own affiliate programme** at `affiliate-program.amazon.sa`,
+with commission from roughly 1% to 10% by category and about 5% on home and
+kitchen. So affiliate revenue is available in Saudi Arabia from launch. The
+Creators API gate discussed below restricts the programmatic *product data* API,
+not the affiliate links themselves — those two were conflated in an earlier
+draft.
+
+Revised sequencing:
+
+1. **Deep links everywhere.** Works in every market, blocks on nothing.
+2. **Amazon.sa and Amazon US affiliate links.** Revenue from day one, no API gate.
+3. **Salla and Zid merchant apps.** Real carts for specialty ingredients in
+   Saudi Arabia. Start with a handful of merchants who stock what the recipes
+   actually need.
+4. **Instacart and Kroger.** A US-only enhancement, not a global dependency.
+
+Store coverage in the prototype is illustrative and per-market link formats are
+unverified. The tier assignments are the part worth trusting; the URLs are not.
 
 | Need | Source | Terms |
 |---|---|---|
@@ -186,9 +219,11 @@ inferred.
 | Product links | Walmart affiliate / content provider API | Read-only, drives traffic out |
 | Shelf-stable goods | Amazon Associates | See caveat below |
 
-**Amazon caveat.** PA-API is being retired during 2026 in favour of the Creators
-API, which requires at least 10 qualified Associates referral sales in the
-trailing 30 days before access is granted. Reported sunset dates vary across
+**Amazon caveat.** The PA-API is being retired during 2026 in favour of the
+Creators API, which requires at least 10 qualified Associates referral sales in
+the trailing 30 days before access is granted. This gates the programmatic
+product-data API only — affiliate links themselves need just an Associates
+account, and Amazon.sa runs its own programme. Reported sunset dates vary across
 sources — verify directly with Amazon. Plan to launch without programmatic
 Amazon access and treat it as a later addition.
 
@@ -207,7 +242,8 @@ partner APIs or deep links; the user checks out in their own account.
 - Nutrition and calorie data are not wired up; the diet engine covers
   religious and preference restrictions only, not macros.
 - Store links open a web search rather than a verified retailer URL, since
-  deep-link formats have not been confirmed per retailer.
+  deep-link formats have not been confirmed per retailer. The integration tier
+  shown against each store is researched; the link is not.
 - The diet engine checks ingredients only. Certification — halal slaughter,
   kosher supervision — is out of scope for an app and is stated as such in
   the UI.
@@ -228,8 +264,10 @@ flow, low-stock surfacing.
 
 **Then — commerce**
 Verified deep links per market first — they work everywhere and block on nothing.
-Instacart partner application second, as a US-only enhancement. Kroger OAuth
-third. Amazon last, once referral volume clears the Creators API threshold.
+Amazon.sa and Amazon US affiliate links second, for revenue with no API gate.
+Salla and Zid merchant apps third, for real carts on specialty ingredients in
+Saudi Arabia. Instacart and Kroger last, as a US-only enhancement rather than a
+global dependency.
 
 **Later — scale content**
 Contributor programme for regional cooks, YouTube variation indexing, nutrition

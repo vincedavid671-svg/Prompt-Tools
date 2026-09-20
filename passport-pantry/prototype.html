@@ -190,7 +190,7 @@ ul.ings li.swapped .iname em{color:var(--jade)}
 }
 .store:hover{border-color:var(--accent);background:var(--accent-soft)}
 .store b{font-size:13.5px}
-.store .pill{align-self:flex-start}
+.store .tierrow{display:flex;gap:4px;flex-wrap:wrap}
 .store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
 
 /* ---------- foundation & layers ---------- */
@@ -435,46 +435,64 @@ const REGION_NOTE = {
 };
 
 /* ---------- regional grocery markets ----------
-   Outside the US there is essentially no partner cart API. These are
-   deep-link destinations, not integrations. The store list is the
-   useful part; every link must be verified before launch.              */
+   `tier` is the integration route, and it is the field that matters:
+     cart      — a documented API can put items in a cart programmatically
+     merchant  — an API exists, but authorization is per merchant, not per
+                 shopper: the shop installs your app, then you can build
+                 carts against its catalogue
+     affiliate — product links with commission, no cart
+     link      — deep link only; the API that exists is merchant-side
+                 (a shop receiving orders), which is the wrong direction
+   Almost every food-platform API in the Gulf is the last case. See the
+   README: the APIs are real and well documented, they just point at
+   vendors rather than at shoppers.                                     */
+const TIERS = {
+  cart:      {label:'Cart API', cls:'jade'},
+  merchant:  {label:'Per-merchant API', cls:'jade'},
+  affiliate: {label:'Affiliate links', cls:'amber'},
+  link:      {label:'Deep link', cls:'plain'}
+};
 const MARKETS = {
   SA:{name:'Saudi Arabia', flag:'🇸🇦', stores:[
-    {n:'Nana', t:'Aggregator', d:'Aggregates Tamimi, Danube, Panda and others. Closest thing to an Instacart analogue here.', for:['fresh','staple']},
-    {n:'Tamimi Markets', t:'Supermarket', d:'Strong on imported and Western goods.', for:['fresh','spec']},
-    {n:'Danube', t:'Supermarket', d:'Wide international range; good for European ingredients.', for:['fresh','spec']},
-    {n:'Panda', t:'Supermarket', d:'Largest domestic chain. Best prices on staples.', for:['fresh','staple']},
-    {n:'Carrefour KSA', t:'Hypermarket', d:'Broad range including South and Southeast Asian ingredients.', for:['fresh','staple','spec']},
-    {n:'Lulu Hypermarket', t:'Hypermarket', d:'The strongest source for Asian and subcontinental specialty items.', for:['spec','fresh']},
-    {n:'Amazon.sa', t:'Marketplace', d:'Shelf-stable goods, spices and equipment.', for:['staple']},
-    {n:'HungerStation Market', t:'Quick delivery', d:'Fast delivery when a single ingredient is missing mid-cook.', for:['fresh']}
+    {n:'Nana', t:'Aggregator', tier:'link', d:'Aggregates Tamimi, Danube, Panda and others. The closest structural analogue to Instacart here, but no public shopper API.', for:['fresh','staple']},
+    {n:'Salla merchants', t:'Store platform', tier:'merchant', d:'Saudi e-commerce platform, ~80,000 stores. Merchant API with carts and orders scopes under OAuth — a spice merchant or butcher can install your app.', for:['spec','staple']},
+    {n:'Zid merchants', t:'Store platform', tier:'merchant', d:'Riyadh-based, same model. Open API, strong B2B feature set.', for:['spec','staple']},
+    {n:'Tamimi Markets', t:'Supermarket', tier:'link', d:'Strong on imported and Western goods.', for:['fresh','spec']},
+    {n:'Danube', t:'Supermarket', tier:'link', d:'Wide international range; good for European ingredients.', for:['fresh','spec']},
+    {n:'Panda', t:'Supermarket', tier:'link', d:'Largest domestic chain. Best prices on staples.', for:['fresh','staple']},
+    {n:'Carrefour KSA', t:'Hypermarket', tier:'link', d:'Broad range including South and Southeast Asian ingredients.', for:['fresh','staple','spec']},
+    {n:'Lulu Hypermarket', t:'Hypermarket', tier:'link', d:'The strongest source for Asian and subcontinental specialty items.', for:['spec','fresh']},
+    {n:'Amazon.sa', t:'Marketplace', tier:'affiliate', d:'Has its own affiliate programme at affiliate-program.amazon.sa. Spices, oils, equipment.', for:['staple']},
+    {n:'noon', t:'Marketplace', tier:'affiliate', d:'Documented seller APIs; noon Minutes covers quick grocery.', for:['staple','fresh']},
+    {n:'HungerStation Market', t:'Quick delivery', tier:'link', d:'Fast delivery when one ingredient is missing mid-cook.', for:['fresh']},
+    {n:'Ninja', t:'Quick delivery', tier:'link', d:'Dark-store model, very fast, limited range.', for:['fresh']}
   ]},
   AE:{name:'United Arab Emirates', flag:'🇦🇪', stores:[
-    {n:'InstaShop', t:'Aggregator', d:'Partners with Carrefour, Spinneys, Choithrams and others. Acquired by Talabat.', for:['fresh','staple']},
-    {n:'Carrefour UAE', t:'Hypermarket', d:'Operated by Majid Al Futtaim. Widest general range.', for:['fresh','staple','spec']},
-    {n:'Lulu Hypermarket', t:'Hypermarket', d:'Best Asian and subcontinental specialty selection.', for:['spec','fresh']},
-    {n:'Spinneys', t:'Supermarket', d:'Premium and Western imports.', for:['fresh','spec']},
-    {n:'Talabat Mart', t:'Quick delivery', d:'Dark-store model, very fast, limited range.', for:['fresh']},
-    {n:'Noon Minutes', t:'Quick delivery', d:'Same model as above; noon.com covers shelf-stable goods.', for:['fresh','staple']},
-    {n:'Kibsons', t:'Fresh specialist', d:'Produce and meat, subscription-led.', for:['fresh']}
+    {n:'InstaShop', t:'Aggregator', tier:'link', d:'Partners with Carrefour, Spinneys, Choithrams. Acquired by Talabat in 2026.', for:['fresh','staple']},
+    {n:'Carrefour UAE', t:'Hypermarket', tier:'link', d:'Operated by Majid Al Futtaim. Widest general range.', for:['fresh','staple','spec']},
+    {n:'Lulu Hypermarket', t:'Hypermarket', tier:'link', d:'Best Asian and subcontinental specialty selection.', for:['spec','fresh']},
+    {n:'Spinneys', t:'Supermarket', tier:'link', d:'Premium and Western imports.', for:['fresh','spec']},
+    {n:'Talabat Mart', t:'Quick delivery', tier:'link', d:'Dark-store model. Talabat’s APIs are vendor-side only.', for:['fresh']},
+    {n:'noon Minutes', t:'Quick delivery', tier:'affiliate', d:'noon has documented seller APIs and an OAuth flow for integrators acting for sellers.', for:['fresh','staple']},
+    {n:'Kibsons', t:'Fresh specialist', tier:'link', d:'Produce and meat, subscription-led.', for:['fresh']}
   ]},
   US:{name:'United States', flag:'🇺🇸', stores:[
-    {n:'Instacart', t:'Aggregator', d:'Multi-retailer. The one platform with a real recipe-to-cart developer API.', for:['fresh','staple','spec']},
-    {n:'Kroger', t:'Supermarket', d:'Public Cart API with OAuth — items can be added to the shopper’s own cart.', for:['fresh','staple']},
-    {n:'Walmart', t:'Supermarket', d:'Affiliate content API, read-only.', for:['fresh','staple']},
-    {n:'Amazon', t:'Marketplace', d:'Shelf-stable goods and equipment. See the Creators API caveat.', for:['staple']},
-    {n:'H Mart / 99 Ranch', t:'Specialty', d:'East and Southeast Asian ingredients, often the only reliable source.', for:['spec']}
+    {n:'Instacart', t:'Aggregator', tier:'cart', d:'Multi-retailer. Developer Platform builds a hosted shoppable recipe page.', for:['fresh','staple','spec']},
+    {n:'Kroger', t:'Supermarket', tier:'cart', d:'Public Cart API with OAuth — items go into the shopper’s own cart.', for:['fresh','staple']},
+    {n:'Walmart', t:'Supermarket', tier:'affiliate', d:'Affiliate content API, read-only.', for:['fresh','staple']},
+    {n:'Amazon', t:'Marketplace', tier:'affiliate', d:'Shelf-stable goods and equipment. See the Creators API caveat.', for:['staple']},
+    {n:'H Mart / 99 Ranch', t:'Specialty', tier:'link', d:'East and Southeast Asian ingredients, often the only reliable source.', for:['spec']}
   ]},
   GB:{name:'United Kingdom', flag:'🇬🇧', stores:[
-    {n:'Tesco', t:'Supermarket', d:'Widest national coverage.', for:['fresh','staple']},
-    {n:'Sainsbury’s', t:'Supermarket', d:'Comparable range and delivery network.', for:['fresh','staple']},
-    {n:'Ocado', t:'Online only', d:'Strong on imported and specialty goods.', for:['fresh','spec']},
-    {n:'Amazon UK', t:'Marketplace', d:'Spices and shelf-stable goods.', for:['staple']}
+    {n:'Tesco', t:'Supermarket', tier:'link', d:'Widest national coverage.', for:['fresh','staple']},
+    {n:'Sainsbury’s', t:'Supermarket', tier:'link', d:'Comparable range and delivery network.', for:['fresh','staple']},
+    {n:'Ocado', t:'Online only', tier:'link', d:'Strong on imported and specialty goods.', for:['fresh','spec']},
+    {n:'Amazon UK', t:'Marketplace', tier:'affiliate', d:'Spices and shelf-stable goods.', for:['staple']}
   ]},
   NZ:{name:'New Zealand', flag:'🇳🇿', stores:[
-    {n:'Woolworths NZ', t:'Supermarket', d:'National coverage and delivery.', for:['fresh','staple']},
-    {n:'New World', t:'Supermarket', d:'Broader specialty range in larger stores.', for:['fresh','spec']},
-    {n:'Tai Ping / Lim Chhour', t:'Specialty', d:'Asian grocers in the main centres.', for:['spec']}
+    {n:'Woolworths NZ', t:'Supermarket', tier:'link', d:'National coverage and delivery.', for:['fresh','staple']},
+    {n:'New World', t:'Supermarket', tier:'link', d:'Broader specialty range in larger stores.', for:['fresh','spec']},
+    {n:'Tai Ping / Lim Chhour', t:'Specialty', tier:'link', d:'Asian grocers in the main centres.', for:['spec']}
   ]}
 };
 
@@ -1318,13 +1336,14 @@ function viewList(){
       <div class="stores">
         ${mkt.stores.filter(s => s.for.includes(g.k)).map(s => `
           <a class="store" href="https://duckduckgo.com/?q=${encodeURIComponent(s.n + ' ' + mkt.name + ' online grocery')}" target="_blank" rel="noopener noreferrer">
-            <b>${esc(s.n)}</b><span class="pill plain">${esc(s.t)}</span>
+            <b>${esc(s.n)}</b>
+            <span class="tierrow"><span class="pill ${TIERS[s.tier].cls}">${esc(TIERS[s.tier].label)}</span><span class="pill plain">${esc(s.t)}</span></span>
             <span class="sd">${esc(s.d)}</span>
           </a>`).join('')}
       </div>
     </div>`;
   }).join('')}
-  <div class="notice" style="margin-top:18px"><strong>Why these are links, not carts.</strong> Only the US has a real recipe-to-cart API ecosystem — Instacart and Kroger. In ${esc(mkt.name)} and most of the world there is no partner cart API, so the app routes you to the store and you finish there. It never holds your store credentials either way.</div>`;
+  <div class="notice" style="margin-top:18px"><strong>What the badges mean.</strong> Saudi and Gulf platforms do publish real, well-documented APIs — Talabat, Jahez, noon, HungerStation all have developer portals. Nearly all of them are <em>vendor-side</em>: they let a shop receive and fulfil orders placed in the platform's own app, which is the opposite direction from what this app needs. The exceptions worth building on are Salla and Zid, where a merchant can authorise your app and you can then build carts against their catalogue. Everything marked deep link opens the store and you finish there. The app never holds your store credentials in any tier.</div>`;
 }
 
 function render(){
