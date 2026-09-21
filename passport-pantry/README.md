@@ -152,9 +152,9 @@ then appear wherever every counted ingredient has a fibre figure, and the keto a
 low-carb tags switch to using the net number.
 
 Some ingredients have no USDA entry at all — scotch bonnet, donne' sali, makrut
-lime leaf, palm sugar, baharat, ají amarillo, belacan, barberry, dendê. The list
-grew from 27 to 36 with the second batch of dishes, and it will keep growing for
-a structural reason rather than a fixable one: USDA is a US database, so the more
+lime leaf, palm sugar, baharat, ají amarillo, belacan, barberry, dendê, jameed,
+doubanjiang. The list has grown from 27 to 42 across two expansions, and it will
+keep growing for a structural reason rather than a fixable one: USDA is a US database, so the more
 genuinely global this catalogue gets, the more of its nutrition is a stand-in.
 The closest available food is used
 and **flagged on the recipe as a proxy**, because a cited number that quietly
@@ -296,10 +296,10 @@ is an explicit `[dir="rtl"]` block.
 `tools/names-resolve.mjs` resolves names from **Wikidata** — CC0, so no
 share-alike obligation on a commercial product, unlike Open Food Facts' ODbL.
 Each name carries a **QID**, the stable identifier that makes it checkable.
-Twenty-two culturally specific ingredients are excluded from automation entirely
+Twenty-eight culturally specific ingredients are excluded from automation entirely
 and carry a hand-curated `mkt` field: the exact thing to say at the counter —
-belacan, ikan bilis, zereshk, dendê and twaróg among them, none of which a
-generic translator renders usefully.
+belacan, ikan bilis, zereshk, dendê, twaróg, jameed and doubanjiang among them,
+none of which a generic translator renders usefully.
 See `tools/README.md`.
 
 ### 7. Allergens
@@ -645,17 +645,20 @@ dishes is enough to find out. If it does not, nothing else matters.
 
 | Region | Dishes |
 |---|---|
-| Europe | Bangers and Mash, Cacio e Pepe, Paella Valenciana, Moussaka, Coq au Vin |
-| Southeast Asia | Phở Gà, Phanaeng Curry, Rendang, Chicken Adobo, Nasi Lemak |
-| East Asia | Pork & Chive Jiaozi, Oyakodon, Kimchi Jjigae |
-| Middle East | Chicken Kabsa, Menemen, Tabbouleh, Ghormeh Sabzi |
+| Europe | Bangers and Mash, Cacio e Pepe, Paella Valenciana, Moussaka, Coq au Vin, Sauerbraten, Bacalhau à Brás |
+| Southeast Asia | Phở Gà, Phanaeng Curry, Rendang, Chicken Adobo, Nasi Lemak, Hainanese Chicken Rice |
+| East Asia | Pork & Chive Jiaozi, Oyakodon, Kimchi Jjigae, Taiwanese Beef Noodle Soup |
+| Middle East | Chicken Kabsa, Menemen, Tabbouleh, Ghormeh Sabzi, Mansaf |
 | Latin America | Lomo Saltado, Tacos al Pastor, Moqueca Baiana |
 | Eastern Europe | Pierogi Ruskie, Borscht |
 | North Africa | Chicken Tagine, Koshari |
-| South Asia | Butter Chicken |
+| South Asia | Butter Chicken, Nihari |
+| West Africa | Jollof Rice, Waakye |
 | Caucasus | Khinkali |
 | Central Asia | Osh (Plov) |
-| West Africa | Jollof Rice |
+| North America | Chicken & Andouille Gumbo |
+| Nordic | Köttbullar |
+| Central Europe | Gulyás |
 | East Africa | Doro Wat |
 | Southern Africa | Bobotie |
 | Caribbean | Rundown |
@@ -674,6 +677,8 @@ that nothing else reached: nasi lemak is the first dish carrying a hidden
 crustacean allergen in a name that gives no hint of it, and moqueca is the first
 where the load-bearing allergen has no substitution that keeps the dish itself,
 so it says so instead.
+
+The third expansion, 33 to 43, closed the last three empty regions — **North America**, the **Nordics** and **Central Europe** — and gave a second dish to five regions that were resting on one. It also added the first ingredient in the registry that *contains* celery rather than merely risking it. Until gumbo and sauerbraten arrived, celery existed only as a label-dependent risk on stock cubes, so the "contains" bucket had never fired on one of the EU's fourteen. Two more hidden-allergen cases came with it: **doubanjiang** is fermented broad bean *with wheat flour*, which the jar rarely leads with, and **jameed** is dairy in its most concentrated form.
 
 Adding those ten also forced one new sourcing channel. African ingredients had
 nowhere to sit — berbere had been filed under Middle Eastern, which is wrong but
@@ -716,8 +721,8 @@ business or a hobby.
 
 ## Prototype technical notes
 
-Single self-contained HTML file. No build step, no dependencies. **33 dishes
-across 16 regions and 33 countries**, 161 canonical ingredients, 14 allergens,
+Single self-contained HTML file. No build step, no dependencies. **43 dishes
+across 19 regions and 43 countries**, 178 canonical ingredients, 14 allergens,
 eight diet profiles, five locales, and 24 delivery platforms reaching 87
 countries.
 

@@ -217,7 +217,26 @@ const MAP = {
   pandan:      {q:'parsley fresh'},
   belacan:     {q:'fish anchovy paste'},
   anchovy_dr:  {q:'fish anchovy european raw'},
-  barberry:    {q:'cranberries dried sweetened'}
+  barberry:    {q:'cranberries dried sweetened'},
+  celery:      {q:'celery raw', not:['seed','flakes','celeriac']},
+  okra:        {q:'okra raw', not:['frozen','cooked','canned']},
+  sausage_smk: {q:'sausage pork smoked', not:['turkey','chicken','beef']},
+  lingon:      {q:'jams and preserves'},
+  caraway:     {q:'spices caraway seed'},
+  juniper:     {q:'spices allspice ground'},
+  /* Exact match, not a proxy. Note only that desalting strips sodium and
+     not energy — the kcal figure survives the soak, the sodium does not. */
+  codsalt:     {q:'fish cod atlantic dried and salted'},
+  olive_blk:   {q:'olives ripe canned small-extra large'},
+  jameed:      {q:'yogurt greek plain nonfat', not:['flavored','fruit']},
+  bread_flat:  {q:'bread pita white enriched'},
+  beef_shank:  {q:'beef shank crosscuts separable lean only raw'},
+  fennel_s:    {q:'spices fennel seed'},
+  doubanjiang: {q:'miso'},
+  noodle_wh:   {q:'noodles chinese chow mein', not:['cooked','canned']},
+  bok_choy:    {q:'cabbage chinese pak-choi raw'},
+  sorghum_lv:  {q:'parsley fresh'},
+  bean_blackeye:{q:'cowpeas blackeyes mature seeds cooked boiled without salt'}
 };
 
 /* Ingredients where the best available USDA food is a stand-in rather than
@@ -259,7 +278,13 @@ const PROXY_NOTE = {
   oil_dende:   'Refined palm oil used. Dende is unrefined — the colour, carotene and aroma are the whole point of it, and none of that shows in the macros.',
   apricot_j:   'Generic fruit preserve. A South African fruit chutney, which is the more usual choice in bobotie, is less sweet and carries vinegar.',
   chickpea:    'Canned chickpeas, drained. Cooked-from-dry differs mainly in sodium.',
-  bean_kidney: 'Canned kidney beans, drained. Same caveat as the chickpeas.'
+  bean_kidney: 'Canned kidney beans, drained. Same caveat as the chickpeas.',
+  sausage_smk: 'Generic smoked pork sausage. Andouille varies enormously by maker, and a Louisiana one is coarser, leaner and far more heavily smoked than the average.',
+  lingon:      'Generic fruit preserve. Lingonberry is sharper and usually carries less sugar than the jams this resolves to.',
+  juniper:     'No juniper entry; allspice berry used. Different berry entirely, but the quantity in a marinade is tiny and most of it is strained out.',
+  jameed:      'No jameed entry anywhere in the database; approximated from strained yogurt scaled for drying. Treat as indicative only.',
+  doubanjiang: 'No broad-bean chilli paste entry; miso used as the nearest fermented-paste stand-in. Salt and formulation vary widely between makers.',
+  sorghum_lv:  'No sorghum-leaf entry; a generic fresh leaf used. The leaves are boiled for colour and removed, so they contribute nothing to the plate.'
 };
 
 /* ------------------------------------------------------------------ */

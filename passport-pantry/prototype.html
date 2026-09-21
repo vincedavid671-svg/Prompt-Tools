@@ -619,7 +619,24 @@ const ING = {
   pandan:     {n:'Pandan leaves',            buy:'spec',   conv:{g:1, piece:6}},
   belacan:    {n:'Belacan (shrimp paste)',   buy:'spec',   conv:{g:1, tsp:5, tbsp:15}},
   anchovy_dr: {n:'Dried anchovies',          buy:'spec',   conv:{g:1, cup:60, tbsp:5}},
-  barberry:   {n:'Dried barberries',         buy:'spec',   conv:{g:1, tbsp:8}}
+  barberry:   {n:'Dried barberries',         buy:'spec',   conv:{g:1, tbsp:8}},
+  celery:     {n:'Celery',                   buy:'fresh',  conv:{g:1, piece:40, cup:101}},
+  okra:       {n:'Okra',                     buy:'fresh',  conv:{g:1, piece:11, cup:100}},
+  sausage_smk:{n:'Smoked sausage (andouille)', buy:'fresh', conv:{g:1, piece:80}},
+  lingon:     {n:'Lingonberry preserve',     buy:'spec',   conv:{g:1, tbsp:20}},
+  caraway:    {n:'Caraway seed',             buy:'staple', conv:{g:1, tsp:2.1, tbsp:6.7}},
+  juniper:    {n:'Juniper berries',          buy:'staple', conv:{g:1, piece:0.15, tsp:2.2}},
+  codsalt:    {n:'Salt cod (bacalhau)',      buy:'spec',   conv:{g:1}},
+  olive_blk:  {n:'Black olives',             buy:'staple', conv:{g:1, cup:135, piece:4}},
+  jameed:     {n:'Jameed (dried fermented yogurt)', buy:'spec', conv:{g:1, cup:150}},
+  bread_flat: {n:'Flatbread (shrak, lavash)', buy:'fresh', conv:{g:1, piece:60}},
+  beef_shank: {n:'Beef shank, boneless',     buy:'fresh',  conv:{g:1}},
+  fennel_s:   {n:'Fennel seed',              buy:'staple', conv:{g:1, tsp:2, tbsp:5.8}},
+  doubanjiang:{n:'Doubanjiang (broad bean chilli paste)', buy:'spec', conv:{g:1, tbsp:18, tsp:6}},
+  noodle_wh:  {n:'Wheat noodles, dried',     buy:'staple', conv:{g:1}},
+  bok_choy:   {n:'Bok choy',                 buy:'fresh',  conv:{g:1, piece:80}},
+  sorghum_lv: {n:'Waakye leaves (dried sorghum)', buy:'spec', conv:{g:1, piece:2}},
+  bean_blackeye:{n:'Black-eyed peas, cooked', buy:'staple', conv:{g:1, cup:170}}
 };
 
 /* ---------- dietary flags ----------
@@ -653,7 +670,12 @@ const FLAGS = {
   belacan:['fish','shellfish'],
   cheese_qrk:['dairy'], cream_sour:['dairy'],
   oil_dende:[], pandan:[], barberry:[], curry_pw:[],
-  lentil_br:[], chickpea:[], bean_kidney:[]
+  lentil_br:[], chickpea:[], bean_kidney:[],
+  sausage_smk:['meat','pork'], beef_shank:['meat','beef'],
+  codsalt:['fish'], jameed:['dairy'],
+  celery:[], okra:[], lingon:[], caraway:[], juniper:[], olive_blk:[],
+  bread_flat:[], fennel_s:[], doubanjiang:[], noodle_wh:[], bok_choy:[],
+  sorghum_lv:[], bean_blackeye:[]
 };
 const flagsOf = id => FLAGS[id] || [];
 
@@ -834,7 +856,24 @@ const ING_L10N = {
   pandan:     {'en-US':'Pandan leaves','en-GB':'Pandan leaves',ar:'أوراق الباندان',es:'Hojas de pandan',fr:'Feuilles de pandan', mkt:'daun pandan'},
   belacan:    {'en-US':'Belacan (shrimp paste)','en-GB':'Belacan (shrimp paste)',ar:'معجون الروبيان المخمر',es:'Pasta de camarón fermentada',fr:'Pâte de crevettes fermentée', mkt:'belacan · terasi'},
   anchovy_dr: {'en-US':'Dried anchovies','en-GB':'Dried anchovies',ar:'أنشوجة مجففة',es:'Anchoas secas',fr:'Anchois séchés', mkt:'ikan bilis'},
-  barberry:   {'en-US':'Dried barberries','en-GB':'Dried barberries',ar:'زرشك',es:'Agracejo seco',fr:'Épine-vinette séchée', mkt:'زرشک · zereshk'}
+  barberry:   {'en-US':'Dried barberries','en-GB':'Dried barberries',ar:'زرشك',es:'Agracejo seco',fr:'Épine-vinette séchée', mkt:'زرشک · zereshk'},
+  celery:     {'en-US':'Celery','en-GB':'Celery',ar:'كرفس',es:'Apio',fr:'Céleri branche'},
+  okra:       {'en-US':'Okra','en-GB':'Okra',ar:'بامية',es:'Quingombó',fr:'Gombo', mkt:'بامية · bamia'},
+  sausage_smk:{'en-US':'Andouille sausage','en-GB':'Smoked sausage',ar:'سجق مدخن',es:'Salchicha ahumada',fr:'Saucisse fumée'},
+  lingon:     {'en-US':'Lingonberry preserve','en-GB':'Lingonberry preserve',ar:'مربى التوت البري',es:'Mermelada de arándano rojo',fr:'Confiture d’airelles', mkt:'lingonsylt'},
+  caraway:    {'en-US':'Caraway seed','en-GB':'Caraway seed',ar:'كراوية',es:'Alcaravea',fr:'Carvi'},
+  juniper:    {'en-US':'Juniper berries','en-GB':'Juniper berries',ar:'حبات العرعر',es:'Bayas de enebro',fr:'Baies de genièvre'},
+  codsalt:    {'en-US':'Salt cod','en-GB':'Salt cod',ar:'سمك القد المملح',es:'Bacalao salado',fr:'Morue salée', mkt:'bacalhau'},
+  olive_blk:  {'en-US':'Black olives','en-GB':'Black olives',ar:'زيتون أسود',es:'Aceitunas negras',fr:'Olives noires'},
+  jameed:     {'en-US':'Jameed','en-GB':'Jameed',ar:'جميد',es:'Jameed',fr:'Jameed', mkt:'جميد · jameed'},
+  bread_flat: {'en-US':'Flatbread','en-GB':'Flatbread',ar:'خبز شراك',es:'Pan plano',fr:'Pain plat', mkt:'خبز شراك · shrak'},
+  beef_shank: {'en-US':'Beef shank','en-GB':'Beef shin',ar:'موزة بقري',es:'Morcillo de ternera',fr:'Jarret de bœuf'},
+  fennel_s:   {'en-US':'Fennel seed','en-GB':'Fennel seed',ar:'بذور الشمر',es:'Semillas de hinojo',fr:'Graines de fenouil'},
+  doubanjiang:{'en-US':'Doubanjiang','en-GB':'Doubanjiang',ar:'معجون الفول الحار',es:'Doubanjiang',fr:'Doubanjiang', mkt:'郫县豆瓣醬 · pixian doubanjiang'},
+  noodle_wh:  {'en-US':'Wheat noodles','en-GB':'Wheat noodles',ar:'نودلز قمح',es:'Fideos de trigo',fr:'Nouilles de blé', mkt:'拉麵 · 麵條'},
+  bok_choy:   {'en-US':'Bok choy','en-GB':'Pak choi',ar:'بوك تشوي',es:'Pak choi',fr:'Pak choï', mkt:'小白菜 · xiao baicai'},
+  sorghum_lv: {'en-US':'Waakye leaves','en-GB':'Waakye leaves',ar:'أوراق الذرة الرفيعة',es:'Hojas de sorgo',fr:'Feuilles de sorgho', mkt:'waakye leaves · sorghum leaves'},
+  bean_blackeye:{'en-US':'Black-eyed peas','en-GB':'Black-eyed beans',ar:'لوبيا',es:'Frijoles carita',fr:'Cornilles'}
 };
 /* Display name in the current language, falling back to the canonical
    English rather than showing nothing. */
@@ -966,7 +1005,24 @@ const ALLERGEN = {
                 note:'Cured meats routinely carry sulphites, and some cures use milk or soy protein as a carrier. Not obvious from a pack of lardons.'},
   curry_pw:    {check:['mustard','celery']},
   apricot_j:   {check:['sulphite'], note:'Dried apricot is routinely sulphited, and some jams are too.'},
-  barberry:    {check:['sulphite'], note:'Dried fruit is commonly sulphited to hold its colour.'}
+  barberry:    {check:['sulphite'], note:'Dried fruit is commonly sulphited to hold its colour.'},
+  /* The first ingredient in the registry that CONTAINS celery rather than
+     merely risking it. Until now celery existed only as a label-dependent
+     risk on stock cubes, so the gumbo and the sauerbraten are the first
+     dishes where the contains bucket fires on it. */
+  celery:      {has:['celery']},
+  codsalt:     {has:['fish']},
+  jameed:      {has:['milk'], note:'Jameed is yogurt strained, salted and dried hard. It is dairy in its most concentrated form, not a trace.'},
+  bread_flat:  {has:['wheat','gluten'], check:['milk','sesame']},
+  noodle_wh:   {has:['wheat','gluten']},
+  doubanjiang: {has:['wheat','gluten'], hidden:['wheat','gluten'], check:['soy'],
+                note:'Pixian doubanjiang is fermented broad bean with wheat flour. Broad bean, not soy — but the wheat is in nearly every jar and the label rarely leads with it.'},
+  sausage_smk: {check:['wheat','gluten','milk','soy','sulphite'], hidden:['wheat'],
+                note:'Smoked sausages carry binders and cure carriers as readily as fresh ones.'},
+  lingon:      {check:['sulphite']},
+  olive_blk:   {check:['sulphite']},
+  okra:        {}, caraway:{}, juniper:{}, fennel_s:{}, bok_choy:{},
+  sorghum_lv:  {}, bean_blackeye:{}, beef_shank:{}
 };
 /* Coconut is classified as a tree nut in US labelling, but most people with
    a tree-nut allergy tolerate it. Advisory rather than a block, with the
@@ -1014,7 +1070,10 @@ const ALT = {
   anchovy_dr:[{to:'peanut', note:'Double the roasted peanuts and leave the anchovies out — the plate keeps its crunch. You lose the salt-and-sea note that balances the sambal against the coconut rice.'}],
   cheese_qrk:[{to:'cheese_df', note:'A dairy-free soft cheese. The filling binds less firmly, so mash it hotter and season harder. Most of these are cashew or soy based, so check the label for a nut allergy.'}],
   cream_sour:[{to:'coconut_ck', note:'Unsweetened coconut cream with a squeeze of lemon reads as sour dairy. In borscht the coconut is faintly noticeable; in a hot dish it disappears.'}],
-  bread_wh:[{to:'flour_gf', note:'Not a like-for-like swap: use two level tablespoons of a gluten-free blend with the milk instead of soaked bread. It binds, but the crumb that keeps a bobotie soft is gone.'}]
+  bread_wh:[{to:'flour_gf', note:'Not a like-for-like swap: use two level tablespoons of a gluten-free blend with the milk instead of soaked bread. It binds, but the crumb that keeps a bobotie soft is gone.'}],
+  celery:[{to:'pepper_bell', note:'More bell pepper in its place. New Orleans cooks call the trinity without celery a fair compromise and some make it that way by preference — you lose a specific green bitterness that nothing else supplies.'}],
+  bread_flat:[{to:'rice_bas', note:'Double the rice and leave the bread out. The shrak underneath is traditionally the plate as much as a component, so this is a subtraction rather than a swap.'}],
+  jameed:[{to:'coconut_ck', note:'Not a substitution so much as a different sauce: coconut cream soured with lemon gives body and tang but none of the sheep-milk depth. Offered because a thin broth is worse, not because it is close.'}]
 };
 
 /* Dishes where an allergen is load-bearing and no substitution rescues the
@@ -1030,7 +1089,10 @@ const CANNOT_SUB = {
   moqueca:{fish:'Moqueca is a fish stew. There is a real Bahian version built on green plantain instead, offered here as a protein swap, but it is not a moqueca de peixe with the fish taken out.'},
   nasi_lemak:{fish:'Both the anchovies and the belacan in the sambal are fish or shellfish. Swapping each individually is offered, but a nasi lemak with neither is a plate of coconut rice and chilli jam — worth eating, and not the dish.'},
   pierogi:{wheat:'The dough has to be rolled to two millimetres and survive a simmer with a wet filling inside it. Gluten-free blends tear at that thickness.',
-           gluten:'As above: the gluten network is what lets the dough go that thin.'}
+           gluten:'As above: the gluten network is what lets the dough go that thin.'},
+  bacalhau:{fish:'The dish is salt cod. Everything else in it — potato, egg, onion — is a vehicle for that one ingredient, and without it there is nothing left to name.'},
+  beef_noodle:{wheat:'Hand-pulled wheat noodles and a wheat-fermented bean paste. Rice noodles make a perfectly good bowl of beef soup, and Taiwanese cooks would not call it niurou mian.',
+               gluten:'As above, and doubled: the noodle and the doubanjiang both carry it.'}
 };
 
 /* ---------- diet profiles ---------- */
@@ -1092,7 +1154,15 @@ const SUBS = {
   cheese_qrk:[
     {to:'cheese_df',   note:'A dairy-free soft cheese binds less firmly. Mash it into the potato while the potato is still hot.'}],
   cream_sour:[
-    {to:'coconut_ck',  note:'Coconut cream with a squeeze of lemon. Close on texture, faintly noticeable on flavour.'}]
+    {to:'coconut_ck',  note:'Coconut cream with a squeeze of lemon. Close on texture, faintly noticeable on flavour.'}],
+  sausage_smk:[
+    {to:'sausage_chk', note:'A smoked chicken sausage is the usual swap and behaves the same in a roux. Milder, so lean harder on the cayenne.'},
+    {to:'sausage_bf',  note:'Smoked beef sausage holds its shape well through a long simmer and reads closer to andouille than chicken does.'}],
+  beef_shank:[
+    {to:'lamb_leg',    note:'Diced the same size. Gives in about 30 minutes sooner and brings its own sweetness, which suits a spiced braise.'},
+    {to:'mushroom',    note:'For a meatless version, browned mushrooms plus a spoon of oil for the fat the shank was going to render. The gelatine that gives the broth its body is simply gone.'}],
+  codsalt:[
+    {to:'tofu',        note:'Pressed firm tofu, torn rather than cubed, salted well. It takes the egg and potato the same way; it cannot supply the cured-fish depth that is the whole point.'}]
 };
 
 /* ---------- regions ---------- */
@@ -1110,7 +1180,11 @@ const REGION_OF = {
   Nigeria:'West Africa', 'South Africa':'Southern Africa',
   Egypt:'North Africa', Iran:'Middle East',
   Poland:'Eastern Europe', Ukraine:'Eastern Europe', France:'Europe',
-  Uzbekistan:'Central Asia', Malaysia:'Southeast Asia', Brazil:'Latin America'
+  Uzbekistan:'Central Asia', Malaysia:'Southeast Asia', Brazil:'Latin America',
+  'United States':'North America', Sweden:'Nordic', Hungary:'Central Europe',
+  Germany:'Europe', Portugal:'Europe', Jordan:'Middle East',
+  Pakistan:'South Asia', Taiwan:'East Asia', Singapore:'Southeast Asia',
+  Ghana:'West Africa'
 };
 const REGION_NOTE = {
   'Middle East':'Rice cooked in the broth of the meat it is served with. Dried limes, baharat, charcoal, and generous platters built for sharing.',
@@ -1128,7 +1202,10 @@ const REGION_NOTE = {
   'West Africa':'A stew base fried until the oil separates, and rice or a pounded starch underneath it. Scotch bonnet for perfume as much as heat, and smoke treated as a flavour to chase rather than a fault.',
   'Southern Africa':'Cape Malay sweet-spicing laid over Dutch and British baking, and the braai as the default way to cook meat. Milder and fruitier than the word curry suggests.',
   'Eastern Europe':'Sour as a seasoning in its own right — vinegar, kvass, fermented cream — with beet, cabbage, potato and wheat dough doing the rest. Soups that are better the day after.',
-  'Central Asia':'Rice, lamb fat and hand-cut carrot in a single heavy pot, cooked without stirring. Cumin and dried fruit over chilli; the meal is a shared platter, not a plate each.'
+  'Central Asia':'Rice, lamb fat and hand-cut carrot in a single heavy pot, cooked without stirring. Cumin and dried fruit over chilli; the meal is a shared platter, not a plate each.',
+  'North America':'Regional before it is national. The deep south cooks on a roux and a long simmer, and the immigrant kitchens that shaped it — West African, French, Spanish, Caribbean — are still legible on the plate.',
+  'Nordic':'Dairy, dill, cured fish and preserved fruit eaten with meat rather than after it. Restrained seasoning and a sweet-sour note where other cuisines would reach for heat.',
+  'Central Europe':'Paprika, lard and slow beef, with soups substantial enough to be the meal. Ottoman and Balkan influence on one side, Austrian baking on the other.'
 };
 
 /* ---------- regional grocery markets ----------
@@ -1433,7 +1510,16 @@ const NUTR = {
   bread_wh:{k:266,p:9.0,c:49.0,f:3.3},    apricot_j:{k:250,p:0.4,c:62.0,f:0.1},
   fish_white:{k:82,p:17.8,c:0,f:0.7},     oil_dende:{k:884,p:0,c:0,f:100},
   pandan:{k:23,p:2.1,c:3.7,f:0.5},        belacan:{k:210,p:24.2,c:0,f:12.3},
-  anchovy_dr:{k:332,p:64.5,c:0.3,f:6.2},  barberry:{k:308,p:0.1,c:82.4,f:1.4}
+  anchovy_dr:{k:332,p:64.5,c:0.3,f:6.2},  barberry:{k:308,p:0.1,c:82.4,f:1.4},
+  celery:{k:16,p:0.7,c:3.0,f:0.2},        okra:{k:33,p:1.9,c:7.5,f:0.2},
+  sausage_smk:{k:301,p:14.0,c:2.0,f:26.0},lingon:{k:240,p:0.2,c:60.0,f:0.1},
+  caraway:{k:333,p:19.8,c:49.9,f:14.6},   juniper:{k:263,p:6.1,c:72.1,f:8.7},
+  codsalt:{k:290,p:62.8,c:0,f:2.4},       olive_blk:{k:115,p:0.8,c:6.3,f:10.7},
+  jameed:{k:250,p:25.0,c:30.0,f:5.0},     bread_flat:{k:275,p:9.0,c:55.0,f:2.0},
+  beef_shank:{k:171,p:20.9,c:0,f:9.1},    fennel_s:{k:345,p:15.8,c:52.3,f:14.9},
+  doubanjiang:{k:120,p:6.0,c:14.0,f:3.0}, noodle_wh:{k:371,p:13.0,c:74.7,f:1.5},
+  bok_choy:{k:13,p:1.5,c:2.2,f:0.2},      sorghum_lv:{k:23,p:2.1,c:3.7,f:0.5},
+  bean_blackeye:{k:116,p:7.7,c:20.8,f:0.5}
 };
 
 /* ---------- daily budget ----------
@@ -1568,7 +1654,13 @@ const NUTR_PROXY = {
   oil_dende:'refined palm oil — dendê is unrefined, and the colour and carotene are the point',
   apricot_j:'generic fruit preserve; a South African fruit chutney is more common in bobotie',
   chickpea:'canned chickpeas, drained',
-  bean_kidney:'canned kidney beans, drained'
+  bean_kidney:'canned kidney beans, drained',
+  sausage_smk:'generic smoked pork sausage — andouille varies enormously by maker',
+  lingon:'generic fruit preserve — lingonberry is sharper and usually less sweet',
+  juniper:'allspice berry — USDA has no juniper, and the quantity here is tiny',
+  jameed:'no jameed entry anywhere; approximated from dried strained yogurt',
+  doubanjiang:'formulations vary widely in salt, bean and wheat content',
+  sorghum_lv:'generic fresh leaf, and the leaves are boiled then removed in any case'
 };
 
 /* ---------- what actually gets eaten ----------
@@ -1603,6 +1695,16 @@ const EATEN = {
   nasi_lemak:{oil_veg:0.5, pandan:0},
   coq_au_vin:{chicken_th:0.70, bay:0},
   bobotie:{bay:0},
+  gumbo:{chicken_th:0.70, bay:0},
+  kottbullar:{potato:0.85},
+  gulyas:{potato:0.85},
+  sauerbraten:{bay:0, juniper:0, clove_sp:0},
+  mansaf:{cardamom:0},
+  nihari:{},
+  beef_noodle:{anise:0, cinnamon:0, ginger:0},
+  hainan:{chicken_wh:0.62, ginger:0.15, scallion:0.4},
+  waakye:{sorghum_lv:0},
+  bacalhau:{oil_veg:0.18},
   jiaozi:{}, mincepie:{}, oyakodon:{}, kimchi_jjigae:{}, butter_chicken:{},
   cacio_pepe:{}, menemen:{}, tabbouleh:{}, moqueca:{}
 };
@@ -1630,7 +1732,16 @@ const EATEN_NOTE = {
   osh:'The garlic heads go in whole and unpeeled. The cloves are squeezed out and eaten; the skins are not.',
   nasi_lemak:'Half the sambal oil and the anchovy frying oil drain off rather than being eaten, and the knotted pandan is pulled out of the rice.',
   coq_au_vin:'Bone-in thighs, and the bay leaves are removed before serving.',
-  bobotie:'The bay leaves stand upright in the custard for aroma and are not eaten.'
+  bobotie:'The bay leaves stand upright in the custard for aroma and are not eaten.',
+  gumbo:'Bone-in thighs, and the bay leaves come out of the pot.',
+  kottbullar:'Potatoes are peeled before boiling.',
+  gulyas:'Potatoes are peeled.',
+  sauerbraten:'Bay, juniper and clove flavour the four-day marinade and are strained out with it.',
+  mansaf:'Cardamom pods perfume the lamb and are left in the bowl.',
+  beef_noodle:'Star anise, cinnamon and the ginger slices are simmered into the broth and strained out before the noodles go in.',
+  hainan:'Bones are about 38% of a whole chicken. Most of the ginger and scallion is poaching aromatics, lifted out of the cavity and the pot rather than eaten.',
+  waakye:'The sorghum leaves colour the rice and are fished out before serving. Nothing of them is eaten.',
+  bacalhau:'The straw potatoes take up roughly a fifth of the frying oil. The rest stays in the pan and is not eaten.'
 };
 
 /* ---------- nutrition maths ----------
@@ -1741,7 +1852,15 @@ const SOURCE = {
   oil_dende:{oc:'afr'}, pandan:{oc:'sea', keep:'fresh'},
   belacan:{oc:'sea'}, anchovy_dr:{oc:'sea'}, barberry:{oc:'me'},
   curry_pw:{oc:'universal'}, lentil_br:{oc:'universal'},
-  chickpea:{oc:'universal'}, bean_kidney:{oc:'universal'}, apricot_j:{oc:'universal'}
+  chickpea:{oc:'universal'}, bean_kidney:{oc:'universal'}, apricot_j:{oc:'universal'},
+  celery:{oc:'universal', keep:'fresh'}, okra:{oc:'universal', keep:'fresh'},
+  beef_shank:{oc:'universal', keep:'fresh'}, bok_choy:{oc:'asian', keep:'fresh'},
+  sausage_smk:{oc:'euro', keep:'chill'}, bread_flat:{oc:'me', keep:'chill'},
+  lingon:{oc:'euro'}, caraway:{oc:'euro'}, juniper:{oc:'euro'},
+  codsalt:{oc:'euro'}, olive_blk:{oc:'euro'},
+  jameed:{oc:'me'}, fennel_s:{oc:'universal'},
+  doubanjiang:{oc:'asian'}, noodle_wh:{oc:'asian'},
+  sorghum_lv:{oc:'afr'}, bean_blackeye:{oc:'universal'}
 };
 function ocOf(id){ return (SOURCE[id] && SOURCE[id].oc) || 'universal'; }
 function keepOf(id){
@@ -2592,6 +2711,250 @@ const R = [
     {h:'Serve', t:'Rest 10 minutes. With yellow rice and sambals — chopped tomato and onion, sliced banana, chutney.'}
   ]
 }
+,
+{
+  id:'gumbo', country:'United States', flag:'🇺🇸', dish:'Chicken & Andouille Gumbo', native:'Gumbo',
+  region:'South Louisiana. Creole gumbo in New Orleans takes tomato; this is the Cajun country version, which does not.',
+  blurb:'A flour-and-oil roux taken to the colour of dark chocolate. Nothing else in the pot matters as much, and there is no way to hurry it — forty minutes of stirring is the recipe.',
+  serves:8, time:'2 h 30 m', level:'Hard',
+  ings:[
+    {i:'flour', q:120, u:'g'}, {i:'oil_veg', q:160, u:'ml'},
+    {i:'onion', q:2, u:'piece'}, {i:'pepper_bell', q:1, u:'piece'},
+    {i:'celery', q:3, u:'piece'}, {i:'garlic', q:5, u:'clove'},
+    {i:'chicken_th', q:900, u:'g'}, {i:'sausage_smk', q:400, u:'g'},
+    {i:'okra', q:250, u:'g'}, {i:'stock_chx', q:2000, u:'ml'},
+    {i:'thyme', q:2, u:'tsp'}, {i:'bay', q:3, u:'piece'},
+    {i:'paprika', q:2, u:'tsp'}, {i:'chili_dry', q:1, u:'tsp'},
+    {i:'scallion', q:1, u:'bunch'}, {i:'rice_long', q:400, u:'g'},
+    {i:'salt', q:2, u:'tsp'}, {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Prep everything first', t:'Chop the onion, pepper and celery — the trinity — and have them within arm\u2019s reach before the roux starts. Once it is going you cannot leave the pan for anything.'},
+    {h:'The roux', t:'Equal weights of flour and oil in a heavy pan. Stir constantly, never stopping, as it goes blonde, then peanut, then copper, then dark chocolate. Thirty to forty-five minutes.', heat:'Medium-low. A black fleck means it has burned, and a burnt roux cannot be rescued — throw it out and start again rather than serving bitter gumbo.'},
+    {h:'Stop it with the trinity', t:'Tip the cold chopped vegetables straight into the finished roux. They drop the temperature and halt the browning instantly, which is exactly what they are for. Stir 5 minutes, then the garlic.'},
+    {h:'Build', t:'Whisk in the hot stock a ladle at a time so the roux does not seize, then the thyme, bay, paprika, cayenne and pepper.'},
+    {h:'Simmer', t:'Add the browned sausage and the chicken thighs. Simmer uncovered 90 minutes, skimming the oil that rises.', heat:'Low, uncovered. Skimming matters — a gumbo is meant to be rich, not greasy.'},
+    {h:'Okra', t:'Add the sliced okra for the last 30 minutes. It thickens as it cooks; if you want no slick at all, brown it separately in a dry pan first.'},
+    {h:'Serve', t:'Pull the chicken, shred it, return it. Salt at the end — the sausage and stock have both been salting the pot for an hour. Over rice, scallion on top, hot sauce at the table.'}
+  ]
+},
+{
+  id:'kottbullar', country:'Sweden', flag:'🇸🇪', dish:'Köttbullar', native:'Köttbullar med gräddsås',
+  region:'Nationwide. The home version, not the canteen one.',
+  blurb:'Meatballs whose texture comes from bread soaked in milk, not from the meat. Skip that and you get something dense and bouncy that misses the point entirely.',
+  serves:4, time:'1 h', level:'Easy',
+  ings:[
+    {i:'beef_grd', q:400, u:'g'}, {i:'pork_grd', q:200, u:'g'},
+    {i:'bread_wh', q:2, u:'piece'}, {i:'milk', q:120, u:'ml'},
+    {i:'onion', q:1, u:'piece'}, {i:'egg', q:1, u:'piece'},
+    {i:'allspice', q:1, u:'tsp'}, {i:'butter', q:50, u:'g'},
+    {i:'flour', q:2, u:'tbsp'}, {i:'stock_beef', q:400, u:'ml'},
+    {i:'cream', q:150, u:'ml'}, {i:'soy', q:1, u:'tsp'},
+    {i:'potato', q:800, u:'g'}, {i:'lingon', q:4, u:'tbsp'},
+    {i:'cucumber', q:0.5, u:'piece'}, {i:'salt', q:2, u:'tsp'},
+    {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Soak', t:'Tear the bread and soak it in the milk for 10 minutes until it falls apart. This is the panade, and it is what keeps the meatballs tender.'},
+    {h:'Sweat the onion', t:'Cook the very finely chopped onion in a little butter until soft and translucent but not coloured, then cool it completely. Raw onion in the mix gives a harsh bite and weeps water in the pan.'},
+    {h:'Mix', t:'Work both meats with the soaked bread, cooled onion, egg, ground allspice, salt and pepper until it just comes together. Fry a teaspoon of it to taste for salt before rolling the rest.'},
+    {h:'Roll and chill', t:'Wet hands, roll to about 25 g each, and chill 20 minutes. Cold meatballs hold their shape in the pan.'},
+    {h:'Brown', t:'Fry in butter in batches, rolling them around the pan so they colour on all sides, 8 to 10 minutes. Do not crowd them.', heat:'Medium. Butter that browns is good; butter that blackens is not — wipe the pan between batches if it does.'},
+    {h:'Gräddsås', t:'Stir the flour into the pan fat, cook 2 minutes, then whisk in the stock and cream. Simmer until it coats a spoon. A teaspoon of soy for colour and depth is a standard Swedish trick.'},
+    {h:'Serve', t:'Return the meatballs to the sauce to warm through. With boiled or mashed potato, lingonberry, and pickled cucumber. The jam is not a garnish — the sweet-sour against the cream is the dish.'}
+  ]
+},
+{
+  id:'gulyas', country:'Hungary', flag:'🇭🇺', dish:'Gulyás', native:'Gulyásleves',
+  region:'Great Plain. A soup, despite what the rest of the world does with the word.',
+  blurb:'Paprika is the dish, and paprika burns in seconds. The pot comes off the heat before it goes in — every Hungarian cook does this and almost no foreign recipe mentions it.',
+  serves:6, time:'2 h 30 m', level:'Easy',
+  ings:[
+    {i:'beef_chuck', q:800, u:'g'}, {i:'onion', q:3, u:'piece'},
+    {i:'oil_veg', q:60, u:'ml'}, {i:'paprika', q:3, u:'tbsp'},
+    {i:'caraway', q:1, u:'tsp'}, {i:'garlic', q:3, u:'clove'},
+    {i:'pepper_bell', q:2, u:'piece'}, {i:'tomato', q:2, u:'piece'},
+    {i:'potato', q:600, u:'g'}, {i:'carrot', q:2, u:'piece'},
+    {i:'bay', q:2, u:'piece'}, {i:'salt', q:2, u:'tsp'},
+    {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Onions, patiently', t:'Cook the chopped onion in the oil over low heat for 20 minutes until golden and collapsing. There should be as much onion by volume as meat — this is the body of the soup.', heat:'Low. Colour without browning; scorched onion turns the whole pot bitter.'},
+    {h:'Paprika off the heat', t:'Take the pot off the burner entirely. Stir in the paprika and the crushed caraway, then a splash of water straight away.', heat:'Off the heat. Paprika burns in under thirty seconds on a hot base and goes irreversibly acrid — this single step separates good gulyás from bad.'},
+    {h:'Meat', t:'Return to the heat, add the beef cut into 2 cm cubes, and turn it through the paprika base until coated. No browning — the meat stews rather than sears here.'},
+    {h:'Simmer', t:'Barely cover with water, add garlic and bay, and simmer covered for 90 minutes, topping up only enough to keep it from catching.', heat:'Low. Adding all the water at the start dilutes it; add it as you go.'},
+    {h:'Vegetables', t:'Add the diced potato, carrot, pepper and tomato and simmer another 25 minutes until the potato is soft.'},
+    {h:'Finish', t:'Thin to a soup rather than a stew — it should be spoonable, not stodgy. Salt at the end. Csipetke, pinched noodle scraps, go in for the last 5 minutes if you make them.'},
+    {h:'Serve', t:'In deep bowls with bread. Sour cream is an Austrian habit; in Hungary the pot goes out as it is.'}
+  ]
+},
+{
+  id:'sauerbraten', country:'Germany', flag:'🇩🇪', dish:'Sauerbraten', native:'Sauerbraten',
+  region:'Rhineland. The version with raisins and a sweet-sour sauce; Franconian and Swabian sauerbraten are drier and less sweet.',
+  blurb:'Four days in an acid marinade before it ever meets heat. That is not for flavour alone — the acid breaks down a cut too tough to roast any other way.',
+  serves:8, time:'4 days + 3 h', level:'Medium',
+  ings:[
+    {i:'beef_chuck', q:1500, u:'g'}, {i:'vinegar_rw', q:400, u:'ml'},
+    {i:'wine_red', q:400, u:'ml'}, {i:'onion', q:2, u:'piece'},
+    {i:'carrot', q:2, u:'piece'}, {i:'celery', q:2, u:'piece'},
+    {i:'bay', q:3, u:'piece'}, {i:'juniper', q:10, u:'piece'},
+    {i:'clove_sp', q:5, u:'piece'}, {i:'pepper', q:1, u:'tbsp'},
+    {i:'oil_veg', q:3, u:'tbsp'}, {i:'flour', q:2, u:'tbsp'},
+    {i:'sugar_wh', q:2, u:'tbsp'}, {i:'raisin', q:60, u:'g'},
+    {i:'salt', q:2, u:'tsp'}
+  ],
+  steps:[
+    {h:'Marinate, and wait', t:'Bring the vinegar, wine, sliced vegetables, bay, crushed juniper, cloves and peppercorns to a boil, then cool completely. Pour over the beef in a non-reactive dish, cover, and refrigerate three to four days, turning daily.', heat:'The marinade must be cold before it touches the meat. Warm acid cooks the surface grey.'},
+    {h:'Dry and sear', t:'Lift the beef out, strain the marinade and keep every drop. Dry the meat thoroughly and sear it hard on all sides in the oil.', heat:'High. Four days in vinegar leaves the surface wet, and wet meat will not brown — take the time to dry it properly.'},
+    {h:'Braise', t:'Add the strained marinade and enough water to come halfway up the joint. Cover and cook very gently for 2½ to 3 hours until a fork turns in the meat with no resistance.', heat:'Barely simmering, or a 150 °C / 300 °F oven.'},
+    {h:'Rest the meat, work the sauce', t:'Lift the beef out and keep it warm. Strain the liquid, skim the fat, and reduce it by about a third.'},
+    {h:'Sweet against sour', t:'Whisk a paste of the flour and a little cold water into the reducing sauce, then add the sugar and raisins. Taste repeatedly: it should land sour first and sweet just behind. Rhineland cooks use crushed Lebkuchen or gingersnaps here instead of flour, which thickens and sweetens in one move.'},
+    {h:'Serve', t:'Sliced across the grain, sauce over. Potato dumplings and red cabbage, and the leftovers are better than the first day.'}
+  ]
+},
+{
+  id:'bacalhau', country:'Portugal', flag:'🇵🇹', dish:'Bacalhau à Brás', native:'Bacalhau à Brás',
+  region:'Lisbon, from the Bairro Alto. One of the several hundred bacalhau dishes the Portuguese count.',
+  blurb:'Salt cod, straw potatoes and egg brought together off the heat. The egg must stay creamy and barely set — a second too long and it turns to scrambled egg with fish in it.',
+  serves:4, time:'36 h soak + 40 m', level:'Medium',
+  ings:[
+    {i:'codsalt', q:300, u:'g'}, {i:'potato', q:600, u:'g'},
+    {i:'onion', q:2, u:'piece'}, {i:'garlic', q:3, u:'clove'},
+    {i:'egg', q:6, u:'piece'}, {i:'oil_olive', q:80, u:'ml'},
+    {i:'oil_veg', q:400, u:'ml'}, {i:'olive_blk', q:60, u:'g'},
+    {i:'parsley', q:30, u:'g'}, {i:'pepper', q:1, u:'tsp'},
+    {i:'bay', q:1, u:'piece'}
+  ],
+  steps:[
+    {h:'Soak the cod', t:'Rinse the salt off and soak 36 to 48 hours in the refrigerator, changing the water four or five times. Under-soaked bacalhau is inedibly salty and no amount of cooking fixes it.'},
+    {h:'Flake it', t:'Poach the cod briefly in water with the bay, 8 minutes, then drain, cool, and flake it by hand into threads, pulling out every bone and any skin.'},
+    {h:'Straw potatoes', t:'Cut the potatoes into matchsticks, rinse off the surface starch, dry them completely, and fry until crisp and pale gold. Drain hard on paper. Shop-bought straw potatoes are widely used in Portugal and nobody minds.', heat:'175 °C / 350 °F. Wet potato will not crisp and will spit.'},
+    {h:'Base', t:'Soften the thinly sliced onion and garlic in the olive oil over low heat, 15 minutes, until sweet and translucent. Fold in the flaked cod and warm it through.'},
+    {h:'Off the heat', t:'Take the pan off the burner. Add the potatoes, then the beaten eggs, and fold continuously with the residual heat only.', heat:'Off the heat entirely. The eggs should thicken to a loose cream and no further. Back on the flame they scramble, and the dish is gone.'},
+    {h:'Serve', t:'Immediately, with black olives and a lot of chopped parsley. It does not wait and it does not reheat.'}
+  ]
+},
+{
+  id:'mansaf', country:'Jordan', flag:'🇯🇴', dish:'Mansaf', native:'منسف',
+  region:'Bedouin, and the national dish. Served at weddings, funerals and every occasion between.',
+  blurb:'Lamb cooked in jameed — yogurt dried into hard salty stones and reconstituted. It is the only sauce that tastes like this, and nothing on a supermarket shelf substitutes for it.',
+  serves:8, time:'3 h', level:'Medium',
+  ings:[
+    {i:'lamb_leg', q:1500, u:'g'}, {i:'jameed', q:400, u:'g'},
+    {i:'rice_bas', q:700, u:'g'}, {i:'ghee', q:80, u:'g'},
+    {i:'bread_flat', q:3, u:'piece'}, {i:'almond', q:60, u:'g'},
+    {i:'onion', q:1, u:'piece'}, {i:'cardamom', q:6, u:'piece'},
+    {i:'turmeric', q:0.5, u:'tsp'}, {i:'parsley', q:20, u:'g'},
+    {i:'salt', q:2, u:'tsp'}, {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Soak the jameed', t:'Break the jameed up and soak it in warm water overnight, then blend it smooth and pass it through a sieve. Sold as a ready-made liquid in Jordanian shops, which is what most households now buy.'},
+    {h:'Boil and skim', t:'Cover the lamb with cold water, bring it up, and skim the grey foam carefully for the first fifteen minutes. Then add the onion, cardamom and pepper and simmer 90 minutes.', heat:'Bare simmer. Clean skimming here is what keeps the jameed sauce from tasting muddy.'},
+    {h:'Marry them', t:'Strain some of the lamb broth into the jameed, then pour it all back over the meat. From here it must be stirred in one direction, constantly, as it comes up to heat.', heat:'Medium-low, and never a boil. Jameed splits if it boils, and a split sauce cannot be brought back. Constant stirring is not optional.'},
+    {h:'Hold it', t:'Simmer gently 30 minutes until the lamb is falling apart and the sauce coats a spoon. Season at the end — jameed is already very salty.'},
+    {h:'Rice', t:'Cook the basmati with the ghee and turmeric, a touch drier than usual. It sits under sauce and should not be soft to start with.'},
+    {h:'Build the platter', t:'Shrak bread across a wide tray, ladle sauce to soften it, rice over that, lamb on top, toasted almonds and parsley scattered over. More sauce in a jug alongside.'},
+    {h:'Serve', t:'From the shared tray, with the right hand, standing. That is not ceremony added on — it is how the dish is eaten.'}
+  ]
+},
+{
+  id:'nihari', country:'Pakistan', flag:'🇵🇰', dish:'Nihari', native:'نہاری',
+  region:'Old Delhi in origin, now most strongly associated with Karachi and Lahore. A breakfast dish.',
+  blurb:'A shank stew cooked overnight until the collagen turns the broth glossy and thick. The name comes from nahar, morning — it was eaten at dawn, after cooking all night.',
+  serves:6, time:'6 h', level:'Medium',
+  ings:[
+    {i:'beef_shank', q:1200, u:'g'}, {i:'ghee', q:150, u:'g'},
+    {i:'onion', q:3, u:'piece'}, {i:'ginger', q:3, u:'tbsp'},
+    {i:'garlic', q:8, u:'clove'}, {i:'chili_kash', q:2, u:'tbsp'},
+    {i:'garam', q:1, u:'tbsp'}, {i:'fennel_s', q:1, u:'tbsp'},
+    {i:'coriander_s', q:1, u:'tbsp'}, {i:'turmeric', q:1, u:'tsp'},
+    {i:'flour', q:60, u:'g'}, {i:'lemon', q:60, u:'ml'},
+    {i:'cilantro', q:1, u:'bunch'}, {i:'chili_dry', q:3, u:'piece'},
+    {i:'salt', q:2, u:'tsp'}
+  ],
+  steps:[
+    {h:'Fry the onion', t:'Slice two onions thin and fry them in the ghee until deep brown and crisp, then lift most of them out for the garnish. Birista — fried onion — is a base and a topping in the same dish.', heat:'Medium. Brown, not black; burnt onion turns the gravy bitter and there is no recovering it.'},
+    {h:'Bhunai', t:'Into the remaining ghee go the ginger and garlic pastes, then the ground spices with a splash of water. Fry, adding water whenever it catches, until the fat separates and floats clear — 10 minutes of real attention.', heat:'Medium-low. The separation of the oil is the signal; before it, the spices are raw.'},
+    {h:'Meat', t:'Add the shank cut into large pieces and turn it through the masala until sealed and coated.'},
+    {h:'Overnight, or nearly', t:'Add 2.5 litres of water and salt, and cook on the lowest possible heat 4 to 5 hours until the meat gives up completely. A marrow bone in the pot is traditional and worth asking the butcher for.', heat:'The lowest setting you have, lid on. Nihari is defined by time, not technique — a pressure cooker gets you there in 90 minutes and the broth never gets the same body.'},
+    {h:'Thicken', t:'Whisk the flour into cold water until smooth, then stir it into the simmering pot in a thin stream. Cook 20 minutes more. The broth should turn glossy and coat the back of a spoon.'},
+    {h:'Rest it', t:'Off the heat for 30 minutes. The fat rises into a red layer on top, which is left there and served with it rather than skimmed.'},
+    {h:'Serve', t:'In bowls, with julienned ginger, sliced green chilli, cilantro and a hard squeeze of lemon over each one. Naan, and nothing else.'}
+  ]
+},
+{
+  id:'beef_noodle', country:'Taiwan', flag:'🇹🇼', dish:'Beef Noodle Soup', native:'紅燒牛肉麵',
+  region:'Taipei. The braised-red style brought by mainland military families after 1949, now Taiwan\u2019s own.',
+  blurb:'Two things cooked separately and joined in the bowl: a dark braise of shank and doubanjiang, and noodles boiled in clean water. Cook the noodles in the broth and you cloud both.',
+  serves:4, time:'3 h', level:'Medium',
+  ings:[
+    {i:'beef_shank', q:1000, u:'g'}, {i:'doubanjiang', q:3, u:'tbsp'},
+    {i:'soy', q:120, u:'ml'}, {i:'shaoxing', q:100, u:'ml'},
+    {i:'sugar_rock', q:30, u:'g'}, {i:'ginger', q:6, u:'tbsp'},
+    {i:'garlic', q:6, u:'clove'}, {i:'scallion', q:1, u:'bunch'},
+    {i:'tomato', q:2, u:'piece'}, {i:'anise', q:3, u:'piece'},
+    {i:'cinnamon', q:1, u:'piece'}, {i:'chili_dry', q:4, u:'piece'},
+    {i:'oil_veg', q:3, u:'tbsp'}, {i:'noodle_wh', q:400, u:'g'},
+    {i:'bok_choy', q:4, u:'piece'}, {i:'salt', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Blanch', t:'Cover the shank in cold water, bring to a boil, boil 3 minutes, then drain and rinse both the meat and the pot. Everything that would cloud the broth leaves here.'},
+    {h:'Fry the paste', t:'In the clean pot, warm the oil and fry the doubanjiang with the sliced ginger, garlic and dried chilli until the oil turns red and smells roasted, 3 minutes.', heat:'Medium-low. Doubanjiang is salty and scorches easily — it should sizzle, not spit.'},
+    {h:'Aromatics', t:'Add the quartered tomato and cook until it collapses, then the star anise and cinnamon, the Shaoxing, soy and rock sugar.'},
+    {h:'Braise', t:'Return the beef, cover with water by two fingers, and simmer covered 2 to 2½ hours until a chopstick goes through with no resistance.', heat:'Low. Never a boil — a hard boil leaves the shank stringy and the broth greasy.'},
+    {h:'Strain and slice', t:'Lift the meat out and let it cool enough to slice thickly across the grain. Strain the broth, pressing the solids, and taste it for salt. It should be assertive; the noodles will pull it back.'},
+    {h:'Noodles apart', t:'Boil the noodles in a separate pot of plain water, and the bok choy alongside for the last 90 seconds. Drain well.', heat:'Rolling boil, own pot. Noodles cooked in the broth release starch and turn the soup murky.'},
+    {h:'Assemble', t:'Noodles in the bowl, beef over them, greens beside, boiling broth ladled over. Scallion on top, pickled mustard greens on the side if you have them.'}
+  ]
+},
+{
+  id:'hainan', country:'Singapore', flag:'🇸🇬', dish:'Hainanese Chicken Rice', native:'海南雞飯',
+  region:'Singapore and Malaysia, by way of Wenchang in Hainan',
+  blurb:'A poached chicken and the rice cooked in its fat and stock. Plain to look at, and completely unforgiving — every stage is about restraint and temperature.',
+  serves:4, time:'1 h 30 m', level:'Medium',
+  ings:[
+    {i:'chicken_wh', q:1, u:'piece'}, {i:'ginger', q:10, u:'tbsp'},
+    {i:'scallion', q:1, u:'bunch'}, {i:'garlic', q:8, u:'clove'},
+    {i:'rice_long', q:400, u:'g'}, {i:'sesame_oil', q:2, u:'tbsp'},
+    {i:'cucumber', q:1, u:'piece'}, {i:'chili_dry', q:6, u:'piece'},
+    {i:'lime', q:30, u:'ml'}, {i:'vinegar_rc', q:2, u:'tbsp'},
+    {i:'soy', q:2, u:'tbsp'}, {i:'cilantro', q:0.5, u:'bunch'},
+    {i:'salt', q:2, u:'tbsp'}
+  ],
+  steps:[
+    {h:'Salt and stuff', t:'Rub the bird inside and out with salt, rinsing it off, then put ginger slices and knotted scallion in the cavity.'},
+    {h:'Poach below a simmer', t:'Lower the chicken into a pot of water barely covering it, bring it to the faintest tremble, then hold it there 40 minutes with the lid on. Never let it boil.', heat:'Around 80 °C / 175 °F — the surface should move but not bubble. A boil tightens the breast and splits the skin, which is the whole aesthetic of the dish.'},
+    {h:'Ice bath', t:'Lift the bird straight into iced water for 10 minutes. This stops the cooking and sets the layer of jelly under the skin that people are actually eating this for.'},
+    {h:'The rice', t:'Skim the chicken fat from the poaching liquid and fry the minced ginger and garlic in it, then the rinsed rice for 2 minutes until it turns translucent at the edges. Cook it in the poaching stock, not water.', heat:'Low and covered, 15 minutes, then 10 off the heat. Rice cooked in water instead of stock is the single most common failure.'},
+    {h:'Chilli sauce', t:'Blend the soaked chillies with garlic, ginger, lime juice, rice vinegar, a pinch of sugar and a spoon of the hot stock. Sharp and loose, not a thick paste.'},
+    {h:'Carve', t:'Chop through the bone into pieces, skin side up. Brush with sesame oil and a little light soy.'},
+    {h:'Serve', t:'Rice, chicken, sliced cucumber, cilantro, a bowl of the clear stock alongside, and three sauces: chilli, dark soy, and minced ginger with scallion in hot oil.'}
+  ]
+},
+{
+  id:'waakye', country:'Ghana', flag:'🇬🇭', dish:'Waakye', native:'Waakye',
+  region:'Northern in origin, from the Hausa "shinkafa da wake" — rice and beans — and now sold on every street in Accra.',
+  blurb:'Rice and beans stained red-brown by dried sorghum leaves. No other ingredient does that colour, and it carries a faint earthiness that is the taste people mean by waakye.',
+  serves:6, time:'1 h 30 m', level:'Easy',
+  ings:[
+    {i:'rice_long', q:500, u:'g'}, {i:'bean_blackeye', q:300, u:'g'},
+    {i:'sorghum_lv', q:8, u:'piece'}, {i:'oil_veg', q:2, u:'tbsp'},
+    {i:'salt', q:2, u:'tsp'}, {i:'onion', q:2, u:'piece'},
+    {i:'tomato_pst', q:80, u:'g'}, {i:'chili_dry', q:8, u:'piece'},
+    {i:'scotch', q:2, u:'piece'}, {i:'anchovy_dr', q:40, u:'g'},
+    {i:'ginger', q:2, u:'tbsp'}, {i:'garlic', q:4, u:'clove'},
+    {i:'egg', q:6, u:'piece'}
+  ],
+  steps:[
+    {h:'Beans first', t:'Soak the black-eyed peas a few hours, then simmer them with the waakye leaves until almost tender, 40 minutes. The water turns deep red as they cook.'},
+    {h:'The colour', t:'That red water is the point. Keep it, and top it up rather than replacing it. Ghanaian cooks add a pinch of bicarbonate to deepen the colour, which also softens the beans — use very little, because too much leaves a soapy taste.'},
+    {h:'Rice in', t:'Wash the rice, stir it into the beans and their liquid, and add enough of the red water to sit just above the rice. Salt now.'},
+    {h:'Steam', t:'Cover tightly and cook on the lowest heat 25 minutes without stirring, then rest 10 minutes off the heat before fluffing.', heat:'Lowest setting. Stirring breaks the grains and the pot turns to porridge, the same failure as jollof.'},
+    {h:'Shito', t:'For the black pepper sauce: fry the blended onion, ginger, garlic and chilli in oil until very dark, add the tomato paste and the ground dried anchovies, and keep frying — 40 minutes — until it is nearly black and the oil rises. It keeps for months and gets better.', heat:'Medium-low and patient. Shito is judged on how far it is taken, not how hot it is.'},
+    {h:'Fish out the leaves', t:'Pull the sorghum leaves from the pot before serving. They have done their work and are not eaten.'},
+    {h:'Serve', t:'With boiled egg, shito, and whatever else the stall has — gari, spaghetti, fried plantain, stewed fish. A waakye plate is an assembly, not a fixed recipe.'}
+  ]
+}
 ];
 
 /* ---------- foundation & layers ----------
@@ -2865,6 +3228,86 @@ bobotie:{
     {w:'Sweet', o:'Apricot jam, fruit chutney, raisins, dried apricot. Cape Malay cooking runs sweeter than the word curry leads people to expect.'},
     {w:'Sour', o:'Vinegar or lemon juice, enough to stop the sweetness sitting flat on the tongue.'},
     {w:'Topping', o:'Egg and milk custard, sometimes tinted with turmeric, with bay leaves standing upright in it. Some houses use a lemon leaf instead.'}
+  ]},
+gumbo:{
+  foundation:'A flour-and-oil roux taken to dark chocolate, stopped with cold trinity, then a long uncovered simmer. A pale roux gives a pale gumbo; there is no other route to the flavour.',
+  layers:[
+    {w:'Roux colour', o:'Blonde for seafood, peanut for chicken, dark chocolate for game and sausage. How far you take it is the single biggest decision in the pot.'},
+    {w:'City or country', o:'Creole gumbo in New Orleans takes tomato and often okra. Cajun country gumbo takes neither and leans darker.'},
+    {w:'Thickener', o:'Okra early in the year, filé powder — ground sassafras — stirred in off the heat later. Using both at once is considered a beginner move.'},
+    {w:'Protein', o:'Chicken and andouille is the everyday pot. Shrimp and crab on the coast, duck and oyster for a special one, gumbo z’herbes with no meat at all during Lent.'}
+  ]},
+kottbullar:{
+  foundation:'A milk-soaked bread panade, cooled onion, and allspice — then browned in butter and finished in a cream sauce. Without the panade you have a dense meatball, not a Swedish one.',
+  layers:[
+    {w:'Meat', o:'Beef and pork two to one is the household standard. All beef is leaner and drier; veal appears in the fancier versions.'},
+    {w:'Spice', o:'Allspice always. White pepper often, nutmeg sometimes — and never more than a whisper of any of them.'},
+    {w:'Sauce', o:'Stock, cream and a spoon of soy for colour. Some add mustard, some a little of the lingonberry itself.'},
+    {w:'Sides', o:'Boiled potato or mash, lingonberry, and pressgurka — pickled cucumber. The jam is structural, not decorative.'}
+  ]},
+gulyas:{
+  foundation:'A very large quantity of onion softened slowly, paprika stirred in off the heat, and beef simmered without ever being browned. Paprika that touches a hot dry pan is ruined and takes the pot with it.',
+  layers:[
+    {w:'Consistency', o:'A soup in Hungary, thin enough to drink from the spoon. What the rest of the world calls goulash is closer to pörkölt, which is a different and thicker dish.'},
+    {w:'Paprika', o:'Sweet édesnemes is the base. A little hot paprika or a fresh cherry pepper adjusts it; smoked paprika is Spanish and out of place here.'},
+    {w:'Meat', o:'Beef shin or chuck. Mutton in the south-east, and a version with pork exists though purists disown it.'},
+    {w:'Noodle', o:'Csipetke, pinched by hand off a stiff egg dough straight into the pot. Optional, and most homes make them anyway.'}
+  ]},
+sauerbraten:{
+  foundation:'Three to four days in a cold vinegar-and-wine marinade, a hard sear on a properly dried surface, then a long gentle braise in the strained marinade. The time is the technique.',
+  layers:[
+    {w:'Region', o:'Rhineland is sweet-sour with raisins and Lebkuchen. Franconian uses more wine and no sugar; Swabian adds smoked bacon.'},
+    {w:'Meat', o:'Chuck or topside. Horse was traditional in the Rhineland and is still sold for it in a few butchers there.'},
+    {w:'Thickener', o:'Crushed gingersnaps or Lebkuchen thickens and sweetens in one move. Flour and sugar separately gives you more control and less character.'},
+    {w:'Sides', o:'Kartoffelklöße and red cabbage, almost without exception. Spätzle in the south.'}
+  ]},
+bacalhau:{
+  foundation:'Properly desalted cod pulled into threads, crisp straw potatoes, and egg folded through off the heat until barely creamy. Heat past that point is the only way to fail it.',
+  layers:[
+    {w:'Potato', o:'Matchsticks fried at home, or the bagged straw potatoes every Portuguese supermarket sells and most cooks use.'},
+    {w:'Egg', o:'Some bind it loosely, some leave it nearly runny. Six eggs to 400 g of cod is a middle position.'},
+    {w:'Relatives', o:'À Gomes de Sá bakes with sliced potato and no scrambled egg. Com Natas uses cream. Different dishes, same fish.'},
+    {w:'Olives', o:'Black, on top, never stirred through — and in Portugal usually still with their stones in.'}
+  ]},
+mansaf:{
+  foundation:'Lamb simmered clean, then finished in reconstituted jameed stirred constantly in one direction and never allowed to boil. A split sauce cannot be brought back.',
+  layers:[
+    {w:'Jameed', o:'Karak jameed has the strongest reputation in Jordan. Sold as hard stones to soak or as a ready liquid; goat jameed is sharper than sheep.'},
+    {w:'Meat', o:'Lamb shoulder or leg on the bone. Camel at the largest gatherings, chicken for a weekday version nobody calls mansaf.'},
+    {w:'Base', o:'Shrak bread under the rice is traditional and acts as the plate. Some families now use rice alone.'},
+    {w:'Top', o:'Toasted almonds and pine nuts, fried in ghee just before serving so they are still hot when the tray goes down.'}
+  ]},
+nihari:{
+  foundation:'Shank and marrow cooked at the lowest possible heat for hours, on a masala fried until the fat separates, then thickened with a flour slurry until the broth turns glossy.',
+  layers:[
+    {w:'Meat', o:'Beef in Karachi, mutton in Lahore and in most of the older Delhi kitchens. A marrow bone — nalli — in the pot is what the regulars order by name.'},
+    {w:'Spice', o:'Every shop guards its own nihari masala. Fennel, long pepper, black cardamom and mace are the ones that make it taste like nihari rather than a generic curry.'},
+    {w:'Taar', o:'The layer of red fat on the surface is wanted and served, not skimmed. A nihari with no taar looks wrong to anyone who grew up with it.'},
+    {w:'Garnish', o:'Julienned ginger, green chilli, cilantro and lemon are not optional — the sharpness cuts fat the dish deliberately carries.'}
+  ]},
+beef_noodle:{
+  foundation:'Shank blanched clean, braised in fried doubanjiang with soy, Shaoxing and whole spice, and noodles boiled in their own pot of plain water. Cooking the noodles in the broth clouds it.',
+  layers:[
+    {w:'Style', o:'Hongshao — braised red — is the Taipei standard. Qingdun is a clear broth with no bean paste, lighter and much harder to hide behind.'},
+    {w:'Cut', o:'Shank for slices, tendon for texture, brisket for fat. A bowl with all three is the one worth queueing for.'},
+    {w:'Noodle', o:'Hand-pulled and thick, knife-cut, or thin and straight. The thicker the noodle, the more broth it carries.'},
+    {w:'Side', o:'Suan cai — pickled mustard greens — on the table, added by the spoonful. The sourness resets the palate between mouthfuls.'}
+  ]},
+hainan:{
+  foundation:'A bird poached below a simmer and shocked in ice, and rice cooked in the rendered fat and the poaching stock. Water instead of stock, or a boil instead of a tremble, and it is simply boiled chicken.',
+  layers:[
+    {w:'Bird', o:'A older, fattier chicken gives more of the jelly under the skin that the dish is about. Kampung or free-range if you can get one.'},
+    {w:'Rice', o:'Fat, ginger and garlic fried into the grain first, then stock. Pandan or a lemongrass stalk in the pot is common in Singapore.'},
+    {w:'Sauces', o:'Three, always: chilli-garlic-lime, thick dark soy, and ginger-scallion oil. Arguments about the chilli sauce are how stalls are ranked.'},
+    {w:'Serving', o:'Room temperature, not hot. A bowl of the clear poaching broth alongside is part of the plate, not an extra.'}
+  ]},
+waakye:{
+  foundation:'Rice and black-eyed peas cooked together in the red water that dried sorghum leaves give up. The leaves are the dish — no other ingredient produces that colour or that faint earthiness.',
+  layers:[
+    {w:'Bean', o:'Black-eyed peas are standard in Accra. Cowpeas and red beans both appear, and the bean decides how long the first stage takes.'},
+    {w:'Colour', o:'Sorghum leaves alone, or with a pinch of bicarbonate to deepen it. Too much and it goes soapy — this is the mistake to avoid.'},
+    {w:'Shito', o:'The black pepper sauce is a household or stall signature, built on dried fish or shrimp and fried far darker than looks sensible.'},
+    {w:'The plate', o:'Gari, spaghetti, boiled egg, fried plantain, stewed fish, salad. A waakye seller is judged on the whole assembly, not the rice alone.'}
   ]}
 };
 
