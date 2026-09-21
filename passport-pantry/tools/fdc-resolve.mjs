@@ -1,0 +1,524 @@
+#!/usr/bin/env node
+/**
+ * Resolve Passport Pantry's canonical ingredients against USDA FoodData
+ * Central and rewrite the NUTR table in prototype.html with real,
+ * traceable values.
+ *
+ *   node tools/fdc-resolve.mjs --key YOUR_KEY            # resolve and write
+ *   node tools/fdc-resolve.mjs --key YOUR_KEY --verify   # report drift only
+ *   node tools/fdc-resolve.mjs --key YOUR_KEY --only salt,flour
+ *
+ * A free key takes about a minute: https://fdc.nal.usda.gov/api-key-signup
+ * FDC data is CC0 public domain. The API allows 1,000 requests an hour per
+ * IP, so responses are cached under tools/.fdc-cache and re-runs are free.
+ *
+ * Why a build-time script rather than a call from the app: nutrient values
+ * for "kosher salt" do not change, so fetching them per page view would
+ * burn quota, add latency, and make the app fail when USDA is down. Resolve
+ * once, commit the result, and the app ships a table it can cite.
+ */
+
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import path from 'node:path';
+
+const ROOT  = path.resolve(import.meta.dirname, '..');
+const TARGET = path.join(ROOT, 'prototype.html');
+const CACHE  = path.join(import.meta.dirname, '.fdc-cache');
+const API    = 'https://api.nal.usda.gov/fdc/v1';
+
+/* FDC nutrient numbers. Energy is the awkward one: Foundation foods often
+   carry Atwater-derived energy (2047/2048) instead of, or alongside, the
+   classic 1008. Take them in preference order. */
+const N = {
+  energy: ['1008', '2048', '2047'],
+  protein: ['1003'],
+  fat:     ['1004'],
+  carb:    ['1005'],
+  fibre:   ['1079']
+};
+
+/* Data types in preference order. Foundation is the most rigorous, SR
+   Legacy the broadest. Survey (FNDDS) describes prepared dishes, useful
+   for things like pastry. Branded is deliberately excluded: those values
+   are one manufacturer's label, not a generic food, and would silently
+   make the table about a product nobody in another country can buy. */
+const TYPES = ['Foundation', 'SR Legacy', 'Survey (FNDDS)'];
+
+/**
+ * The map that matters. `q` is the search phrase, `must` are words that
+ * have to appear in the chosen food's description, `not` rules out the
+ * classic mismatches, and `type` narrows the data type where the generic
+ * search picks badly. Everything here is a judgement about which USDA food
+ * best represents the ingredient a cook actually buys — review it rather
+ * than trusting it.
+ */
+const MAP = {
+  flour:       {q:'wheat flour white all-purpose enriched bleached', not:['self-rising','cake','bread flour']},
+  water:       {q:'water bottled generic'},
+  salt:        {q:'salt table', not:['substitute']},
+  pepper:      {q:'spices black pepper'},
+  beef_grd:    {q:'ground beef 80% lean meat 20% fat raw'},
+  pork_grd:    {q:'pork ground raw'},
+  beef_loin:   {q:'beef loin top sirloin steak separable lean raw'},
+  chicken_wh:  {q:'chicken whole raw meat and skin'},
+  chicken_th:  {q:'chicken thigh meat and skin raw'},
+  mackerel:    {q:'fish mackerel salted'},
+  onion:       {q:'onions raw', not:['dehydrated','young green','welsh']},
+  onion_red:   {q:'onions red raw', not:['dehydrated']},
+  scallion:    {q:'onions spring or scallions including tops and bulb raw'},
+  garlic:      {q:'garlic raw', not:['powder','salt']},
+  ginger:      {q:'ginger root raw'},
+  cilantro:    {q:'coriander leaves cilantro raw'},
+  chives_g:    {q:'chives raw'},
+  tomato:      {q:'tomatoes red ripe raw year round average'},
+  pepper_bell: {q:'peppers sweet green raw'},
+  thyme:       {q:'thyme fresh'},
+  scotch:      {q:'peppers hot chili red raw'},
+  donne:       {q:'peppers hot chili red raw'},
+  chili_dry:   {q:'spices pepper red or cayenne'},
+  basil_thai:  {q:'basil fresh'},
+  limeleaf:    {q:'lime peel raw'},
+  soy:         {q:'soy sauce made from soy and wheat shoyu', not:['low sodium','tamari']},
+  shaoxing:    {q:'alcoholic beverage wine cooking'},
+  vinegar_rw:  {q:'vinegar red wine'},
+  sesame_oil:  {q:'oil sesame salad or cooking'},
+  oil_veg:     {q:'oil vegetable canola industrial'},
+  oil_olive:   {q:'oil olive salad or cooking'},
+  fishsauce:   {q:'fish sauce ready to serve'},
+  sugar_palm:  {q:'sugars granulated'},
+  sugar_rock:  {q:'sugars granulated'},
+  coconut_ck:  {q:'nuts coconut cream canned sweetened', not:['sweetened']},
+  coconut_mk:  {q:'nuts coconut milk canned liquid expressed from grated meat and water'},
+  coconut_fr:  {q:'nuts coconut meat raw'},
+  peanut:      {q:'peanuts all types dry-roasted without salt'},
+  paste_pnng:  {q:'curry paste', type:'Survey (FNDDS)'},
+  paste_aji:   {q:'peppers hot chili red canned'},
+  fenugreek:   {q:'spices fenugreek seed'},
+  anise:       {q:'spices anise seed'},
+  cinnamon:    {q:'spices cinnamon ground'},
+  coriander_s: {q:'spices coriander seed'},
+  allspice:    {q:'spices allspice ground'},
+  turmeric:    {q:'spices turmeric ground'},
+  ginger_g:    {q:'spices ginger ground'},
+  saffron:     {q:'spices saffron'},
+  preslemon:   {q:'lemon peel raw'},
+  olive_grn:   {q:'olives pickled canned or bottled green'},
+  lemon:       {q:'lemon juice raw'},
+  noodle_rice: {q:'rice noodles dry'},
+  rice_long:   {q:'rice white long-grain regular raw unenriched'},
+  potato:      {q:'potatoes flesh and skin raw'},
+  whitepep:    {q:'spices pepper white'},
+  banana_grn:  {q:'plantains green raw'},
+  sausage_pork:{q:'pork sausage link or patty raw'},
+  sausage_chk: {q:'sausage chicken raw', type:'Survey (FNDDS)'},
+  sausage_bf:  {q:'sausage beef raw', type:'Survey (FNDDS)'},
+  lamb_grd:    {q:'lamb ground raw'},
+  lamb_leg:    {q:'lamb leg whole separable lean and fat raw'},
+  chicken_grd: {q:'chicken ground raw'},
+  mushroom:    {q:'mushrooms white raw'},
+  butter:      {q:'butter salted', not:['whipped','light']},
+  ghee:        {q:'butter oil anhydrous ghee'},
+  milk:        {q:'milk whole 3.25% milkfat', not:['chocolate','dry']},
+  cheddar:     {q:'cheese cheddar', not:['low fat','nonfat']},
+  egg:         {q:'egg whole raw fresh'},
+  stock_beef:  {q:'soup beef broth or bouillon canned ready to serve'},
+  stock_chx:   {q:'soup chicken broth canned ready to serve'},
+  worcester:   {q:'sauce worcestershire'},
+  vinegar_rc:  {q:'vinegar rice'},
+  tomato_pst:  {q:'tomato products canned paste without salt added'},
+  pastry_sh:   {q:'pie crust standard-type dry form', type:'Survey (FNDDS)'},
+  pastry_pf:   {q:'puff pastry frozen ready to bake', type:'Survey (FNDDS)'},
+  rice_bas:    {q:'rice white long-grain regular raw unenriched'},
+  carrot:      {q:'carrots raw'},
+  baharat:     {q:'spices curry powder'},
+  loomi:       {q:'lime peel raw'},
+  cardamom:    {q:'spices cardamom'},
+  clove_sp:    {q:'spices cloves ground'},
+  bay:         {q:'spices bay leaf'},
+  almond:      {q:'nuts almonds', not:['oil','butter','milk','paste']},
+  raisin:      {q:'raisins seedless', not:['golden']},
+  potato_fl:   {q:'potatoes russet flesh and skin raw'},
+  /* allergen-substitution targets */
+  tamari:      {q:'soy sauce made from soy tamari'},
+  coco_amino:  {q:'coconut aminos'},
+  flour_gf:    {q:'flour gluten free', type:'Survey (FNDDS)'},
+  flour_rice:  {q:'rice flour white'},
+  milk_oat:    {q:'oat milk unsweetened', type:'Survey (FNDDS)'},
+  marg_df:     {q:'margarine like spread approximately 60% fat tub'},
+  cheese_df:   {q:'cheese substitute', type:'Survey (FNDDS)'},
+  flax:        {q:'seeds flaxseed'},
+  seed_sun:    {q:'seeds sunflower seed kernels dried'},
+  seed_pump:   {q:'seeds pumpkin and squash seed kernels dried'},
+  /* --- second batch of dishes --- */
+  dashi:       {q:'soup stock fish home prepared', type:'Survey (FNDDS)'},
+  mirin:       {q:'alcoholic beverage rice wine sake'},
+  sake:        {q:'alcoholic beverage rice wine sake'},
+  sugar_wh:    {q:'sugars granulated'},
+  rice_short:  {q:'rice white short-grain raw unenriched'},
+  kimchi:      {q:'kimchi cabbage'},
+  pork_belly:  {q:'pork fresh belly raw'},
+  tofu:        {q:'tofu raw firm prepared with calcium sulfate', not:['silken','fried']},
+  gochugaru:   {q:'spices pepper red or cayenne'},
+  gochujang:   {q:'gochujang chili paste', type:'Survey (FNDDS)'},
+  yogurt:      {q:'yogurt plain whole milk', not:['greek','low fat','nonfat']},
+  garam:       {q:'spices garam masala'},
+  chili_kash:  {q:'spices pepper red or cayenne'},
+  cream:       {q:'cream fluid heavy whipping', not:['light','half']},
+  cashew:      {q:'nuts cashew nuts raw', not:['butter','milk']},
+  methi:       {q:'spices fenugreek seed'},
+  cumin:       {q:'spices cumin seed'},
+  pork_sh:     {q:'pork fresh shoulder blade boston butt raw'},
+  achiote:     {q:'spices annatto'},
+  chili_guaj:  {q:'peppers guajillo dried'},
+  chili_anch:  {q:'peppers ancho dried'},
+  pineapple:   {q:'pineapple raw all varieties', not:['juice','canned']},
+  vinegar_wh:  {q:'vinegar distilled'},
+  oregano:     {q:'spices oregano dried'},
+  tortilla:    {q:'tortillas ready to bake or fry corn'},
+  pasta:       {q:'pasta dry enriched', not:['cooked','whole wheat','gluten free']},
+  pecorino:    {q:'cheese romano'},
+  rice_bomba:  {q:'rice white short-grain raw unenriched'},
+  rabbit:      {q:'game meat rabbit domesticated composite of cuts raw'},
+  bean_green:  {q:'beans snap green raw'},
+  bean_butter: {q:'lima beans large mature seeds cooked boiled without salt'},
+  paprika:     {q:'spices paprika'},
+  rosemary:    {q:'rosemary fresh'},
+  eggplant:    {q:'eggplant raw'},
+  nutmeg:      {q:'spices nutmeg ground'},
+  wine_red:    {q:'alcoholic beverage wine table red'},
+  berbere:     {q:'spices curry powder'},
+  beef_chuck:  {q:'beef chuck shoulder clod separable lean and fat raw'},
+  lemongrass:  {q:'lemon grass citronella raw'},
+  galangal:    {q:'ginger root raw'},
+  shallot:     {q:'shallots raw'},
+  tamarind:    {q:'tamarinds raw'},
+  candlenut:   {q:'nuts macadamia nuts raw'},
+  parsley:     {q:'parsley fresh'},
+  bulgur:      {q:'bulgur dry', not:['cooked']},
+  mint:        {q:'peppermint fresh'},
+  lentil_br:   {q:'lentils raw', not:['sprouted','cooked']},
+  chickpea:    {q:'chickpeas garbanzo beans canned drained solids'},
+  bean_kidney: {q:'beans kidney red canned drained solids'},
+  curry_pw:    {q:'spices curry powder'},
+  beet:        {q:'beets raw', not:['canned','greens','pickled']},
+  cabbage:     {q:'cabbage raw', not:['red','savoy','chinese','napa']},
+  dill:        {q:'dill weed fresh'},
+  cucumber:    {q:'cucumber with peel raw'},
+  lime:        {q:'limes raw'},
+  cheese_qrk:  {q:'cheese cottage lowfat dry curd'},
+  cream_sour:  {q:'cream sour cultured', not:['reduced fat','fat free','imitation']},
+  bacon:       {q:'pork cured bacon raw'},
+  bread_wh:    {q:'bread white commercially prepared', not:['toasted','reduced calorie']},
+  apricot_j:   {q:'jams and preserves apricot'},
+  fish_white:  {q:'fish cod atlantic raw'},
+  oil_dende:   {q:'oil palm'},
+  pandan:      {q:'parsley fresh'},
+  belacan:     {q:'fish anchovy paste'},
+  anchovy_dr:  {q:'fish anchovy european raw'},
+  barberry:    {q:'cranberries dried sweetened'},
+  celery:      {q:'celery raw', not:['seed','flakes','celeriac']},
+  okra:        {q:'okra raw', not:['frozen','cooked','canned']},
+  sausage_smk: {q:'sausage pork smoked', not:['turkey','chicken','beef']},
+  lingon:      {q:'jams and preserves'},
+  caraway:     {q:'spices caraway seed'},
+  juniper:     {q:'spices allspice ground'},
+  /* Exact match, not a proxy. Note only that desalting strips sodium and
+     not energy — the kcal figure survives the soak, the sodium does not. */
+  codsalt:     {q:'fish cod atlantic dried and salted'},
+  olive_blk:   {q:'olives ripe canned small-extra large'},
+  jameed:      {q:'yogurt greek plain nonfat', not:['flavored','fruit']},
+  bread_flat:  {q:'bread pita white enriched'},
+  beef_shank:  {q:'beef shank crosscuts separable lean only raw'},
+  fennel_s:    {q:'spices fennel seed'},
+  doubanjiang: {q:'miso'},
+  noodle_wh:   {q:'noodles chinese chow mein', not:['cooked','canned']},
+  bok_choy:    {q:'cabbage chinese pak-choi raw'},
+  sorghum_lv:  {q:'parsley fresh'},
+  bean_blackeye:{q:'cowpeas blackeyes mature seeds cooked boiled without salt'}
+};
+
+/* Ingredients where the best available USDA food is a stand-in rather than
+   the real thing. Recorded so the app can flag them instead of implying a
+   precision the match does not have. */
+const PROXY_NOTE = {
+  scotch:     'USDA has no scotch bonnet; generic hot chilli used.',
+  donne:      "USDA has no donne' sali; generic hot chilli used.",
+  sugar_palm: 'USDA has no palm sugar; granulated sugar used. Real palm sugar is slightly lower in sucrose and carries trace minerals.',
+  sugar_rock: 'Rock sugar treated as granulated sucrose.',
+  limeleaf:   'No makrut lime leaf entry; lime peel used. Contributes negligible mass to a dish anyway.',
+  loomi:      'No dried lime entry; lime peel used. Mostly not eaten.',
+  preslemon:  'No preserved lemon entry; lemon peel used. Real preserved lemon is far higher in sodium.',
+  baharat:    'No baharat entry; curry powder used as a mixed-spice proxy.',
+  paste_pnng: 'Curry paste formulations vary enormously between brands and households.',
+  paste_aji:  'No ají amarillo entry; canned hot chilli used.',
+  rice_bas:   'Basmati treated as generic long-grain white rice.',
+  shaoxing:   'Generic cooking wine used.',
+  mackerel:   'Salted mackerel before desalting; boiling and soaking lower the sodium considerably.',
+  coco_amino: 'USDA is unlikely to hold coconut aminos. If this resolves to something else, check it — or hand-fill from the bottle.',
+  flour_gf:   'No single USDA food for a gluten-free blend; blends differ by manufacturer. Treat as indicative.',
+  cheese_df:  'Dairy-free cheeses vary enormously by base (cashew, coconut, soy). Any single match is only indicative.',
+  marg_df:    'Generic tub spread used; dairy-free blocks for baking are firmer and higher in fat.',
+  mirin:       'No USDA entry for mirin; sake used. Mirin is far sweeter — roughly 40g of sugar per 100ml that this does not account for.',
+  gochugaru:   'Generic cayenne used. Gochugaru is milder and fruitier, and coarser in grind.',
+  chili_kash:  'Generic cayenne used. Kashmiri chilli is much milder and is chosen for colour.',
+  berbere:     'Curry powder as a mixed-spice proxy. Berbere is a different blend entirely — chilli-forward, with fenugreek and korarima.',
+  methi:       'Fenugreek seed used for the dried leaf. Related but not the same thing; the leaf is milder and less bitter.',
+  galangal:    'Ginger used for galangal. Botanically close, noticeably different in flavour.',
+  candlenut:   'Macadamia used for candlenut — the standard culinary substitute and close in fat content.',
+  rice_bomba:  'Generic short-grain white rice; bomba absorbs considerably more liquid than the nutrition figures suggest.',
+  dashi:       'Generic fish stock. Real dashi varies with the katsuobushi-to-kombu ratio.',
+  gochujang:   'Formulations vary widely in sugar and grain content between brands.',
+  belacan:     'USDA has no fermented shrimp paste; anchovy paste used. Comparable in salt and protein, wrong in every other respect.',
+  anchovy_dr:  'Whole dried anchovy. USDA holds raw and canned-in-oil anchovy; drying concentrates protein and salt well beyond either.',
+  barberry:    'No barberry entry; dried sweetened cranberry used. Barberry is far more sour and unsweetened, so the sugar figure is an overstatement.',
+  pandan:      'No pandan entry; a generic fresh herb used. The leaves are knotted, cooked and removed, so they contribute nothing to the plate anyway.',
+  cheese_qrk:  'Dry-curd cottage cheese used for twarog. Fat content varies enormously between a tlusty and a chudy curd.',
+  oil_dende:   'Refined palm oil used. Dende is unrefined — the colour, carotene and aroma are the whole point of it, and none of that shows in the macros.',
+  apricot_j:   'Generic fruit preserve. A South African fruit chutney, which is the more usual choice in bobotie, is less sweet and carries vinegar.',
+  chickpea:    'Canned chickpeas, drained. Cooked-from-dry differs mainly in sodium.',
+  bean_kidney: 'Canned kidney beans, drained. Same caveat as the chickpeas.',
+  sausage_smk: 'Generic smoked pork sausage. Andouille varies enormously by maker, and a Louisiana one is coarser, leaner and far more heavily smoked than the average.',
+  lingon:      'Generic fruit preserve. Lingonberry is sharper and usually carries less sugar than the jams this resolves to.',
+  juniper:     'No juniper entry; allspice berry used. Different berry entirely, but the quantity in a marinade is tiny and most of it is strained out.',
+  jameed:      'No jameed entry anywhere in the database; approximated from strained yogurt scaled for drying. Treat as indicative only.',
+  doubanjiang: 'No broad-bean chilli paste entry; miso used as the nearest fermented-paste stand-in. Salt and formulation vary widely between makers.',
+  sorghum_lv:  'No sorghum-leaf entry; a generic fresh leaf used. The leaves are boiled for colour and removed, so they contribute nothing to the plate.'
+};
+
+/* ------------------------------------------------------------------ */
+
+const argv = process.argv.slice(2);
+const arg = (name, def) => {
+  const i = argv.indexOf('--' + name);
+  return i === -1 ? def : (argv[i + 1] ?? true);
+};
+const KEY     = arg('key', process.env.FDC_API_KEY);
+const VERIFY  = argv.includes('--verify');
+const ONLY    = arg('only', null);
+const PAGESIZE = 10;
+
+if(!KEY){
+  console.error('No API key. Pass --key KEY or set FDC_API_KEY.');
+  console.error('Free signup: https://fdc.nal.usda.gov/api-key-signup');
+  process.exit(2);
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function cached(url){
+  await mkdir(CACHE, {recursive:true});
+  const file = path.join(CACHE, createHash('sha1').update(url).digest('hex') + '.json');
+  if(existsSync(file)) return JSON.parse(await readFile(file, 'utf8'));
+  let res, attempt = 0;
+  while(true){
+    res = await fetch(url);
+    if(res.status === 429){                      // quota: back off and retry
+      attempt++;
+      if(attempt > 5) throw new Error('rate limited five times; try again later');
+      const wait = 60_000 * attempt;
+      console.error(`  rate limited, waiting ${wait / 1000}s`);
+      await sleep(wait);
+      continue;
+    }
+    break;
+  }
+  if(!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url.replace(KEY, 'KEY')}`);
+  const json = await res.json();
+  await writeFile(file, JSON.stringify(json));
+  await sleep(250);                              // stay well inside 1000/hour
+  return json;
+}
+
+/** Nutrient lookup that tolerates both the search and detail shapes. */
+function nutrient(food, numbers){
+  const rows = food.foodNutrients || [];
+  for(const num of numbers){
+    for(const r of rows){
+      const n = String(r.nutrientNumber ?? r.nutrient?.number ?? '');
+      if(n === num){
+        const v = r.value ?? r.amount;
+        if(typeof v === 'number') return v;
+      }
+    }
+  }
+  return null;
+}
+
+function scoreFood(food, spec){
+  const d = (food.description || '').toLowerCase();
+  if(spec.must && !spec.must.every(w => d.includes(w.toLowerCase()))) return -1;
+  if(spec.not  &&  spec.not.some(w => d.includes(w.toLowerCase()))) return -1;
+  let s = 100 - (TYPES.indexOf(food.dataType) * 20);
+  if(TYPES.indexOf(food.dataType) === -1) return -1;     // Branded and friends
+  s -= Math.min(30, d.length / 6);                       // prefer plainer names
+  return s;
+}
+
+async function resolveOne(id, spec){
+  const type = spec.type ? spec.type : TYPES.join(',');
+  const url = `${API}/foods/search?query=${encodeURIComponent(spec.q)}`
+            + `&dataType=${encodeURIComponent(type)}&pageSize=${PAGESIZE}&api_key=${KEY}`;
+  const res = await cached(url);
+  const ranked = (res.foods || [])
+    .map(f => ({f, s:scoreFood(f, spec)}))
+    .filter(x => x.s >= 0)
+    .sort((a, b) => b.s - a.s);
+  if(!ranked.length) return {id, error:'no acceptable match', tried:spec.q};
+
+  const pick = ranked[0].f;
+  // The search payload usually carries the nutrients already; fall back to
+  // the detail endpoint when energy is missing.
+  let food = pick;
+  if(nutrient(food, N.energy) === null){
+    food = await cached(`${API}/food/${pick.fdcId}?api_key=${KEY}`);
+  }
+  const k = nutrient(food, N.energy);
+  const p = nutrient(food, N.protein);
+  const c = nutrient(food, N.carb);
+  const f = nutrient(food, N.fat);
+  const fib = nutrient(food, N.fibre);
+  if(k === null || p === null || c === null || f === null){
+    return {id, error:'match found but missing core nutrients', fdc:pick.fdcId, desc:pick.description};
+  }
+  return {
+    id, fdc:pick.fdcId, desc:pick.description, dataType:pick.dataType,
+    k:round(k), p:round(p), c:round(c), f:round(f),
+    fib:fib === null ? null : round(fib),
+    alternatives:ranked.slice(1, 4).map(x => `${x.f.fdcId} ${x.f.description}`)
+  };
+}
+const round = v => Math.round(v * 10) / 10;
+
+/**
+ * The rewrite is driven by MAP, so any ingredient the app defines but MAP
+ * omits would be silently dropped from the table — which breaks the app,
+ * because nutritionOf() then counts it as uncountable. This happened once
+ * already: ten allergen-substitution ingredients were added to the app
+ * after this script was written. Check before writing, never after.
+ */
+async function checkCoverage(){
+  const src = await readFile(TARGET, 'utf8');
+  const i = src.indexOf('const ING = {');
+  const j = src.indexOf('\n};', i);
+  const appIngredients = [...src.slice(i, j).matchAll(/^  (\w+):\s*\{n:/gm)].map(m => m[1]);
+  const uncovered = appIngredients.filter(id => !MAP[id]);
+  const orphaned  = Object.keys(MAP).filter(id => !appIngredients.includes(id));
+  return {appIngredients, uncovered, orphaned};
+}
+
+/** Pull the current NUTR block out of the page so we can diff and rewrite. */
+async function readCurrent(){
+  const src = await readFile(TARGET, 'utf8');
+  const start = src.indexOf('const NUTR = {');
+  if(start === -1) throw new Error('NUTR table not found in prototype.html');
+  const end = src.indexOf('\n};', start);
+  if(end === -1) throw new Error('NUTR table not terminated');
+  const block = src.slice(start, end + 3);
+  const cur = {};
+  for(const m of block.matchAll(/(\w+):\{k:([\d.]+),p:([\d.]+),c:([\d.]+),f:([\d.]+)/g)){
+    cur[m[1]] = {k:+m[2], p:+m[3], c:+m[4], f:+m[5]};
+  }
+  return {src, start, end:end + 3, block, cur};
+}
+
+function renderBlock(rows){
+  const keys = Object.keys(MAP);
+  const width = Math.max(...keys.map(k => k.length));
+  const lines = keys.map(id => {
+    const r = rows[id];
+    if(!r || r.error) return null;
+    const parts = [`k:${r.k}`, `p:${r.p}`, `c:${r.c}`, `f:${r.f}`];
+    if(r.fib !== null && r.fib !== undefined) parts.push(`fib:${r.fib}`);
+    parts.push(`fdc:${r.fdc}`);
+    return `  ${(id + ':').padEnd(width + 1)} {${parts.join(',')}},`
+         + (PROXY_NOTE[id] ? `   // proxy: ${PROXY_NOTE[id]}` : '');
+  }).filter(Boolean);
+  return 'const NUTR = {\n'
+       + '  /* Resolved from USDA FoodData Central (CC0) by tools/fdc-resolve.mjs\n'
+       + `     on ${new Date().toISOString().slice(0, 10)}. Every row carries its FDC id;\n`
+       + '     look one up at https://fdc.nal.usda.gov/food-details/<id>\n'
+       + '     Rows marked "proxy" are the closest available USDA food, not the\n'
+       + '     ingredient itself — the app flags these in the UI. */\n'
+       + lines.join('\n') + '\n};';
+}
+
+/* ------------------------------------------------------------------ */
+
+const cov = await checkCoverage();
+if(cov.uncovered.length){
+  console.error(`Refusing to run: ${cov.uncovered.length} ingredient(s) in the app have no query here.`);
+  console.error('Writing the table would delete their nutrition rows and break the app.');
+  cov.uncovered.forEach(id => console.error('  ' + id));
+  console.error('\nAdd a MAP entry for each, then re-run.');
+  process.exit(2);
+}
+if(cov.orphaned.length){
+  console.log(`Note: ${cov.orphaned.length} query(ies) here match no app ingredient — harmless, but stale:`);
+  cov.orphaned.forEach(id => console.log('  ' + id));
+  console.log('');
+}
+
+const ids = ONLY ? String(ONLY).split(',').map(s => s.trim()) : Object.keys(MAP);
+const {src, start, end, cur} = await readCurrent();
+const rows = {}, failures = [], drift = [];
+
+console.log(`Resolving ${ids.length} ingredients against FoodData Central\n`);
+
+for(const id of ids){
+  const spec = MAP[id];
+  if(!spec){ failures.push({id, error:'not in MAP'}); continue; }
+  try{
+    const r = await resolveOne(id, spec);
+    rows[id] = r;
+    if(r.error){
+      failures.push(r);
+      console.log(`  ✗ ${id.padEnd(13)} ${r.error}`);
+      continue;
+    }
+    const was = cur[id];
+    const dk = was ? Math.abs(r.k - was.k) / Math.max(was.k, 1) * 100 : 0;
+    if(was && dk >= 20) drift.push({id, was:was.k, now:r.k, pct:Math.round(dk)});
+    console.log(`  ✓ ${id.padEnd(13)} ${String(r.fdc).padEnd(8)} ${String(r.k).padStart(5)} kcal`
+      + `  ${dk >= 20 ? `(was ${was.k}, ${Math.round(dk)}% off)` : ''}`
+      + `  ${r.desc.slice(0, 52)}`);
+  }catch(e){
+    failures.push({id, error:e.message});
+    console.log(`  ✗ ${id.padEnd(13)} ${e.message}`);
+  }
+}
+
+console.log(`\nResolved ${Object.values(rows).filter(r => !r.error).length}/${ids.length}`);
+
+if(drift.length){
+  console.log(`\n${drift.length} value(s) more than 20% from the approximation — worth eyeballing:`);
+  drift.sort((a, b) => b.pct - a.pct)
+       .forEach(d => console.log(`  ${d.id.padEnd(13)} ${d.was} → ${d.now} kcal (${d.pct}%)`));
+}
+
+if(failures.length){
+  console.log(`\n${failures.length} unresolved — decide these by hand rather than guessing:`);
+  failures.forEach(f => console.log(`  ${f.id.padEnd(13)} ${f.error}${f.tried ? ` (query: "${f.tried}")` : ''}`));
+}
+
+const fibreCount = Object.values(rows).filter(r => !r.error && r.fib !== null).length;
+console.log(`\nFibre available for ${fibreCount} ingredients — enough for net carbs where all of a recipe's ingredients have it.`);
+
+if(VERIFY){
+  console.log('\n--verify: nothing written.');
+  process.exit(failures.length ? 1 : 0);
+}
+if(ONLY){
+  console.log('\n--only: partial run, not rewriting the table. Drop --only to write.');
+  process.exit(0);
+}
+if(failures.length){
+  console.log('\nNot writing: resolve or hand-fill the failures first, then re-run.');
+  console.log('Cached responses mean the re-run costs almost no quota.');
+  process.exit(1);
+}
+
+await writeFile(TARGET, src.slice(0, start) + renderBlock(rows) + src.slice(end));
+console.log(`\nWrote ${Object.keys(rows).length} rows into ${path.relative(ROOT, TARGET)}.`);
+console.log('Every value now carries an FDC id, and the app will show itself as USDA-sourced.');

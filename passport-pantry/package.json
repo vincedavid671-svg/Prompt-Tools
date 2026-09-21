@@ -1,0 +1,42 @@
+{
+  "name": "passport-pantry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Travel-memory recipe app: country-first dish catalogue, canonical ingredient registry, allergen and diet engines, purchase-anchored pantry, and location-relative ingredient sourcing.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node tools/consistency-check.mjs",
+    "test:ingest": "node tools/jsonld-ingest.mjs --selftest",
+    "check": "npm run test && npm run test:boundary && npm run test:ingest",
+    "resolve:nutrition": "node tools/fdc-resolve.mjs",
+    "resolve:names": "node tools/names-resolve.mjs",
+    "ingest": "node tools/jsonld-ingest.mjs",
+    "start": "echo \"No server. Open prototype.html in a browser, or: npx http-server . -p 8000\"",
+    "test:boundary": "node tools/boundary-check.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "//": [
+    "MODULE BOUNDARY — see docs/MODULE_BOUNDARY.md before changing this file.",
+    "",
+    "dependencies and devDependencies are empty ON PURPOSE. The application is a",
+    "single self-contained HTML file and the tools are plain Node ES modules that",
+    "use only the standard library. Nothing here needs `npm install`; every script",
+    "above runs on a bare Node 18+. Adding the first dependency is a real decision,",
+    "not a convenience — it introduces a lockfile, an install step and a supply",
+    "chain to this module, and it is the point at which the separate-release-cycle",
+    "criterion in MODULE_BOUNDARY.md starts to apply.",
+    "",
+    "This package is deliberately NOT registered in the root package.json's",
+    "`workspaces` field. The repository root is a fork of an unrelated upstream",
+    "project (jwangkun/Prompt-Tools); editing its manifest creates rebase conflicts",
+    "for no benefit, since a zero-dependency package gains nothing from hoisting.",
+    "Run these scripts from this directory. If one-command-from-root is ever wanted,",
+    "add workspaces then — it is reversible, and this comment is the argument",
+    "against doing it prematurely."
+  ]
+}
