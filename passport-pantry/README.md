@@ -481,6 +481,27 @@ republish their work. These rules keep the product defensible.
 Also: respect `robots.txt`, prefer sites' own schema.org/Recipe JSON-LD (which
 is published to be machine-read), and run a takedown process from day one.
 
+`tools/jsonld-ingest.mjs` implements exactly that channel, with the table above
+enforced in code: ingredients imported, steps held as reference only in a field
+the app never reads, headnotes and images never read at all, and the source
+always recorded. It produces drafts for a human to finish, and never writes into
+the app.
+
+**On ingesting cookbook PDFs and bulk recipe datasets.** Worth recording why
+neither is the answer. RecipeNLG — the dataset everyone reaches for — is
+licensed for *non-commercial research and education only*, which rules it out
+for anything sold. Recipe1M+ shares that lineage and those limits. Public-domain
+cookbooks (Project Gutenberg has hundreds) are legally clean but pre-1930 and
+overwhelmingly Anglo-American: they contain nothing about khinkali, rendang,
+doro wat or kelaguen, which is to say nothing about the cuisines that are this
+product's entire differentiator.
+
+And where a file came from does not change what may be extracted from it. A
+pirated PDF does not expand the rule; a lawfully bought one does not let you
+copy the prose. Volume is the competitor's game — twenty-three dishes with a
+verified foundation beat two hundred thousand scraped ones, and the scraped pile
+actively dilutes them.
+
 ### YouTube specifically
 
 | Do | Don't |

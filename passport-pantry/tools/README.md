@@ -139,3 +139,84 @@ Where Wikidata has no label in a target language, the script reports it and
 leaves the existing name in place rather than substituting something
 approximate. In a recipe app a wrong ingredient name sends someone home with the
 wrong thing; a missing one sends them to ask.
+
+---
+
+## jsonld-ingest.mjs
+
+Ingests structured recipe data from **schema.org/Recipe JSON-LD** — the markup
+recipe sites publish deliberately so machines can read them.
+
+```bash
+node tools/jsonld-ingest.mjs --url https://example.com/a-recipe
+node tools/jsonld-ingest.mjs --file urls.txt --out drafts/
+node tools/jsonld-ingest.mjs --selftest        # parser tests, no network
+```
+
+### What it takes, and what it refuses to take
+
+The project's sourcing rule, enforced in code rather than left to good
+intentions:
+
+| Field | Treatment |
+|---|---|
+| `recipeIngredient` | **Imported** — uncopyrightable fact |
+| `recipeInstructions` | **Reference only**, into a field the app never reads |
+| `description`, `headline` | **Never read** — the headnote is the copyrightable part |
+| `image` | **Never read** |
+| `author`, `publisher`, URL | **Always recorded** |
+
+Extracted steps land in `stepsForReference` with a notice attached. The
+procedure they describe is free to follow and re-describe; the sentences are the
+author's. A human rewrites them and deletes the field.
+
+**It never writes into `prototype.html`.** Output is a draft per recipe. A
+finished dish also needs a foundation, its layers, a region, yield corrections
+and a method in our own words — none of which come from markup.
+
+### Ingredient parsing
+
+`"1 1/2 cups all-purpose flour"` → `{qty: 1.5, unit: 'cup', text: 'all-purpose flour'}`
+
+Handles vulgar fractions (`½`, `1½`), mixed numbers, ranges (takes the lower
+bound — under-buying is recoverable, over-buying is waste), and converts
+imperial weight to grams so the pantry ledger works. Preparation words are
+stripped before matching: *finely chopped fresh flat-leaf parsley* and *parsley*
+are the same ingredient.
+
+### Matching is deliberately conservative
+
+This is the part that matters. **The allergen engine and the nutrition table
+both key off the canonical ingredient id.** Mapping `tamari` onto `soy` would
+tell a coeliac that a wheat-free sauce contains wheat — or, reversed, that a
+wheat-brewed one does not.
+
+So matching has three outcomes and only the first is automatic:
+
+| Confidence | Source | Action |
+|---|---|---|
+| `high` | Explicit alias, or exact registry name | Mapped |
+| `medium` | Strong token overlap, clear winner | **Reported for a human to confirm** |
+| `none` | Anything else | **Reported with the closest candidates** |
+
+Nothing is ever guessed into place. An unknown ingredient must be added to the
+registry with its gram conversions, nutrition row, sourcing channel, dietary
+flags and **allergen tags** before a recipe using it can ship — and the tool
+says so, because the allergen tag is the one a reviewer must not skip.
+
+### Manners
+
+Checks `robots.txt` before every origin and respects `Disallow` for `*`. Sends a
+descriptive User-Agent. One request per second. None of that is optional if you
+want the sites whose markup you are reading to stay friendly.
+
+### Self-test
+
+`--selftest` runs the parser against fixtures with no network: quantity forms,
+line parsing including imperial conversion, the tamari/soy distinction, unknown
+and ambiguous matching, and JSON-LD extraction from `@graph`.
+
+It has already earned its place. It caught the walker returning every recipe
+twice, because it descended into `@graph` explicitly and then reached it again
+through the generic object walk — and `@graph` is what WordPress and Yoast emit,
+so that was most recipe sites rather than an edge case.
