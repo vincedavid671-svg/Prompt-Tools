@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Passport Pantry build-time caches (resolver responses, never source)
+passport-pantry/tools/.fdc-cache/
+passport-pantry/tools/.wd-cache/
+
+# Local environment files — .env.example is the only one that is committed
+.env
+.env.local
+.env.*.local
