@@ -553,8 +553,29 @@ partner APIs or deep links; the user checks out in their own account.
 ## Roadmap
 
 **Now — validate**
-Does the foundation-and-layers framing actually help someone cook better? Eleven
+Does the foundation-and-layers framing actually help someone cook better? 23
 dishes is enough to find out. If it does not, nothing else matters.
+
+### Catalogue as it stands
+
+| Region | Dishes |
+|---|---|
+| Europe | Bangers and Mash, Cacio e Pepe, Paella Valenciana, Moussaka |
+| Southeast Asia | Phở Gà, Phanaeng Curry, Rendang, Chicken Adobo |
+| East Asia | Pork & Chive Jiaozi, Oyakodon, Kimchi Jjigae |
+| Middle East | Chicken Kabsa, Menemen, Tabbouleh |
+| Latin America | Lomo Saltado, Tacos al Pastor |
+| South Asia | Butter Chicken |
+| Caucasus | Khinkali |
+| North Africa | Chicken Tagine |
+| East Africa | Doro Wat |
+| Caribbean | Rundown |
+| Pacific Islands | Chicken Kelaguen |
+| Oceania | Mince and Cheese Pie |
+
+Three are vegetarian as written — Cacio e Pepe, Menemen, Tabbouleh — which the
+first eleven were not, and the diet engine needs dishes that pass as well as
+dishes that fail to be worth anything.
 
 **Next — make the ledger real**
 Extend the conversion table, add barcode scan for purchase anchoring, correction
@@ -589,9 +610,9 @@ business or a hobby.
 
 ## Prototype technical notes
 
-Single self-contained HTML file. No build step, no dependencies. Eleven dishes
-across nine regions, 85 canonical ingredients, eight diet profiles, and 24
-delivery platforms reaching 83 countries.
+Single self-contained HTML file. No build step, no dependencies. **23 dishes
+across 12 regions and 23 countries**, 141 canonical ingredients, 14 allergens,
+eight diet profiles, and 24 delivery platforms reaching 85 countries.
 
 A consistency suite (not shipped in the file) checks: every recipe ingredient
 exists in the registry and normalizes to grams; every substitution target exists

@@ -413,7 +413,7 @@ const ING = {
   thyme:      {n:'Fresh thyme',              buy:'fresh',  conv:{g:1, bunch:25, tsp:1}},
   scotch:     {n:"Scotch bonnet pepper",     buy:'spec',   conv:{g:1, piece:8}},
   donne:      {n:"Donne' sali (boonie pepper)", buy:'spec', conv:{g:1, piece:1}},
-  chili_dry:  {n:'Dried red chili',          buy:'spec',   conv:{g:1, piece:2}},
+  chili_dry:  {n:'Dried red chili',          buy:'spec',   conv:{g:1, piece:2, tsp:2.5, tbsp:7.5}},
   basil_thai: {n:'Thai basil',               buy:'spec',   conv:{g:1, bunch:40}},
   limeleaf:   {n:'Makrut lime leaves',       buy:'spec',   conv:{g:1, piece:0.4}},
   soy:        {n:'Light soy sauce',          buy:'staple', conv:{ml:1, g:1.1, tbsp:16, tsp:5.3}},
@@ -487,7 +487,54 @@ const ING = {
   cheese_df:  {n:'Dairy-free hard cheese',   buy:'fresh',  conv:{g:1, cup:113}},
   flax:       {n:'Ground flaxseed',          buy:'staple', conv:{g:1, tbsp:7, tsp:2.3}},
   seed_sun:   {n:'Sunflower seeds',          buy:'staple', conv:{g:1, tbsp:9}},
-  seed_pump:  {n:'Pumpkin seeds',            buy:'staple', conv:{g:1, tbsp:8}}
+  seed_pump:  {n:'Pumpkin seeds',            buy:'staple', conv:{g:1, tbsp:8}},
+  /* --- added with the second batch of dishes --- */
+  dashi:      {n:'Dashi',                    buy:'spec',   conv:{ml:1, g:1, cup:237}},
+  mirin:      {n:'Mirin',                    buy:'spec',   conv:{ml:1, g:1.1, tbsp:18, tsp:6}},
+  sake:       {n:'Sake',                     buy:'spec',   conv:{ml:1, g:1, tbsp:15}},
+  sugar_wh:   {n:'White sugar',              buy:'staple', conv:{g:1, tbsp:12.5, tsp:4.2, cup:200}},
+  rice_short: {n:'Short-grain rice',         buy:'staple', conv:{g:1, cup:185}},
+  kimchi:     {n:'Aged kimchi',              buy:'spec',   conv:{g:1, cup:150}},
+  pork_belly: {n:'Pork belly',               buy:'fresh',  conv:{g:1}},
+  tofu:       {n:'Firm tofu',                buy:'fresh',  conv:{g:1}},
+  gochugaru:  {n:'Gochugaru (Korean chilli flakes)', buy:'spec', conv:{g:1, tbsp:7, tsp:2.3}},
+  gochujang:  {n:'Gochujang',                buy:'spec',   conv:{g:1, tbsp:18, tsp:6}},
+  yogurt:     {n:'Plain whole-milk yogurt',  buy:'fresh',  conv:{g:1, cup:245, tbsp:15}},
+  garam:      {n:'Garam masala',             buy:'spec',   conv:{g:1, tbsp:7, tsp:2.3}},
+  chili_kash: {n:'Kashmiri chilli powder',   buy:'spec',   conv:{g:1, tbsp:8, tsp:2.7}},
+  cream:      {n:'Double cream',             buy:'fresh',  conv:{ml:1, g:1, cup:238, tbsp:15}},
+  cashew:     {n:'Cashews',                  buy:'staple', conv:{g:1, tbsp:9, cup:137}},
+  methi:      {n:'Kasuri methi (dried fenugreek leaves)', buy:'spec', conv:{g:1, tbsp:2, tsp:0.7}},
+  cumin:      {n:'Cumin seed',               buy:'staple', conv:{g:1, tbsp:6, tsp:2.1}},
+  pork_sh:    {n:'Pork shoulder',            buy:'fresh',  conv:{g:1}},
+  achiote:    {n:'Achiote paste',            buy:'spec',   conv:{g:1, tbsp:16}},
+  chili_guaj: {n:'Guajillo chillies, dried', buy:'spec',   conv:{g:1, piece:9}},
+  chili_anch: {n:'Ancho chillies, dried',    buy:'spec',   conv:{g:1, piece:17}},
+  pineapple:  {n:'Pineapple',                buy:'fresh',  conv:{g:1, cup:165, piece:900}},
+  vinegar_wh: {n:'White vinegar',            buy:'staple', conv:{ml:1, g:1, tbsp:15, cup:237}},
+  oregano:    {n:'Dried oregano',            buy:'staple', conv:{g:1, tbsp:3, tsp:1}},
+  tortilla:   {n:'Corn tortillas',           buy:'spec',   conv:{g:1, piece:26}},
+  pasta:      {n:'Dried pasta',              buy:'staple', conv:{g:1}},
+  pecorino:   {n:'Pecorino Romano',          buy:'spec',   conv:{g:1, cup:100, tbsp:6}},
+  rice_bomba: {n:'Bomba or Calasparra rice', buy:'spec',   conv:{g:1, cup:200}},
+  rabbit:     {n:'Rabbit',                   buy:'spec',   conv:{g:1}},
+  bean_green: {n:'Flat green beans',         buy:'fresh',  conv:{g:1, cup:110}},
+  bean_butter:{n:'Butter beans',             buy:'staple', conv:{g:1, cup:170}},
+  paprika:    {n:'Sweet paprika',            buy:'staple', conv:{g:1, tbsp:7, tsp:2.3}},
+  rosemary:   {n:'Fresh rosemary',           buy:'fresh',  conv:{g:1, tbsp:1.7, piece:1}},
+  eggplant:   {n:'Aubergine',                buy:'fresh',  conv:{g:1, piece:450}},
+  nutmeg:     {n:'Nutmeg',                   buy:'staple', conv:{g:1, tsp:2.2}},
+  wine_red:   {n:'Red wine',                 buy:'staple', conv:{ml:1, g:0.99, cup:237}},
+  berbere:    {n:'Berbere',                  buy:'spec',   conv:{g:1, tbsp:8, tsp:2.7}},
+  beef_chuck: {n:'Beef chuck',               buy:'fresh',  conv:{g:1}},
+  lemongrass: {n:'Lemongrass',               buy:'spec',   conv:{g:1, piece:20}},
+  galangal:   {n:'Galangal',                 buy:'spec',   conv:{g:1, tbsp:6}},
+  shallot:    {n:'Shallots',                 buy:'fresh',  conv:{g:1, piece:30}},
+  tamarind:   {n:'Tamarind paste',           buy:'spec',   conv:{g:1, tbsp:16}},
+  candlenut:  {n:'Candlenuts',               buy:'spec',   conv:{g:1, piece:4}},
+  parsley:    {n:'Flat-leaf parsley',        buy:'fresh',  conv:{g:1, bunch:60}},
+  bulgur:     {n:'Fine bulgur',              buy:'spec',   conv:{g:1, cup:140, tbsp:9}},
+  mint:       {n:'Fresh mint',               buy:'fresh',  conv:{g:1, bunch:40}}
 };
 
 /* ---------- dietary flags ----------
@@ -506,7 +553,13 @@ const FLAGS = {
   butter:['dairy'], milk:['dairy'], cheddar:['dairy'], ghee:['dairy'],
   egg:['egg'],
   shaoxing:['alcohol'], vinegar_rw:['alcohol_derived'],
-  marg_df:[], cheese_df:[], milk_oat:[], tamari:[], coco_amino:[]
+  marg_df:[], cheese_df:[], milk_oat:[], tamari:[], coco_amino:[],
+  pork_belly:['meat','pork'], pork_sh:['meat','pork'],
+  beef_chuck:['meat','beef'], rabbit:['meat'],
+  dashi:['fish'], kimchi:['fish'],
+  yogurt:['dairy'], cream:['dairy'], pecorino:['dairy'],
+  mirin:['alcohol'], sake:['alcohol'], wine_red:['alcohol'],
+  vinegar_wh:[], tofu:[], gochujang:[], gochugaru:[]
 };
 const flagsOf = id => FLAGS[id] || [];
 
@@ -595,7 +648,23 @@ const ALLERGEN = {
   cheese_df:   {check:['treenut','soy'], note:'Dairy-free cheeses are frequently cashew or soy based.'},
   seed_sun:    {check:['treenut'], note:'Seeds are often packed on tree-nut lines.'},
   seed_pump:   {check:['treenut']},
-  flax:        {}
+  flax:        {},
+  dashi:       {has:['fish'], hidden:['fish'],
+                note:'Dashi is made from katsuobushi — dried bonito. Nearly every Japanese simmered dish is built on it, and it is invisible in the name.'},
+  kimchi:      {check:['fish','crustacean'], hidden:['fish','crustacean'],
+                note:'Traditional kimchi is fermented with salted shrimp or anchovy sauce. Vegan kimchi exists but is the exception — read the jar.'},
+  gochujang:   {has:['soy'], check:['wheat','gluten'], hidden:['wheat','gluten'],
+                note:'Most gochujang is made with barley or wheat malt. Gluten-free versions exist and are labelled as such.'},
+  tofu:        {has:['soy']},
+  yogurt:      {has:['milk']}, cream:{has:['milk']}, pecorino:{has:['milk']},
+  cashew:      {has:['treenut']}, candlenut:{has:['treenut']},
+  pasta:       {has:['wheat','gluten']}, bulgur:{has:['wheat','gluten']},
+  tortilla:    {check:['wheat','gluten'], note:'Corn tortillas are usually pure masa, but some brands blend in wheat.'},
+  wine_red:    {check:['sulphite'], note:'Wine is routinely sulphited, and EU labels must say so.'},
+  berbere:     {check:['mustard','celery']},
+  garam:       {check:['mustard']},
+  mirin:       {check:['wheat'], note:'Hon-mirin is rice-based, but cheaper aji-mirin often adds wheat-derived syrup.'},
+  achiote:     {check:['wheat'], note:'Achiote paste sometimes uses wheat flour as a bulking agent.'}
 };
 /* Coconut is classified as a tree nut in US labelling, but most people with
    a tree-nut allergy tolerate it. Advisory rather than a block, with the
@@ -698,14 +767,23 @@ const SUBS = {
 
 /* ---------- regions ---------- */
 const REGION_OF = {
-  Georgia:'Caucasus', China:'Asia', Vietnam:'Asia', Thailand:'Asia',
-  Guam:'Pacific Islands', Jamaica:'Caribbean', Morocco:'North Africa',
-  Peru:'Latin America', 'United Kingdom':'Europe', 'New Zealand':'Oceania',
-  'Saudi Arabia':'Middle East'
+  Georgia:'Caucasus',
+  China:'East Asia', Japan:'East Asia', 'South Korea':'East Asia',
+  Vietnam:'Southeast Asia', Thailand:'Southeast Asia',
+  Indonesia:'Southeast Asia', Philippines:'Southeast Asia',
+  India:'South Asia',
+  'Saudi Arabia':'Middle East', Turkey:'Middle East', Lebanon:'Middle East',
+  'United Kingdom':'Europe', Italy:'Europe', Spain:'Europe', Greece:'Europe',
+  Morocco:'North Africa', Ethiopia:'East Africa',
+  Peru:'Latin America', Mexico:'Latin America',
+  Jamaica:'Caribbean', Guam:'Pacific Islands', 'New Zealand':'Oceania'
 };
 const REGION_NOTE = {
   'Middle East':'Rice cooked in the broth of the meat it is served with. Dried limes, baharat, charcoal, and generous platters built for sharing.',
-  'Asia':'Fermented salt in every kitchen — fish sauce, soy, shrimp paste. Technique carries more weight here than ingredient count.',
+  'East Asia':'Fermented soy in everything — sauce, paste, bean curd — and rice as the axis the meal turns on. Restraint and knife work over long ingredient lists.',
+  'Southeast Asia':'Fish sauce, fresh herbs by the handful, and the salty-sour-sweet-hot balance adjusted at the table rather than settled in the kitchen.',
+  'South Asia':'Whole spices bloomed in fat before anything else happens, and dairy used as a cooling counterweight to heat.',
+  'East Africa':'Spice blends with real depth — berbere, mitmita — and the long, patient onion base that carries them. Bread doubles as the cutlery.',
   'Europe':'Stock, fat and time. The pub and household plate: one protein, one starch, and a sauce that took longer than either.',
   'Caucasus':'Walnut, herb and sour fruit. Bread and dumpling traditions that predate most national borders in the region.',
   'Caribbean':'Coconut reduced until it breaks, scotch bonnet for perfume before heat, and provisions — the starches that feed the plate.',
@@ -751,7 +829,7 @@ const PLATFORMS = {
               cc:['GE','FI','SE','DK','NO','DE','PL','CZ','SK','HU','GR','IL','JP','EE','LV','LT','HR','RS','CY','AZ','KZ','MT']},
   glovo:     {n:'Glovo', t:'Food + grocery', tier:'link', for:['fresh','staple'],
               d:'Owned by Delivery Hero. Delivers supermarket groceries, including from Carrefour.',
-              cc:['GE','ES','IT','PT','PL','UA','RO','BG','HR','RS','MA','EG','KE','NG','GH','KZ','AM','MD','KG']},
+              cc:['GE','ES','IT','PT','PL','UA','RO','BG','HR','RS','MA','EG','KE','NG','GH','KZ','AM','MD','KG','ET']},
   boltfood:  {n:'Bolt Food', t:'Food delivery', tier:'link', for:['fresh'],
               d:'Estonian. Shares the driver fleet with Bolt rides, so it scales fast in a new city.',
               cc:['GE','EE','LV','LT','PL','CZ','SK','RO','PT','ZA','NG','KE','GH','AZ']},
@@ -766,7 +844,7 @@ const PLATFORMS = {
               cc:['TH','PH','MY','TW','HK','PK','BD','LA','KH']},
   talabat:   {n:'Talabat', t:'Food + grocery', tier:'link', for:['fresh'],
               d:'Delivery Hero. Publishes vendor-side APIs only — a shop receives orders, you cannot place one.',
-              cc:['AE','SA','KW','QA','BH','OM','JO','EG','IQ']},
+              cc:['AE','SA','KW','QA','BH','OM','JO','EG','IQ','LB']},
   hungerst:  {n:'HungerStation', t:'Food + grocery', tier:'link', for:['fresh'],
               d:'HungerStation Market covers groceries. Vendor-side API via middleware.',
               cc:['SA','BH']},
@@ -804,7 +882,7 @@ const PLATFORMS = {
               d:'Dominant in mainland China alongside Ele.me.', cc:['CN']},
   carrefour: {n:'Carrefour', t:'Hypermarket', tier:'link', for:['fresh','staple','spec'],
               d:'Very wide international range, which makes it a reliable first stop for foreign ingredients.',
-              cc:['SA','AE','FR','ES','IT','PL','RO','BR','AR','TW','KE','EG','MA','JO','QA','KW','GE']},
+              cc:['SA','AE','FR','ES','IT','PL','RO','BR','AR','TW','KE','EG','MA','JO','QA','KW','GE','LB']},
   lulu:      {n:'Lulu Hypermarket', t:'Hypermarket', tier:'link', for:['spec','fresh'],
               d:'The strongest source anywhere in the Gulf for Asian and subcontinental ingredients.',
               cc:['SA','AE','KW','QA','BH','OM','IN','MY','ID','EG']},
@@ -860,6 +938,11 @@ const LOCAL = {
   VN:[{n:'Bách Hóa Xanh', t:'Supermarket', tier:'link', for:['fresh'], d:'Widest domestic grocery footprint.'}],
   IN:[{n:'BigBasket', t:'Grocery', tier:'link', for:['fresh','staple'], d:'Tata-owned, national scheduled delivery.'}],
   PH:[{n:'Landers / S&R', t:'Warehouse', tier:'link', for:['staple','spec'], d:'Imported and bulk goods.'}],
+  ET:[{n:'Merkato and local markets', t:'Market', tier:'link', for:['fresh','spec','staple'],
+       d:'Berbere and niter kibbeh are made and sold locally, and vary by stall. Buy from somewhere with turnover.'}],
+  LB:[{n:'Spinneys Lebanon', t:'Supermarket', tier:'link', for:['fresh','staple'], d:'National coverage.'},
+      {n:'Souks and local greengrocers', t:'Market', tier:'link', for:['fresh','spec'],
+       d:'Parsley by the kilo, which is the right way to buy it for tabbouleh.'}],
   /* Two places with no delivery platform coverage at all. Worth handling
      honestly rather than hiding — a user here needs different advice, not
      an empty screen, and telling them to go to the market is the correct
@@ -898,7 +981,8 @@ const COUNTRIES = {
   BE:{n:'Belgium', f:'🇧🇪'}, IE:{n:'Ireland', f:'🇮🇪'}, CO:{n:'Colombia', f:'🇨🇴'},
   AR:{n:'Argentina', f:'🇦🇷'}, CL:{n:'Chile', f:'🇨🇱'}, EC:{n:'Ecuador', f:'🇪🇨'},
   UY:{n:'Uruguay', f:'🇺🇾'}, CR:{n:'Costa Rica', f:'🇨🇷'}, ZM:{n:'Zambia', f:'🇿🇲'},
-  NL:{n:'Netherlands', f:'🇳🇱'}, JM:{n:'Jamaica', f:'🇯🇲'}, GU:{n:'Guam', f:'🇬🇺'}
+  NL:{n:'Netherlands', f:'🇳🇱'}, JM:{n:'Jamaica', f:'🇯🇲'}, GU:{n:'Guam', f:'🇬🇺'},
+  ET:{n:'Ethiopia', f:'🇪🇹'}, LB:{n:'Lebanon', f:'🇱🇧'}
 };
 
 /* ---------- nutrition, per 100 g ----------
@@ -967,7 +1051,30 @@ const NUTR = {
   flour_gf:{k:363,p:6.0,c:77.0,f:1.5},    flour_rice:{k:366,p:6.0,c:80.1,f:1.4},
   milk_oat:{k:45,p:1.0,c:7.0,f:1.5},      marg_df:{k:717,p:0.2,c:0.7,f:80.0},
   cheese_df:{k:290,p:1.0,c:23.0,f:21.0},  flax:{k:534,p:18.3,c:28.9,f:42.2},
-  seed_sun:{k:584,p:20.8,c:20.0,f:51.5},  seed_pump:{k:559,p:30.2,c:10.7,f:49.1}
+  seed_sun:{k:584,p:20.8,c:20.0,f:51.5},  seed_pump:{k:559,p:30.2,c:10.7,f:49.1},
+  dashi:{k:3,p:0.5,c:0.3,f:0},            mirin:{k:258,p:0.2,c:43.0,f:0},
+  sake:{k:134,p:0.5,c:5.0,f:0},           sugar_wh:{k:387,p:0,c:100,f:0},
+  rice_short:{k:358,p:6.5,c:79.0,f:0.5},  kimchi:{k:15,p:1.1,c:2.4,f:0.5},
+  pork_belly:{k:518,p:9.3,c:0,f:53.0},    tofu:{k:76,p:8.1,c:1.9,f:4.8},
+  gochugaru:{k:282,p:12.0,c:50.0,f:13.0}, gochujang:{k:214,p:5.5,c:45.0,f:1.5},
+  yogurt:{k:61,p:3.5,c:4.7,f:3.3},        garam:{k:379,p:14.0,c:45.0,f:15.0},
+  chili_kash:{k:282,p:12.0,c:50.0,f:13.0},cream:{k:340,p:2.1,c:2.8,f:36.0},
+  cashew:{k:553,p:18.2,c:30.2,f:43.8},    methi:{k:300,p:23.0,c:58.0,f:6.0},
+  cumin:{k:375,p:17.8,c:44.2,f:22.3},     pork_sh:{k:269,p:16.9,c:0,f:21.8},
+  achiote:{k:250,p:5.0,c:50.0,f:5.0},     chili_guaj:{k:313,p:11.0,c:57.0,f:12.0},
+  chili_anch:{k:281,p:11.9,c:51.1,f:8.2}, pineapple:{k:50,p:0.5,c:13.1,f:0.1},
+  vinegar_wh:{k:18,p:0,c:0.04,f:0},       oregano:{k:265,p:9.0,c:68.9,f:4.3},
+  tortilla:{k:218,p:5.7,c:44.6,f:2.9},    pasta:{k:371,p:13.0,c:74.7,f:1.5},
+  pecorino:{k:387,p:25.5,c:3.6,f:30.0},   rice_bomba:{k:349,p:7.0,c:77.0,f:0.6},
+  rabbit:{k:136,p:20.1,c:0,f:5.6},        bean_green:{k:31,p:1.8,c:7.0,f:0.2},
+  bean_butter:{k:115,p:7.8,c:20.9,f:0.4}, paprika:{k:282,p:14.1,c:53.9,f:12.9},
+  rosemary:{k:131,p:3.3,c:20.7,f:5.9},    eggplant:{k:25,p:1.0,c:5.9,f:0.2},
+  nutmeg:{k:525,p:5.8,c:49.3,f:36.3},     wine_red:{k:85,p:0.1,c:2.6,f:0},
+  berbere:{k:320,p:13.0,c:55.0,f:10.0},   beef_chuck:{k:217,p:18.9,c:0,f:15.4},
+  lemongrass:{k:99,p:1.8,c:25.3,f:0.5},   galangal:{k:71,p:1.0,c:15.0,f:0.8},
+  shallot:{k:72,p:2.5,c:16.8,f:0.1},      tamarind:{k:239,p:2.8,c:62.5,f:0.6},
+  candlenut:{k:628,p:8.0,c:12.0,f:65.0},  parsley:{k:36,p:3.0,c:6.3,f:0.8},
+  bulgur:{k:342,p:12.3,c:75.9,f:1.3},     mint:{k:70,p:3.8,c:14.9,f:0.9}
 };
 
 /* ---------- daily budget ----------
@@ -1079,7 +1186,21 @@ const NUTR_PROXY = {
   paste_aji:'canned hot chilli — no ají amarillo entry',
   rice_bas:'generic long-grain white rice',
   shaoxing:'generic cooking wine',
-  mackerel:'salted before desalting — soaking and boiling cut the sodium sharply'
+  mackerel:'salted before desalting — soaking and boiling cut the sodium sharply',
+  coco_amino:'USDA is unlikely to hold coconut aminos at all',
+  flour_gf:'no single USDA food for a gluten-free blend — they differ by manufacturer',
+  cheese_df:'dairy-free cheeses vary enormously by base (cashew, coconut, soy)',
+  marg_df:'generic tub spread — baking blocks are firmer and higher in fat',
+  mirin:'sake used — mirin carries roughly 40g more sugar per 100ml',
+  gochugaru:'generic cayenne — gochugaru is milder, fruitier and coarser',
+  chili_kash:'generic cayenne — Kashmiri chilli is much milder and chosen for colour',
+  berbere:'curry powder as a mixed-spice proxy — berbere is a different blend entirely',
+  methi:'fenugreek seed used for the dried leaf; the leaf is milder and less bitter',
+  galangal:'ginger used for galangal — botanically close, noticeably different',
+  candlenut:'macadamia — the standard culinary substitute, close in fat',
+  rice_bomba:'generic short-grain rice; bomba absorbs considerably more liquid',
+  dashi:'generic fish stock — real dashi varies with the katsuobushi-to-kombu ratio',
+  gochujang:'formulations vary widely in sugar and grain content between brands'
 };
 
 /* ---------- what actually gets eaten ----------
@@ -1098,7 +1219,15 @@ const EATEN = {
   rundown:{banana_grn:0.65, scotch:0},
   lomo:{oil_veg:0.35, potato:0.85},
   bangers:{potato_fl:0.85},
-  phanaeng:{limeleaf:0}
+  phanaeng:{limeleaf:0},
+  paella:{chicken_th:0.70, rabbit:0.58, rosemary:0},
+  doro_wat:{chicken_th:0.70, cardamom:0},
+  adobo:{chicken_th:0.70, bay:0},
+  moussaka:{potato:0.85, cinnamon:0},
+  rendang:{lemongrass:0, limeleaf:0},
+  al_pastor:{pineapple:0.75},
+  oyakodon:{}, kimchi_jjigae:{}, butter_chicken:{}, cacio_pepe:{},
+  menemen:{}, tabbouleh:{}
 };
 const EATEN_NOTE = {
   pho_ga:'The carcass and all the aromatics are strained out and binned, and you eat roughly a third of the bird by weight. Counting the whole chicken and the spices would overstate this bowl by a wide margin.',
@@ -1109,7 +1238,13 @@ const EATEN_NOTE = {
   rundown:'Green bananas are boiled in their skins and peeled. The scotch bonnet is removed whole.',
   lomo:'Most of the frying oil drains off the chips rather than ending up in the dish, and the potatoes are peeled.',
   bangers:'Potatoes are peeled before mashing.',
-  phanaeng:'Makrut lime leaves perfume the sauce and are picked out, not chewed.'
+  phanaeng:'Makrut lime leaves perfume the sauce and are picked out, not chewed.',
+  paella:'Rabbit carries more bone than chicken, and the rosemary sprig is lifted out before serving.',
+  doro_wat:'Bone-in thighs, and the cardamom pods are not eaten.',
+  adobo:'Bone-in thighs; the bay leaves are fished out.',
+  moussaka:'Potatoes are peeled, and the cinnamon stick is removed from the meat sauce.',
+  rendang:'Lemongrass stalks and lime leaves flavour the paste and are left on the plate.',
+  al_pastor:'Part of the pineapple cooks into the stack as a tenderiser rather than being eaten.'
 };
 
 /* ---------- nutrition maths ----------
@@ -1193,6 +1328,23 @@ const SOURCE = {
   flour_rice:{oc:'asian'}, milk_oat:{oc:'universal'}, marg_df:{oc:'universal', keep:'chill'},
   cheese_df:{oc:'universal', keep:'chill'}, flax:{oc:'universal'},
   seed_sun:{oc:'universal'}, seed_pump:{oc:'universal'},
+  dashi:{oc:'asian'}, mirin:{oc:'asian'}, sake:{oc:'asian'}, rice_short:{oc:'asian'},
+  kimchi:{oc:'asian', keep:'chill'}, gochugaru:{oc:'asian'}, gochujang:{oc:'asian'},
+  tofu:{oc:'asian', keep:'chill'},
+  garam:{oc:'asian'}, chili_kash:{oc:'asian'}, methi:{oc:'asian'}, cashew:{oc:'universal'},
+  yogurt:{oc:'universal', keep:'chill'}, cream:{oc:'universal', keep:'chill'},
+  achiote:{oc:'latin'}, chili_guaj:{oc:'latin'}, chili_anch:{oc:'latin'},
+  oregano:{oc:'latin'}, tortilla:{oc:'latin', keep:'chill'},
+  pasta:{oc:'euro'}, pecorino:{oc:'euro', keep:'chill'}, rice_bomba:{oc:'euro'},
+  rabbit:{oc:'euro', keep:'fresh'}, bean_green:{oc:'euro', keep:'fresh'},
+  bean_butter:{oc:'euro'}, paprika:{oc:'euro'}, rosemary:{oc:'euro', keep:'fresh'},
+  eggplant:{oc:'universal', keep:'fresh'}, nutmeg:{oc:'universal'}, wine_red:{oc:'euro'},
+  berbere:{oc:'me'}, bulgur:{oc:'me'}, parsley:{oc:'universal', keep:'fresh'},
+  mint:{oc:'universal', keep:'fresh'},
+  lemongrass:{oc:'sea', keep:'fresh'}, galangal:{oc:'sea', keep:'fresh'},
+  tamarind:{oc:'sea'}, candlenut:{oc:'sea'}, shallot:{oc:'universal'},
+  pork_belly:{oc:'universal', keep:'fresh'}, pork_sh:{oc:'universal', keep:'fresh'},
+  beef_chuck:{oc:'universal', keep:'fresh'},
   donne:{oc:'pac', keep:'fresh'}
 };
 function ocOf(id){ return (SOURCE[id] && SOURCE[id].oc) || 'universal'; }
@@ -1219,7 +1371,8 @@ const NATIVE = {
   HR:['euro'], RS:['euro'], GR:['euro'], SE:['euro'], DK:['euro'],
   NO:['euro'], FI:['euro'], EE:['euro'], LV:['euro'], LT:['euro'],
   AU:['euro'], NZ:['euro'], US:['euro'], CA:['euro'],
-  IN:['asian','me'], PK:['asian','me'], BD:['asian']
+  IN:['asian','me'], PK:['asian','me'], BD:['asian'],
+  ET:['me'], LB:['me']
 };
 
 /* ---------- store sourcing profiles ----------
@@ -1541,6 +1694,259 @@ const R = [
     {h:'Fill', t:'Cold filling in, grated cheddar over the top, puff pastry lid on. Seal the edges, cut a steam vent, and brush with beaten egg.'},
     {h:'Bake', t:'200 °C / 400 °F for 25 to 30 minutes until the lid is deep gold and risen.', heat:'If the lid browns before the base is done, drop to 180 °C / 350 °F and cover loosely with foil.'},
     {h:'Serve', t:'Rest 10 minutes or the filling will run. Tomato sauce on top is not optional here.'}
+  ]},
+{
+  id:'oyakodon', country:'Japan', flag:'🇯🇵', dish:'Oyakodon', native:'親子丼',
+  region:'Nationwide — the everyday donburi',
+  blurb:'Parent and child: chicken and egg over rice. The whole dish is one shallow pan, five minutes, and knowing exactly when to stop cooking the egg.',
+  serves:2, time:'25 m', level:'Easy',
+  ings:[
+    {i:'chicken_th', q:250, u:'g'}, {i:'onion', q:1, u:'piece'},
+    {i:'egg', q:4, u:'piece'}, {i:'dashi', q:150, u:'ml'},
+    {i:'soy', q:3, u:'tbsp'}, {i:'mirin', q:3, u:'tbsp'},
+    {i:'sake', q:1, u:'tbsp'}, {i:'sugar_wh', q:1, u:'tsp'},
+    {i:'rice_short', q:200, u:'g'}, {i:'scallion', q:0.3, u:'bunch'}
+  ],
+  steps:[
+    {h:'Rice first', t:'Wash the short-grain rice until the water runs clear, then cook it. Everything else takes five minutes, so the rice sets the timetable.'},
+    {h:'Broth', t:'In a small shallow pan — ideally one per serving — combine dashi, soy, mirin, sake and sugar. Bring to a simmer.'},
+    {h:'Onion then chicken', t:'Add sliced onion and cook 2 minutes until translucent, then the chicken cut into bite pieces. Simmer 4 to 5 minutes.', heat:'Medium. The liquid should reduce a little but still pool.'},
+    {h:'Beat badly', t:'Beat the eggs only four or five strokes. Streaks of unmixed white and yolk are correct — a uniform mixture gives you a flat omelette instead of the layered curds this dish is about.'},
+    {h:'Two pours', t:'Pour two thirds of the egg in a spiral over the surface. Cover, 30 seconds. Add the rest, cover, 20 seconds more, then take it off the heat.', heat:'The centre should still be loose and glossy. Residual heat finishes it on the way to the table.'},
+    {h:'Serve', t:'Slide the whole thing onto hot rice, scallion over the top. Eat immediately — the egg keeps cooking in the bowl.'}
+  ]
+},
+{
+  id:'kimchi_jjigae', country:'South Korea', flag:'🇰🇷', dish:'Kimchi Jjigae', native:'김치찌개',
+  region:'Nationwide — the household stew',
+  blurb:'The dish that exists because kimchi got too sour to eat straight. Old kimchi is not a compromise here; fresh kimchi makes a noticeably worse stew.',
+  serves:4, time:'40 m', level:'Easy',
+  ings:[
+    {i:'kimchi', q:400, u:'g'}, {i:'pork_belly', q:250, u:'g'},
+    {i:'tofu', q:300, u:'g'}, {i:'onion', q:0.5, u:'piece'},
+    {i:'scallion', q:0.5, u:'bunch'}, {i:'garlic', q:4, u:'clove'},
+    {i:'gochugaru', q:1, u:'tbsp'}, {i:'gochujang', q:1, u:'tbsp'},
+    {i:'soy', q:1, u:'tbsp'}, {i:'sesame_oil', q:1, u:'tbsp'},
+    {i:'sugar_wh', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Render the pork', t:'Cut the belly into thin strips and fry in a dry pot until the fat renders and the edges brown, 6 to 8 minutes. Do not drain it — that fat is the body of the stew.', heat:'Medium-high, then lower once the fat runs.'},
+    {h:'Fry the kimchi', t:'Add the chopped kimchi and cook 5 minutes in the pork fat until it darkens and smells sweet rather than sharp. This step is what separates a good jjigae from boiled kimchi soup.'},
+    {h:'Season', t:'Stir in garlic, gochugaru, gochujang, soy and sugar. Cook a minute.'},
+    {h:'Simmer', t:'Add the kimchi brine and enough water to just cover, about 500 ml. Simmer 15 to 20 minutes.', heat:'Steady simmer, uncovered. Longer is better; this is a dish that improves with time.'},
+    {h:'Tofu last', t:'Slide in thick slabs of tofu and the sliced onion. Simmer 5 minutes more — long enough to heat through, not so long that the tofu breaks up.'},
+    {h:'Serve', t:'Sesame oil and scallion off the heat. With plain short-grain rice, straight from the pot.'}
+  ]
+},
+{
+  id:'butter_chicken', country:'India', flag:'🇮🇳', dish:'Butter Chicken', native:'मुर्ग़ मक्खनी',
+  region:'Delhi — invented at Moti Mahal in the 1950s to use leftover tandoori chicken',
+  blurb:'Two cooking processes that meet at the end: chicken charred hard, sauce built separately. Cooking the chicken in the sauce gives you a curry, not this.',
+  serves:4, time:'1 h 30 m', level:'Medium',
+  ings:[
+    {i:'chicken_th', q:800, u:'g'}, {i:'yogurt', q:150, u:'g'},
+    {i:'ginger', q:2, u:'tbsp'}, {i:'garlic', q:6, u:'clove'},
+    {i:'chili_kash', q:2, u:'tsp'}, {i:'garam', q:2, u:'tsp'},
+    {i:'cumin', q:1, u:'tsp'}, {i:'turmeric', q:0.5, u:'tsp'},
+    {i:'tomato', q:6, u:'piece'}, {i:'cashew', q:40, u:'g'},
+    {i:'butter', q:80, u:'g'}, {i:'cream', q:120, u:'ml'},
+    {i:'methi', q:1, u:'tbsp'}, {i:'sugar_wh', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Marinate', t:'Boneless thigh, cut large. Coat in yogurt, grated ginger and garlic, Kashmiri chilli, half the garam masala, cumin and turmeric. At least an hour, overnight if you can.', heat:'Kashmiri chilli is for colour more than heat — that deep red is the point and cayenne will not do it.'},
+    {h:'Char it', t:'Grill, broil or pan-sear the chicken hard until blackened at the edges and just cooked. Do not be gentle. Rest and keep every drop of the juice.', heat:'As hot as your grill goes, or a broiler with the rack close. Char is a flavour, not a mistake.'},
+    {h:'Sauce base', t:'Simmer quartered tomatoes with the cashews and a splash of water for 20 minutes until collapsing, then blend completely smooth and pass through a sieve. The sieve is not optional if you want the texture right.'},
+    {h:'Build', t:'Melt the butter, add the tomato and cashew purée, and cook 10 minutes until it thickens and the butter starts to separate at the edges.', heat:'Medium-low, stirring. It will spit.'},
+    {h:'Finish', t:'Cream, sugar, remaining garam masala, and the kasuri methi crushed between your palms as it goes in. Then the charred chicken and its juices. Simmer 5 minutes.'},
+    {h:'Serve', t:'A last knob of butter on top. Naan, and plain rice for what is left in the bowl.'}
+  ]
+},
+{
+  id:'al_pastor', country:'Mexico', flag:'🇲🇽', dish:'Tacos al Pastor', native:'Tacos al pastor',
+  region:'Mexico City — Lebanese shawarma technique, Mexican ingredients',
+  blurb:'Lebanese immigrants brought the vertical spit; Mexico supplied the chillies and the pineapple. A home version cannot match a trompo, but it can get close with a very hot pan.',
+  serves:6, time:'5 h', level:'Medium',
+  ings:[
+    {i:'pork_sh', q:1200, u:'g'}, {i:'chili_guaj', q:6, u:'piece'},
+    {i:'chili_anch', q:2, u:'piece'}, {i:'achiote', q:3, u:'tbsp'},
+    {i:'pineapple', q:400, u:'g'}, {i:'vinegar_wh', q:80, u:'ml'},
+    {i:'garlic', q:5, u:'clove'}, {i:'cumin', q:1, u:'tsp'},
+    {i:'oregano', q:1, u:'tsp'}, {i:'onion', q:1, u:'piece'},
+    {i:'cilantro', q:1, u:'bunch'}, {i:'tortilla', q:18, u:'piece'}
+  ],
+  steps:[
+    {h:'Wake the chillies', t:'Stem and seed the dried chillies, toast them in a dry pan for 30 seconds a side until they smell nutty, then soak in hot water 20 minutes. Burnt chillies turn the whole marinade bitter, so watch them.', heat:'Medium-dry pan. They should soften and puff, not smoke.'},
+    {h:'Adobo', t:'Blend the soaked chillies with achiote paste, vinegar, garlic, cumin, oregano, a little soaking water and a slice of the pineapple until completely smooth.'},
+    {h:'Marinate', t:'Slice the pork shoulder thin — 5 mm, across the grain — and turn it through the adobo. Four hours minimum, overnight is better.'},
+    {h:'Stack and roast', t:'Pack the slices tightly into a loaf tin with pineapple chunks between the layers, and roast at 180 °C / 350 °F for 90 minutes. This is the home stand-in for the trompo: pressure and slow heat.', heat:'Cover with foil for the first hour, uncover for the last thirty.'},
+    {h:'Then sear', t:'Rest, slice thinly off the block, and crisp the slices hard in a dry, very hot pan. Skipping this leaves you with stewed pork — the crust is the dish.', heat:'The hottest pan you have. Work in batches, no crowding.'},
+    {h:'Serve', t:'Warmed corn tortillas, doubled. Pork, finely diced onion, cilantro, a piece of grilled pineapple, lime. Salsa verde on the side.'}
+  ]
+},
+{
+  id:'cacio_pepe', country:'Italy', flag:'🇮🇹', dish:'Cacio e Pepe', native:'Cacio e pepe',
+  region:'Rome — one of the four canonical Roman pastas',
+  blurb:'Three ingredients and nowhere to hide. Everything depends on an emulsion of cheese, starch water and fat, and heat is what breaks it.',
+  serves:2, time:'20 m', level:'Hard',
+  ings:[
+    {i:'pasta', q:200, u:'g'}, {i:'pecorino', q:120, u:'g'},
+    {i:'pepper', q:2, u:'tsp'}, {i:'salt', q:1, u:'tbsp'}
+  ],
+  steps:[
+    {h:'Less water', t:'Cook the pasta in about half the water you normally would, salted lightly. You want that water starchy — it is the emulsifier, and dilute water will not hold the sauce.'},
+    {h:'Toast the pepper', t:'Crack the peppercorns coarsely and toast them in a dry wide pan until fragrant, under a minute. Add a ladle of pasta water and let it bubble into a pepper broth.'},
+    {h:'Cheese paste', t:'Grate the pecorino very finely and work it with a few spoons of pasta water into a thick, smooth paste. Lumps here become lumps in the bowl.'},
+    {h:'Off the heat', t:'Drain the pasta two minutes early and finish it in the pepper broth. Then take the pan off the heat and wait until it stops sizzling before the cheese goes anywhere near it.', heat:'This is the whole dish. Above roughly 65 °C the cheese proteins tighten and you get stringy clumps in a watery pan — the failure everyone has had.'},
+    {h:'Emulsify', t:'Add the cheese paste and toss hard, adding pasta water a spoon at a time until it turns glossy and coats every strand.'},
+    {h:'Serve', t:'Straight into warm bowls with more pepper. It waits for nobody.'}
+  ]
+},
+{
+  id:'paella', country:'Spain', flag:'🇪🇸', dish:'Paella Valenciana', native:'Paella valenciana',
+  region:'Valencia — and no, the original has no seafood in it',
+  blurb:'Rabbit, chicken and beans. The seafood version is a different dish from the coast. What matters is a thin layer of rice, never stirred, and the toasted crust underneath.',
+  serves:6, time:'1 h 15 m', level:'Hard',
+  ings:[
+    {i:'rice_bomba', q:500, u:'g'}, {i:'chicken_th', q:500, u:'g'},
+    {i:'rabbit', q:500, u:'g'}, {i:'bean_green', q:200, u:'g'},
+    {i:'bean_butter', q:150, u:'g'}, {i:'tomato', q:2, u:'piece'},
+    {i:'paprika', q:1, u:'tbsp'}, {i:'saffron', q:0.3, u:'g'},
+    {i:'oil_olive', q:100, u:'ml'}, {i:'rosemary', q:1, u:'piece'},
+    {i:'salt', q:1, u:'tbsp'}
+  ],
+  steps:[
+    {h:'Brown the meat', t:'Salt the chicken and rabbit, and brown them slowly in the oil around the outside of the pan, 15 to 20 minutes. Slow browning here is most of the flavour.', heat:'Medium. A paella pan is wide and thin — move pieces to the hot spots rather than turning the heat up.'},
+    {h:'Sofrito', t:'Push the meat to the edge. In the middle, cook the green beans a few minutes, then grated tomato and paprika. Take the pan off the heat before the paprika goes in — it scorches in seconds and turns bitter.'},
+    {h:'Broth', t:'Water to the pan rivets, butter beans, rosemary, saffron bloomed in a little warm water, and salt. Boil hard 20 minutes to make the broth right there.', heat:'Hard boil. Taste it — it should be slightly too salty, because the rice will take a lot.'},
+    {h:'Rice in', t:'Scatter the rice evenly across the whole surface and level it. From this moment do not stir. Ever. Stirring releases starch and makes risotto.', heat:'High for 10 minutes, then low for 8.'},
+    {h:'Socarrat', t:'When the liquid is gone, raise the heat for 60 to 90 seconds until you hear crackling and smell toast — not burning. That caramelised crust on the base is the point of the dish.', heat:'Listen more than you look. When it goes from crackle toward acrid, it is done.'},
+    {h:'Rest', t:'Off the heat, cover with a cloth for 5 minutes. Serve from the pan, and scrape the bottom.'}
+  ]
+},
+{
+  id:'menemen', country:'Turkey', flag:'🇹🇷', dish:'Menemen', native:'Menemen',
+  region:'Aegean — named for a town near İzmir, eaten everywhere for breakfast',
+  blurb:'Eggs cooked into peppers and tomato until soft and spoonable. Not scrambled eggs with vegetables in them — the vegetables come first and the egg joins late.',
+  serves:2, time:'25 m', level:'Easy',
+  ings:[
+    {i:'egg', q:4, u:'piece'}, {i:'tomato', q:4, u:'piece'},
+    {i:'pepper_bell', q:2, u:'piece'}, {i:'butter', q:30, u:'g'},
+    {i:'oil_olive', q:1, u:'tbsp'}, {i:'chili_dry', q:1, u:'tsp'},
+    {i:'salt', q:1, u:'tsp'}, {i:'parsley', q:0.3, u:'bunch'}
+  ],
+  steps:[
+    {h:'Peppers first', t:'Long green peppers if you can get them, otherwise a mild bell. Chop and cook gently in the butter and oil for 8 to 10 minutes until genuinely soft.', heat:'Medium-low. Underdone peppers are the most common fault.'},
+    {h:'Tomato down', t:'Peel and chop the tomatoes, add with salt and chilli flakes, and cook 8 minutes until they break down and the liquid reduces to a loose sauce.'},
+    {h:'Eggs in whole', t:'Crack the eggs straight into the pan and stir slowly with a wooden spoon, folding the tomato through them. Beating the eggs separately first makes a different dish.', heat:'Low. Take it off the heat while the egg still looks slightly underdone.'},
+    {h:'Serve', t:'Parsley over the top, straight from the pan, with a lot of bread. Tea, not coffee.'}
+  ]
+},
+{
+  id:'moussaka', country:'Greece', flag:'🇬🇷', dish:'Moussaka', native:'Μουσακάς',
+  region:'Nationwide — the modern version dates to Nikolaos Tselementes in the 1920s',
+  blurb:'Three separately cooked layers assembled at the end. The béchamel on top is a twentieth-century French addition, and it is what makes it this dish rather than a bake.',
+  serves:8, time:'2 h 30 m', level:'Hard',
+  ings:[
+    {i:'eggplant', q:1200, u:'g'}, {i:'potato', q:500, u:'g'},
+    {i:'lamb_grd', q:700, u:'g'}, {i:'onion', q:2, u:'piece'},
+    {i:'garlic', q:3, u:'clove'}, {i:'tomato_pst', q:2, u:'tbsp'},
+    {i:'tomato', q:3, u:'piece'}, {i:'wine_red', q:120, u:'ml'},
+    {i:'cinnamon', q:1, u:'piece'}, {i:'oil_olive', q:120, u:'ml'},
+    {i:'butter', q:80, u:'g'}, {i:'flour', q:80, u:'g'},
+    {i:'milk', q:800, u:'ml'}, {i:'egg', q:2, u:'piece'},
+    {i:'pecorino', q:100, u:'g'}, {i:'nutmeg', q:0.5, u:'tsp'}
+  ],
+  steps:[
+    {h:'Salt the aubergine', t:'Slice 1 cm thick, salt generously, and leave in a colander 30 minutes. Pat dry. This draws out water so the slices roast instead of steaming.'},
+    {h:'Roast, do not fry', t:'Brush with olive oil and roast at 200 °C / 400 °F for 25 minutes until golden. Frying aubergine absorbs an alarming amount of oil and makes the finished dish greasy.'},
+    {h:'Meat sauce', t:'Brown the lamb hard, then onion and garlic, then tomato paste cooked out for a minute. Wine, chopped tomato, cinnamon stick. Simmer 30 minutes until thick and almost dry.', heat:'It must be dry. A wet meat layer makes the whole thing collapse when you cut it.'},
+    {h:'Béchamel', t:'Melt the butter, stir in the flour and cook 2 minutes, then add the warm milk gradually, whisking. Cook until thick enough to hold a ribbon. Off the heat, beat in the eggs, most of the cheese and the nutmeg.', heat:'Warm milk into a hot roux. Cold milk gives you lumps.'},
+    {h:'Layer', t:'Par-boiled potato slices on the base, then aubergine, then all the meat sauce, then the rest of the aubergine, then the béchamel. Remaining cheese over the top.'},
+    {h:'Bake and wait', t:'180 °C / 350 °F for 45 minutes until deep gold. Then rest at least 30 minutes — an hour is better. Cut it hot and it runs across the plate.'}
+  ]
+},
+{
+  id:'doro_wat', country:'Ethiopia', flag:'🇪🇹', dish:'Doro Wat', native:'ዶሮ ወጥ',
+  region:'Amhara and Addis Ababa — the dish of holidays and welcome',
+  blurb:'Onions cooked down dry for the better part of an hour before any fat goes in. That is not a step to rush; it is the entire base of the stew.',
+  serves:6, time:'2 h 30 m', level:'Medium',
+  ings:[
+    {i:'chicken_th', q:1200, u:'g'}, {i:'onion', q:6, u:'piece'},
+    {i:'ghee', q:120, u:'g'}, {i:'berbere', q:5, u:'tbsp'},
+    {i:'garlic', q:6, u:'clove'}, {i:'ginger', q:3, u:'tbsp'},
+    {i:'egg', q:6, u:'piece'}, {i:'lemon', q:60, u:'ml'},
+    {i:'cardamom', q:4, u:'piece'}, {i:'salt', q:2, u:'tsp'}
+  ],
+  steps:[
+    {h:'Dry onions', t:'Finely chop the onions and cook them in a dry pot, no fat at all, stirring often for 40 to 50 minutes until collapsed and deep gold. They release their own water and then caramelise in it.', heat:'Medium-low throughout. This step cannot be shortened and is the difference between doro wat and a red chicken stew.'},
+    {h:'Then the fat', t:'Now add the ghee — niter kibbeh, spiced clarified butter, if you have it — with the garlic and ginger. Cook 5 minutes.'},
+    {h:'Bloom the berbere', t:'Stir in the berbere and cook it in the fat for 5 minutes until it darkens and loses its raw edge. Add a little water whenever it threatens to catch.'},
+    {h:'Chicken', t:'Rub the chicken with lemon juice and salt first, then add to the pot with the cardamom and enough water to half-cover. Simmer 45 minutes.', heat:'Low and slow, partly covered. The sauce should end thick enough to scoop, never pourable.'},
+    {h:'Eggs', t:'Hard-boil the eggs, peel, and score each one shallowly all over so the sauce gets in. Add for the last 15 minutes.'},
+    {h:'Serve', t:'On injera, with more injera to eat it with. No cutlery.'}
+  ]
+},
+{
+  id:'rendang', country:'Indonesia', flag:'🇮🇩', dish:'Rendang', native:'Rendang',
+  region:'Minangkabau, West Sumatra — originally a way of preserving meat',
+  blurb:'Not a curry. You keep cooking past the point where the sauce disappears, until the coconut oil separates out and starts frying the meat in its own spice paste.',
+  serves:6, time:'4 h', level:'Medium',
+  ings:[
+    {i:'beef_chuck', q:1200, u:'g'}, {i:'coconut_mk', q:1000, u:'ml'},
+    {i:'shallot', q:12, u:'piece'}, {i:'garlic', q:8, u:'clove'},
+    {i:'chili_dry', q:12, u:'piece'}, {i:'galangal', q:3, u:'tbsp'},
+    {i:'ginger', q:2, u:'tbsp'}, {i:'lemongrass', q:3, u:'piece'},
+    {i:'turmeric', q:1, u:'tsp'}, {i:'candlenut', q:6, u:'piece'},
+    {i:'limeleaf', q:6, u:'piece'}, {i:'tamarind', q:1, u:'tbsp'},
+    {i:'salt', q:2, u:'tsp'}
+  ],
+  steps:[
+    {h:'Paste', t:'Blend shallots, garlic, soaked dried chillies, galangal, ginger, turmeric and candlenuts into a smooth paste. Candlenuts thicken it and add richness; macadamias are the usual substitute.'},
+    {h:'Fry the paste', t:'Cook the paste in a little oil for 10 minutes until it darkens and the raw smell goes. Add bruised lemongrass and torn lime leaves.'},
+    {h:'First stage — simmer', t:'Add the beef in large cubes, all the coconut milk, tamarind and salt. Simmer uncovered, stirring occasionally, for about 2 hours until the sauce thickens.', heat:'Gentle and uncovered the whole way. Covering it traps steam and the liquid never reduces.'},
+    {h:'Second stage — the turn', t:'Keep going. The sauce darkens from cream to caramel to deep brown, and then the oil separates out. From that moment you are frying, not stewing, and you must stir constantly.', heat:'Low. Another hour or more. This is the step that makes it rendang rather than kalio, the wetter halfway dish — which is also delicious, if you want to stop early.'},
+    {h:'Done', t:'Finished when the meat is dark, almost dry, coated in paste, and shreds under a fork. Properly made it keeps for days unrefrigerated, which is what it was for.'},
+    {h:'Serve', t:'With plain rice, and something sharp alongside.'}
+  ]
+},
+{
+  id:'adobo', country:'Philippines', flag:'🇵🇭', dish:'Chicken Adobo', native:'Adobong manok',
+  region:'Nationwide — and every household disagrees about it',
+  blurb:'Vinegar, soy, garlic, bay, pepper. The technique that matters is letting the vinegar boil off its sharpness before you stir anything.',
+  serves:4, time:'1 h', level:'Easy',
+  ings:[
+    {i:'chicken_th', q:1000, u:'g'}, {i:'vinegar_wh', q:120, u:'ml'},
+    {i:'soy', q:100, u:'ml'}, {i:'garlic', q:10, u:'clove'},
+    {i:'bay', q:4, u:'piece'}, {i:'pepper', q:1, u:'tbsp'},
+    {i:'sugar_wh', q:1, u:'tbsp'}, {i:'oil_veg', q:1, u:'tbsp'}
+  ],
+  steps:[
+    {h:'Marinate', t:'Bone-in thighs in the soy, half the garlic and the cracked pepper for 30 minutes to an hour. No vinegar yet.'},
+    {h:'Sear', t:'Lift the chicken out, pat it dry, and brown it skin down in the oil. Keep the marinade.', heat:'Medium-high. Dry skin browns; wet skin steams.'},
+    {h:'Vinegar, then leave it', t:'Add the vinegar, marinade, bay and remaining garlic. Bring to a boil and do not stir for the first few minutes while the harshness cooks off. Stirring early is the classic mistake and leaves it raw-tasting.', heat:'Hard boil for 3 minutes, then drop to a simmer.'},
+    {h:'Braise', t:'Simmer covered 25 minutes, then uncover and reduce until the sauce is glossy and clings. Sugar at the end to balance if it needs it.'},
+    {h:'Optional crisp', t:'Many households pull the chicken out, fry it until the skin crisps, and pour the reduced sauce back over. Worth doing.'},
+    {h:'Serve', t:'Rice, and enough sauce to flood it. Better the next day, which everyone says and is true.'}
+  ]
+},
+{
+  id:'tabbouleh', country:'Lebanon', flag:'🇱🇧', dish:'Tabbouleh', native:'تبولة',
+  region:'Levant — a herb salad, not a grain salad',
+  blurb:'Overwhelmingly parsley. The bulgur is a seasoning, roughly a tenth of the bowl — the version with grain as the base is a foreign invention.',
+  serves:6, time:'40 m', level:'Easy',
+  ings:[
+    {i:'parsley', q:300, u:'g'}, {i:'bulgur', q:40, u:'g'},
+    {i:'tomato', q:4, u:'piece'}, {i:'mint', q:0.5, u:'bunch'},
+    {i:'scallion', q:0.5, u:'bunch'}, {i:'lemon', q:80, u:'ml'},
+    {i:'oil_olive', q:80, u:'ml'}, {i:'salt', q:1.5, u:'tsp'}
+  ],
+  steps:[
+    {h:'Bulgur', t:'Fine bulgur only. Soak it in the lemon juice rather than water for 20 minutes — it softens and takes on the acidity at the same time.'},
+    {h:'Dry the parsley', t:'Wash well and dry completely, then strip the leaves. Wet parsley makes a watery bowl and nothing later fixes it.'},
+    {h:'Chop, do not blitz', t:'Bunch the leaves tightly and slice with a very sharp knife. A food processor bruises the parsley and turns it black within the hour.'},
+    {h:'Tomato', t:'Small dice, and drain off the seeds and juice. That liquid is the other thing that waterlogs the salad.'},
+    {h:'Combine late', t:'Fold everything with the soaked bulgur, olive oil and salt no more than 20 minutes before eating. Dressed early it wilts.'},
+    {h:'Serve', t:'Cold, with romaine leaves to scoop it. Part of a mezze, not a side dish.'}
   ]
 }
 ];
@@ -1640,6 +2046,102 @@ mincepie:{
     {w:'Base', o:'Shortcrust below and puff above is the classic construction. All-puff is faster and structurally worse.'},
     {w:'Depth', o:'Worcestershire and tomato paste is the everyday version. A spoonful of Marmite is a common bakery secret.'},
     {w:'Size', o:'Individual pies are the national form. A family-sized pie needs a longer bake and a firmer filling still.'}
+  ]},
+oyakodon:{
+  foundation:'A seasoned dashi broth reduced with onion and chicken, then barely-beaten egg poured in two stages and taken off the heat while still loose. The egg must not set fully.',
+  layers:[
+    {w:'Protein', o:'Chicken and egg is the name — oya (parent) and ko (child). Beef makes it gyudon, pork katsu makes it katsudon.'},
+    {w:'Sweetness', o:'The mirin-to-soy ratio is the main regional variable. Kantō runs sweeter and darker than Kansai.'},
+    {w:'Egg doneness', o:'Tokyo shops serve it distinctly runny. Set firmer if that worries you, but you lose the texture the dish is built around.'},
+    {w:'Top', o:'Scallion always. Mitsuba, shichimi or nori depending on the shop.'}
+  ]},
+kimchi_jjigae:{
+  foundation:'Sour aged kimchi fried in rendered pork fat until it sweetens, then simmered with its own brine. Fresh kimchi makes a thinner, sharper stew — the age is the ingredient.',
+  layers:[
+    {w:'Fat', o:'Pork belly is standard. Tinned tuna is the quick weeknight version, and Spam has its own devoted following.'},
+    {w:'Kimchi age', o:'Three weeks minimum, and months is better. Some cooks keep a jar specifically to go sour.'},
+    {w:'Heat', o:'Gochugaru for clean heat, gochujang for depth and body. Most households use both, in their own ratio.'},
+    {w:'Extras', o:'Tofu nearly always. Enoki, rice cakes, ramen noodles or a raw egg cracked in at the end.'}
+  ]},
+butter_chicken:{
+  foundation:'Yogurt-marinated chicken charred separately and hard, and a sauce of sieved tomato, cashew and butter built on its own. They meet only at the end.',
+  layers:[
+    {w:'Char', o:'Tandoor, grill, broiler or a hard sear. However you do it, the blackened edges are a flavour the sauce cannot supply.'},
+    {w:'Richness', o:'Cashew, cream, butter, or all three. This is where restaurant and home versions diverge most.'},
+    {w:'Heat', o:'Kashmiri chilli gives colour without much burn. Restaurants often keep it mild and serve chilli separately.'},
+    {w:'Kasuri methi', o:'Crushed dried fenugreek leaf at the end. Leave it out and most people cannot name what is missing, but they notice.'}
+  ]},
+al_pastor:{
+  foundation:'Thin pork marinated in an adobo of toasted dried chillies and achiote, cooked under pressure in a stack, then crisped hard in a dry pan at the last moment.',
+  layers:[
+    {w:'Chillies', o:'Guajillo for colour and mild fruit, ancho for depth, chile de árbol if you want real heat.'},
+    {w:'Pineapple', o:'In the marinade it tenderises — its enzymes will turn the pork mushy if you leave it more than a day. On the taco it is for contrast.'},
+    {w:'Cut', o:'Shoulder for fat. Loin is leaner and drier, and needs more marinade time.'},
+    {w:'Salsa', o:'Verde is the common partner. Some stands do a roasted red árbol salsa instead.'}
+  ]},
+cacio_pepe:{
+  foundation:'An emulsion of finely grated pecorino, starchy pasta water and toasted pepper, made off the heat. There is no cream and no butter, and heat is the enemy.',
+  layers:[
+    {w:'Pasta', o:'Tonnarelli in Rome. Spaghetti or bucatini work; a shape with grip works better.'},
+    {w:'Cheese', o:'Pecorino Romano is the rule. Some cooks cut it with a little parmesan to soften the sharpness, which Romans will tell you is wrong.'},
+    {w:'Pepper', o:'Coarsely cracked and toasted. Pre-ground pepper has already lost what you are toasting for.'},
+    {w:'Method', o:'Cheese paste in a bowl, or the whole thing tossed in the pan off-heat. Both work; both fail the same way if the pan is too hot.'}
+  ]},
+paella:{
+  foundation:'A broth built in the pan, then a thin even layer of short-grain rice that is never stirred, finished with a burst of heat to toast the base into socarrat.',
+  layers:[
+    {w:'Protein', o:'Rabbit and chicken in Valencia, sometimes snails. Seafood paella is a coastal dish, and mixing the two is a tourist invention locals are weary of.'},
+    {w:'Beans', o:'Garrofó and ferradura are the Valencian pair. Butter beans and flat green beans are the usual stand-ins.'},
+    {w:'Rice', o:'Bomba absorbs three times its volume and forgives timing. Calasparra is the connoisseur choice; risotto rice is not a substitute.'},
+    {w:'Fuel', o:'Orange wood over an open fire is traditional and genuinely tastes different. A wide burner is the practical version.'}
+  ]},
+menemen:{
+  foundation:'Peppers softened slowly, tomato cooked down to a sauce, and whole eggs stirred in late over low heat so they stay soft and fold through rather than scramble.',
+  layers:[
+    {w:'Onion', o:'The great national argument. Purists say never; plenty of households add it anyway.'},
+    {w:'Cheese', o:'Beyaz peynir or kaşar stirred in at the end is common in İstanbul, less so in the Aegean.'},
+    {w:'Sausage', o:'Sucuk fried first, its fat used to cook the peppers, is the heartier version.'},
+    {w:'Heat', o:'Pul biber is standard. The amount is personal and usually considerable.'}
+  ]},
+moussaka:{
+  foundation:'Three components cooked separately — roasted aubergine, a nearly dry spiced meat sauce, and an egg-enriched béchamel — layered and baked, then rested until it will hold a cut.',
+  layers:[
+    {w:'Base', o:'Potato under the aubergine is common and makes it more substantial. Aubergine alone is the older form.'},
+    {w:'Meat', o:'Lamb is traditional, beef is common, and a lentil version is standard during Orthodox fasting.'},
+    {w:'Spice', o:'Cinnamon and allspice. The warm-spice-in-meat instinct is the Ottoman inheritance.'},
+    {w:'Top', o:'Béchamel with egg and cheese. A thinner, custardier top is the Athenian style.'}
+  ]},
+doro_wat:{
+  foundation:'A very large quantity of onion cooked dry until it collapses and caramelises in its own moisture, before any fat or spice. Then berbere bloomed in ghee, then chicken simmered down to a thick scoopable stew.',
+  layers:[
+    {w:'Fat', o:'Niter kibbeh — butter clarified with ginger, garlic, fenugreek and korarima — is the real thing. Plain ghee works and is noticeably plainer.'},
+    {w:'Heat', o:'Berbere blends vary enormously between households and markets. Buy from somewhere that sells a lot of it.'},
+    {w:'Eggs', o:'Scored hard-boiled eggs are essentially obligatory, one per person at a holiday table.'},
+    {w:'Occasion', o:'This is the dish for Christmas, Easter and guests. Everyday wat is smaller and quicker.'}
+  ]},
+rendang:{
+  foundation:'Coconut milk and spice paste reduced far past a curry, until the liquid goes and the separated coconut oil starts frying the meat. Stop earlier and you have kalio, a different and wetter dish.',
+  layers:[
+    {w:'Meat', o:'Beef chuck or shin. Buffalo traditionally, and chicken or jackfruit versions exist across the region.'},
+    {w:'Dryness', o:'How far you take it is the main variable. Sumatran rendang goes almost black and dry; Malaysian versions often stop wetter.'},
+    {w:'Aromatics', o:'Galangal, lemongrass, turmeric leaf and kaffir lime. Turmeric leaf is hard to find abroad and is genuinely missed.'},
+    {w:'Thickener', o:'Candlenut is standard. Macadamia is the closest substitute; cashew will do at a push.'}
+  ]},
+adobo:{
+  foundation:'Vinegar and soy braised with garlic, bay and pepper, with the vinegar boiled hard and left unstirred at the start so its sharpness cooks off.',
+  layers:[
+    {w:'Ratio', o:'The vinegar-to-soy balance is the household signature and people are firm about it.'},
+    {w:'Colour', o:'Adobong puti uses no soy at all and is the older form. Some add coconut milk, some annatto.'},
+    {w:'Protein', o:'Chicken, pork, both together, squid, or kangkong for a vegetable version.'},
+    {w:'Finish', o:'Reduced to a glaze, or left saucy for the rice. Both defensible; the fried-then-glazed version wins most arguments.'}
+  ]},
+tabbouleh:{
+  foundation:'Parsley by volume, with bulgur as a seasoning rather than a base. Everything dry, cut with a sharp knife, and dressed at the last moment.',
+  layers:[
+    {w:'Ratio', o:'Roughly ten parts parsley to one of bulgur. The Western inversion of this is the single biggest difference between versions.'},
+    {w:'Grain', o:'Fine bulgur soaked in lemon. Coarse bulgur stays gritty; quinoa is a modern substitution that changes the texture entirely.'},
+    {w:'Herbs', o:'Mint always, in a much smaller quantity than parsley. Some families add a little scallion green.'},
+    {w:'Acid', o:'Lemon, generously, and more than you would expect. Sumac appears in some Palestinian versions.'}
   ]}
 };
 
