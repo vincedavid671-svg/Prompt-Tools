@@ -22,7 +22,7 @@ already knows what is in their cupboard → an estimate of what is left afterwar
 
 ---
 
-## Eleven mechanics, all demonstrated in the prototype
+## Twelve mechanics, all demonstrated in the prototype
 
 ### 1. Foundation and layers
 
@@ -238,7 +238,65 @@ not accurate enough to manage a medical condition on. **Wire FoodData Central
 before shipping this feature to real users** — a diabetic counting carbohydrate on
 approximations is a genuine harm, not a rough edge.
 
-### 6. Allergens
+### 6. Language
+
+The app reaches 85 countries and shipped entirely in English. That is three
+separate problems wearing one word, and they need different answers.
+
+**1. UI chrome** — a finite set of short strings, human-translated once and
+shipped as a dictionary. 44 strings across English (US), English (UK), Arabic,
+Spanish and French. A missing key falls back to English rather than showing a
+raw identifier, because a half-translated screen should still be usable.
+
+**2. Ingredient names** — the highest-value translation in the product and the
+one nobody thinks of. Standing in a Riyadh souk, "makrut lime leaves" is useless;
+ورق الليمون الكافر gets you the leaves.
+
+Note the first two columns. Even within English the names diverge:
+
+| US | UK |
+|---|---|
+| Eggplant | Aubergine |
+| Cilantro | Fresh coriander |
+| Scallions | Spring onions |
+| All-purpose flour | Plain flour |
+| Ground beef | Beef mince |
+| Heavy cream | Double cream |
+
+An American reading "aubergine" or a Briton reading "cilantro" is a small
+constant friction the app can simply remove, and it costs nothing.
+
+**3. Method text** — long prose, and the only part where machine translation
+earns its place. Opt-in per recipe via the `sample` capability, labelled as
+machine output, with the original one tap away. A translation that comes back
+covering fewer steps than the recipe has is **discarded rather than shown** — a
+recipe silently missing a step is worse than an untranslated one.
+
+#### The hard rule
+
+**Allergen and medical copy is never machine-translated.** A mistranslated
+allergen warning can put someone in hospital. Those strings ship human-translated
+or they ship in English with an explicit note saying so — which is what the
+Arabic, Spanish and French locales currently do. The ingredient names above them
+are translated; the warnings are not, and the app says which is which.
+
+#### Right-to-left
+
+Arabic needs more than a flipped direction. Numbers and Latin fragments stay LTR
+inside an RTL line, flex rows reverse, and anything anchored with a physical
+left or right has to be restated. Logical properties cover most of it; the rest
+is an explicit `[dir="rtl"]` block.
+
+#### Where the names come from
+
+`tools/names-resolve.mjs` resolves names from **Wikidata** — CC0, so no
+share-alike obligation on a commercial product, unlike Open Food Facts' ODbL.
+Each name carries a **QID**, the stable identifier that makes it checkable.
+Sixteen culturally specific ingredients are excluded from automation entirely
+and carry a hand-curated `mkt` field: the exact thing to say at the counter.
+See `tools/README.md`.
+
+### 7. Allergens
 
 A deliberately separate system from the diet engine, because the stakes differ.
 Getting halal wrong is distressing. Getting peanut wrong puts someone in hospital.
@@ -310,7 +368,7 @@ Region matters too: the US Big 9 show by default, and the extra EU-declared
 allergens (celery, mustard, sulphites, molluscs) appear when shopping from a
 country that requires them, with a note about which regime applies.
 
-### 7. Purchase-anchored pantry ledger
+### 8. Purchase-anchored pantry ledger
 
 The differentiator, and the feature most likely to fail if built naively.
 
@@ -327,7 +385,7 @@ The design that survives:
 - **Present estimates as estimates.** "≈ 210 g left" with one-tap correction,
   never a ledger claiming precision it does not have.
 
-### 8. Protein and dietary swaps
+### 9. Protein and dietary swaps
 
 Religion and preference decide the protein long before taste does. The diet
 engine holds eight profiles — halal, kosher, no pork, no beef, pescatarian,
@@ -351,13 +409,13 @@ Swaps resolve in one function, `effectiveIng()`. Quantities, pantry coverage and
 the shopping list all read through it, so a swap propagates without any of them
 knowing diets exist.
 
-### 9. Region browsing
+### 10. Region browsing
 
 The Atlas filters by region before country, because that is how travel memory is
 organised — people remember *Southeast Asia* or *the Gulf*, not a country list.
 Each region carries a line on what it is known for.
 
-### 10. Global sourcing from a derived platform registry
+### 11. Global sourcing from a derived platform registry
 
 The first version of this hand-curated a store list per country. That does not
 scale past a handful of markets, and the product is global by definition — the
@@ -397,7 +455,7 @@ Country coverage is researched but not verified market by market, and platforms
 enter and leave countries constantly. The tier assignments are the durable part;
 treat coverage as a starting point that needs maintenance.
 
-### 11. Community layer
+### 12. Community layer
 
 Ratings and notes from people who actually cooked the dish, stored per-dish.
 This is original user content, owned outright, and it is the only realistic way

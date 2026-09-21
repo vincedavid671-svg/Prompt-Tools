@@ -73,3 +73,69 @@ sourced. Nothing else needs changing — the switch is one field.
 `fib` arrives with the resolve, which is what makes **net carbohydrate** possible.
 It is shown only where every counted ingredient in a recipe carries fibre, and the
 keto and low-carb tags then use the net figure rather than total carbs.
+
+---
+
+## names-resolve.mjs
+
+Resolves ingredient names into many languages from **Wikidata**, and writes them
+into `ING_L10N` in `prototype.html`.
+
+```bash
+node tools/names-resolve.mjs --langs ar,es,fr,de,tr,id
+node tools/names-resolve.mjs --verify            # report, write nothing
+node tools/names-resolve.mjs --only cilantro,eggplant
+```
+
+No API key. Wikidata asks for a descriptive User-Agent and sane request rates;
+both are set. Responses cache to `.wd-cache`.
+
+### Why Wikidata and not Open Food Facts
+
+Open Food Facts publishes an ingredients taxonomy with translations in a great
+many languages, and as a *food* dataset it is better. But it is licensed
+**ODbL**, which is share-alike for the database: extracting a substantial part
+into a commercial product carries an obligation to license the derived database
+on the same terms.
+
+**Wikidata is CC0** — no conditions, no share-alike, no attribution requirement.
+For something intended to be sold, that difference outweighs the marginal data
+quality. If you later decide OFF's terms are acceptable, its ingredients
+taxonomy is a drop-in alternative and only `fetchLabels()` changes.
+
+### How it works
+
+1. **Search** Wikidata for each ingredient by English name.
+2. **Rank** candidates by their description, so "saffron" resolves to the spice
+   rather than a film or a band. Items whose description matches none of the
+   expected words are rejected outright.
+3. **Query** the SPARQL endpoint for that item's label in each target language.
+4. **Write** the names back, along with the **QID** — the stable identifier that
+   makes every name checkable at `wikidata.org/wiki/<QID>`.
+
+QIDs are never hardcoded in this file. An invented identifier is a fabricated
+citation, and the entire value of anchoring to Wikidata is that the anchor can
+be checked.
+
+### What it deliberately does not do
+
+**Dictionary translation is not the word a shopkeeper recognises.** Wikidata will
+tell you coriander leaf is كزبرة خضراء. It will not tell you that at Deserter's
+Bazaar in Tbilisi you ask for ქინძი, or that the Thai stall wants ใบมะกรูด rather
+than a formal botanical name.
+
+So 16 ingredients are on a `HAND_CURATED` list the script never touches —
+makrut lime leaf, baharat, loomi, berbere, donne' sali, gochugaru, kasuri methi,
+achiote, candlenut and the rest. Those carry a separate `mkt` field: the exact
+thing to say at the counter, transliterated where the script alone would not
+help.
+
+That is the same split as the nutrition resolver. The machine fills the bulk;
+a human fills the part that is actually hard.
+
+### A gap is better than a wrong word
+
+Where Wikidata has no label in a target language, the script reports it and
+leaves the existing name in place rather than substituting something
+approximate. In a recipe app a wrong ingredient name sends someone home with the
+wrong thing; a missing one sends them to ask.

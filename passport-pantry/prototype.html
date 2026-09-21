@@ -144,6 +144,48 @@ ol.steps b{display:block;font-weight:700;font-size:12px;letter-spacing:.04em;tex
 .log li{border-top:1px solid var(--line);padding-top:9px;font-size:13px}
 .log .meta{font-size:11px;color:var(--ink-3);display:flex;gap:8px;align-items:center}
 
+/* ---------- method translation ----------
+   The one place machine translation is the right tool: long prose, where
+   a rough rendering beats no rendering. Deliberately opt-in, deliberately
+   labelled, and the original is always one tap away. Allergen and medical
+   copy never comes through here. */
+async function translateMethod(r){
+  if(!state.sample || state.translating) return;
+  state.translating = true; render();
+  const target = LOCALES[state.lang].name;
+  const payload = r.steps.map((s, i) => `${i}|${s.h}|${s.t}${s.heat ? '|' + s.heat : ''}`).join('\n');
+  const prompt =
+`Translate these cooking method steps into ${target}.
+
+Rules:
+- Keep every temperature, time and quantity exactly as written, including both °C and °F.
+- Keep the pipe-delimited format: index|heading|body|heat (heat is optional and may be absent).
+- Translate cooking terms the way a cook in that language would say them, not literally.
+- Leave dish and ingredient names that have no common translation in their original form.
+- Output nothing but the lines.
+
+${payload}`;
+  try{
+    const res = await state.sample(prompt, {modelTier:'default'});
+    const steps = res.text.trim().split('\n').map(line => {
+      const parts = line.split('|');
+      if(parts.length < 3) return null;
+      return {h:parts[1].trim(), t:parts[2].trim(), heat:parts[3] ? parts[3].trim() : null};
+    });
+    // Only accept a translation that covers every step; a partial one would
+    // silently drop instructions from a recipe.
+    if(steps.length >= r.steps.length && steps.slice(0, r.steps.length).every(Boolean)){
+      state.translated[r.id] = {lang:state.lang, steps};
+    }else{
+      state.translated[r.id] = null;
+      alert('The translation came back incomplete, so it was discarded rather than showing you a recipe with steps missing.');
+    }
+  }catch(e){
+    state.translated[r.id] = null;
+  }
+  state.translating = false; state.showOriginal = false; render();
+}
+
 /* ---------- coach ---------- */
 .coach{display:flex;flex-direction:column;gap:9px}
 .coach .row{display:flex;gap:7px}
@@ -192,6 +234,29 @@ ul.ings li.swapped .iname em{color:var(--jade)}
 .store b{font-size:13.5px}
 .store .tierrow{display:flex;gap:4px;flex-wrap:wrap}
 .store .sd{font-size:11.5px;color:var(--ink-2);line-height:1.4}
+/* ---------- right-to-left ----------
+   Arabic needs more than a flipped text direction. Numbers and Latin
+   fragments stay LTR inside an RTL line, the tab row and every row built
+   with flex reverses, and anything anchored with a physical left/right
+   has to be restated. Logical properties handle most of it; these are
+   the places they do not reach. */
+[dir="rtl"] body{font-family:var(--body)}
+[dir="rtl"] .brand{margin-right:0;margin-left:auto}
+[dir="rtl"] .kserves{margin-left:0;margin-right:auto}
+[dir="rtl"] .panel.allerg{border-left:0;border-right:3px solid var(--line-2)}
+[dir="rtl"] .panel.allerg.bad{border-right-color:var(--chili)}
+[dir="rtl"] .panel.allerg.warn{border-right-color:var(--accent)}
+[dir="rtl"] .panel.allerg.good{border-right-color:var(--jade)}
+[dir="rtl"] .shopitem.hard{border-left:1px solid var(--line);border-right:3px solid var(--chili)}
+[dir="rtl"] .attrib{border-left:0;border-right:3px solid var(--line-2);padding:2px 12px 2px 0}
+[dir="rtl"] ol.steps li{grid-template-columns:26px 1fr}
+[dir="rtl"] .num{direction:ltr;unicode-bidi:embed;display:inline-block}
+[dir="rtl"] .qty{text-align:right}
+[dir="rtl"] .ytplan ol{padding-left:0;padding-right:18px}
+.mktname{font-size:11.5px;color:var(--accent-ink);margin-top:2px;font-weight:600;direction:ltr;unicode-bidi:isolate}
+.mtrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.asafety.notrans{border-color:var(--accent);color:var(--accent-ink);margin-bottom:10px}
+
 /* ---------- allergens ---------- */
 .allergsel{margin-top:14px;border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;background:var(--surface)}
 .achips{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
@@ -359,10 +424,10 @@ footer.foot{border-top:1px solid var(--line);margin-top:34px;padding-top:14px;fo
     <div class="bar-in">
       <div class="brand"><b>Passport Pantry</b><span>Prototype</span></div>
       <nav class="tabs" role="tablist" id="tabs">
-        <button role="tab" data-view="atlas" aria-selected="true">Atlas</button>
-        <button role="tab" data-view="today" aria-selected="false">Today</button>
-        <button role="tab" data-view="pantry" aria-selected="false">Pantry</button>
-        <button role="tab" data-view="list" aria-selected="false">Shopping</button>
+        <button role="tab" data-view="atlas" aria-selected="true" data-t="atlas">Atlas</button>
+        <button role="tab" data-view="today" aria-selected="false" data-t="today">Today</button>
+        <button role="tab" data-view="pantry" aria-selected="false" data-t="pantry">Pantry</button>
+        <button role="tab" data-view="list" aria-selected="false" data-t="shopping">Shopping</button>
       </nav>
     </div>
   </header>
@@ -562,6 +627,181 @@ const FLAGS = {
   vinegar_wh:[], tofu:[], gochujang:[], gochugaru:[]
 };
 const flagsOf = id => FLAGS[id] || [];
+
+/* ---------- language ----------
+   Three different problems wearing one word, and they need different
+   answers:
+
+   1. UI chrome — a finite set of short strings. Human-translated once,
+      shipped as a dictionary. Cheap and reliable.
+   2. Ingredient names — the highest-value translation in the product and
+      the one nobody thinks of. Standing in a Riyadh souk, "makrut lime
+      leaves" is useless; ورق الليمون الكافر gets you the leaves. This is
+      curated per language, not machine-translated, because culinary terms
+      do not survive a generic translator.
+   3. Method text — long, prose, and the only part where machine
+      translation earns its place. Offered at view time, labelled as
+      machine output, with the original always one tap away.
+
+   And one hard rule: allergen and medical text is NEVER machine
+   translated. A mistranslated allergen warning can put someone in
+   hospital. Those strings ship human-translated or they ship in English
+   with an explicit note saying so.                                       */
+const LOCALES = {
+  'en-US':{name:'English (US)',  dir:'ltr', safety:true},
+  'en-GB':{name:'English (UK)',  dir:'ltr', safety:true},
+  'ar':   {name:'العربية',        dir:'rtl', safety:false},
+  'es':   {name:'Español',        dir:'ltr', safety:false},
+  'fr':   {name:'Français',       dir:'ltr', safety:false}
+};
+
+/* UI strings. A missing key falls back to en-US rather than showing a
+   raw identifier — a half-translated screen should still be usable. */
+const T = {
+  atlas:      {'en-US':'Atlas','en-GB':'Atlas',ar:'الأطلس',es:'Atlas',fr:'Atlas'},
+  today:      {'en-US':'Today','en-GB':'Today',ar:'اليوم',es:'Hoy',fr:'Aujourd’hui'},
+  pantry:     {'en-US':'Pantry','en-GB':'Pantry',ar:'المخزن',es:'Despensa',fr:'Garde-manger'},
+  shopping:   {'en-US':'Shopping','en-GB':'Shopping',ar:'التسوق',es:'Compras',fr:'Courses'},
+  region:     {'en-US':'Region','en-GB':'Region',ar:'المنطقة',es:'Región',fr:'Région'},
+  country:    {'en-US':'Country','en-GB':'Country',ar:'الدولة',es:'País',fr:'Pays'},
+  everywhere: {'en-US':'Everywhere','en-GB':'Everywhere',ar:'كل المناطق',es:'Todo el mundo',fr:'Partout'},
+  diet:       {'en-US':'Diet','en-GB':'Diet',ar:'النظام الغذائي',es:'Dieta',fr:'Régime'},
+  allergies:  {'en-US':'Allergies — tap to add','en-GB':'Allergies — tap to add',ar:'الحساسية — اضغط للإضافة',es:'Alergias — toca para añadir',fr:'Allergies — appuyez pour ajouter'},
+  shopFrom:   {'en-US':'Shopping from','en-GB':'Shopping from',ar:'التسوق من',es:'Comprando desde',fr:'Achats depuis'},
+  language:   {'en-US':'Language','en-GB':'Language',ar:'اللغة',es:'Idioma',fr:'Langue'},
+  ingredients:{'en-US':'Ingredients','en-GB':'Ingredients',ar:'المكونات',es:'Ingredientes',fr:'Ingrédients'},
+  method:     {'en-US':'Method','en-GB':'Method',ar:'طريقة التحضير',es:'Preparación',fr:'Préparation'},
+  foundation: {'en-US':'The foundation','en-GB':'The foundation',ar:'الأساس',es:'La base',fr:'Le fondement'},
+  whatChange: {'en-US':'What people change','en-GB':'What people change',ar:'ما يختلف بين الطباخين',es:'Lo que cada cocinero cambia',fr:'Ce que chacun modifie'},
+  perServing: {'en-US':'Per serving','en-GB':'Per serving',ar:'لكل حصة',es:'Por ración',fr:'Par portion'},
+  protein:    {'en-US':'Protein','en-GB':'Protein',ar:'بروتين',es:'Proteína',fr:'Protéines'},
+  carbs:      {'en-US':'Carbs','en-GB':'Carbs',ar:'كربوهيدرات',es:'Carbohidratos',fr:'Glucides'},
+  fat:        {'en-US':'Fat','en-GB':'Fat',ar:'دهون',es:'Grasas',fr:'Lipides'},
+  servings:   {'en-US':'servings','en-GB':'servings',ar:'حصص',es:'raciones',fr:'portions'},
+  inPantry:   {'en-US':'in pantry','en-GB':'in pantry',ar:'متوفر',es:'en la despensa',fr:'en stock'},
+  nonePantry: {'en-US':'none in pantry','en-GB':'none in pantry',ar:'غير متوفر',es:'no hay',fr:'pas en stock'},
+  notTracked: {'en-US':'not tracked','en-GB':'not tracked',ar:'غير محسوب',es:'sin seguimiento',fr:'non suivi'},
+  short:      {'en-US':'short','en-GB':'short',ar:'ناقص',es:'faltan',fr:'manque'},
+  addShort:   {'en-US':'Add everything I’m short of','en-GB':'Add everything I’m short of',ar:'أضف كل ما ينقصني',es:'Añadir todo lo que me falta',fr:'Ajouter tout ce qui manque'},
+  logCook:    {'en-US':'Log this cook','en-GB':'Log this cook',ar:'سجّل هذا الطبخ',es:'Registrar esta preparación',fr:'Enregistrer cette cuisson'},
+  logServing: {'en-US':'Log a serving','en-GB':'Log a serving',ar:'سجّل حصة',es:'Registrar una ración',fr:'Enregistrer une portion'},
+  allergens:  {'en-US':'Allergens','en-GB':'Allergens',ar:'مسببات الحساسية',es:'Alérgenos',fr:'Allergènes'},
+  easyMiss:   {'en-US':'Easy to miss','en-GB':'Easy to miss',ar:'يسهل إغفاله',es:'Fácil pasar por alto',fr:'Facile à manquer'},
+  readLabel:  {'en-US':'Depends on the brand — read the label','en-GB':'Depends on the brand — read the label',ar:'يعتمد على العلامة التجارية — اقرأ الملصق',es:'Depende de la marca — lee la etiqueta',fr:'Dépend de la marque — lisez l’étiquette'},
+  source:     {'en-US':'Source','en-GB':'Source',ar:'المصدر',es:'Fuente',fr:'Source'},
+  watchMade:  {'en-US':'Watch it made','en-GB':'Watch it made',ar:'شاهد طريقة التحضير',es:'Míralo cocinar',fr:'Regardez-le se faire'},
+  askCoach:   {'en-US':'Ask the kitchen coach','en-GB':'Ask the kitchen coach',ar:'اسأل مدرب المطبخ',es:'Pregunta al asesor de cocina',fr:'Demandez au coach cuisine'},
+  allDishes:  {'en-US':'All','en-GB':'All',ar:'الكل',es:'Todos',fr:'Tous'},
+  draft:      {'en-US':'Draft · untested','en-GB':'Draft · untested',ar:'مسودة · غير مجربة',es:'Borrador · sin probar',fr:'Brouillon · non testé'},
+  remove:     {'en-US':'Remove','en-GB':'Remove',ar:'إزالة',es:'Quitar',fr:'Retirer'},
+  bought:     {'en-US':'Bought','en-GB':'Bought',ar:'تم شراؤه',es:'Comprado',fr:'Acheté'},
+  estLeft:    {'en-US':'Estimated left','en-GB':'Estimated left',ar:'المتبقي التقديري',es:'Restante estimado',fr:'Restant estimé'},
+  refill:     {'en-US':'Refill','en-GB':'Refill',ar:'إعادة تعبئة',es:'Rellenar',fr:'Remplir'},
+  kcalLeft:   {'en-US':'kcal left','en-GB':'kcal left',ar:'سعرة متبقية',es:'kcal restantes',fr:'kcal restantes'},
+  kcalOver:   {'en-US':'kcal over','en-GB':'kcal over',ar:'سعرة زائدة',es:'kcal de más',fr:'kcal en trop'},
+  eaten:      {'en-US':'Eaten','en-GB':'Eaten',ar:'المستهلك',es:'Consumido',fr:'Consommé'},
+  target:     {'en-US':'Target','en-GB':'Target',ar:'الهدف',es:'Objetivo',fr:'Objectif'},
+  loggedToday:{'en-US':'Logged today','en-GB':'Logged today',ar:'مسجّل اليوم',es:'Registrado hoy',fr:'Enregistré aujourd’hui'}
+};
+function t(key){
+  const row = T[key];
+  if(!row) return key;
+  return row[state.lang] || row['en-US'] || key;
+}
+
+/* ---------- ingredient names by language ----------
+   Note the first two columns. Even within English the names diverge, and
+   an American cook reading "aubergine" or a British one reading "cilantro"
+   is a small, constant friction the app can simply remove.
+
+   `mkt` is the name to ask for in a market where that differs from the
+   dictionary word — transliterated where the script would not help.     */
+const ING_L10N = {
+  eggplant:   {'en-US':'Eggplant','en-GB':'Aubergine',ar:'باذنجان',es:'Berenjena',fr:'Aubergine'},
+  cilantro:   {'en-US':'Cilantro','en-GB':'Fresh coriander',ar:'كزبرة خضراء',es:'Cilantro',fr:'Coriandre fraîche'},
+  scallion:   {'en-US':'Scallions','en-GB':'Spring onions',ar:'بصل أخضر',es:'Cebolleta',fr:'Oignon nouveau'},
+  pepper_bell:{'en-US':'Bell pepper','en-GB':'Sweet pepper',ar:'فلفل رومي',es:'Pimiento',fr:'Poivron'},
+  chives_g:   {'en-US':'Garlic chives','en-GB':'Chinese chives',ar:'ثوم معمر صيني',es:'Cebollino chino',fr:'Ciboule de Chine'},
+  flour:      {'en-US':'All-purpose flour','en-GB':'Plain flour',ar:'دقيق',es:'Harina',fr:'Farine'},
+  cream:      {'en-US':'Heavy cream','en-GB':'Double cream',ar:'كريمة',es:'Nata',fr:'Crème entière'},
+  potato_fl:  {'en-US':'Russet potatoes','en-GB':'Floury potatoes',ar:'بطاطس',es:'Patatas harinosas',fr:'Pommes de terre farineuses'},
+  bean_green: {'en-US':'Flat green beans','en-GB':'Runner beans',ar:'فاصوليا خضراء',es:'Judía verde plana',fr:'Haricots plats'},
+  shallot:    {'en-US':'Shallots','en-GB':'Shallots',ar:'بصل أحمر صغير',es:'Chalotas',fr:'Échalotes'},
+  onion:      {'en-US':'Yellow onion','en-GB':'Brown onion',ar:'بصل',es:'Cebolla',fr:'Oignon'},
+  garlic:     {'en-US':'Garlic','en-GB':'Garlic',ar:'ثوم',es:'Ajo',fr:'Ail'},
+  tomato:     {'en-US':'Tomato','en-GB':'Tomato',ar:'طماطم',es:'Tomate',fr:'Tomate'},
+  carrot:     {'en-US':'Carrot','en-GB':'Carrot',ar:'جزر',es:'Zanahoria',fr:'Carotte'},
+  parsley:    {'en-US':'Flat-leaf parsley','en-GB':'Flat-leaf parsley',ar:'بقدونس',es:'Perejil',fr:'Persil plat'},
+  mint:       {'en-US':'Fresh mint','en-GB':'Fresh mint',ar:'نعناع',es:'Menta',fr:'Menthe'},
+  lemon:      {'en-US':'Lemon','en-GB':'Lemon',ar:'ليمون',es:'Limón',fr:'Citron'},
+  ginger:     {'en-US':'Fresh ginger','en-GB':'Fresh ginger',ar:'زنجبيل',es:'Jengibre',fr:'Gingembre'},
+  salt:       {'en-US':'Kosher salt','en-GB':'Coarse salt',ar:'ملح',es:'Sal',fr:'Sel'},
+  pepper:     {'en-US':'Black peppercorns','en-GB':'Black peppercorns',ar:'فلفل أسود',es:'Pimienta negra',fr:'Poivre noir'},
+  oil_olive:  {'en-US':'Olive oil','en-GB':'Olive oil',ar:'زيت زيتون',es:'Aceite de oliva',fr:'Huile d’olive'},
+  butter:     {'en-US':'Butter','en-GB':'Butter',ar:'زبدة',es:'Mantequilla',fr:'Beurre'},
+  ghee:       {'en-US':'Ghee','en-GB':'Ghee',ar:'سمن',es:'Ghee',fr:'Ghee'},
+  milk:       {'en-US':'Whole milk','en-GB':'Whole milk',ar:'حليب',es:'Leche entera',fr:'Lait entier'},
+  yogurt:     {'en-US':'Plain yogurt','en-GB':'Natural yoghurt',ar:'لبن زبادي',es:'Yogur natural',fr:'Yaourt nature'},
+  egg:        {'en-US':'Egg','en-GB':'Egg',ar:'بيض',es:'Huevo',fr:'Œuf'},
+  chicken_th: {'en-US':'Chicken thighs','en-GB':'Chicken thighs',ar:'أفخاذ دجاج',es:'Muslos de pollo',fr:'Cuisses de poulet'},
+  chicken_wh: {'en-US':'Whole chicken','en-GB':'Whole chicken',ar:'دجاجة كاملة',es:'Pollo entero',fr:'Poulet entier'},
+  lamb_grd:   {'en-US':'Ground lamb','en-GB':'Lamb mince',ar:'لحم غنم مفروم',es:'Cordero picado',fr:'Agneau haché'},
+  beef_grd:   {'en-US':'Ground beef','en-GB':'Beef mince',ar:'لحم بقري مفروم',es:'Carne picada',fr:'Bœuf haché'},
+  beef_chuck: {'en-US':'Beef chuck','en-GB':'Beef shin or chuck',ar:'لحم بقري للطبخ البطيء',es:'Aguja de ternera',fr:'Paleron de bœuf'},
+  rice_bas:   {'en-US':'Basmati rice','en-GB':'Basmati rice',ar:'أرز بسمتي',es:'Arroz basmati',fr:'Riz basmati'},
+  rice_short: {'en-US':'Short-grain rice','en-GB':'Short-grain rice',ar:'أرز قصير الحبة',es:'Arroz de grano corto',fr:'Riz à grain court'},
+  bulgur:     {'en-US':'Fine bulgur','en-GB':'Fine bulgur',ar:'برغل ناعم',es:'Bulgur fino',fr:'Boulgour fin'},
+  pasta:      {'en-US':'Dried pasta','en-GB':'Dried pasta',ar:'معكرونة',es:'Pasta seca',fr:'Pâtes sèches'},
+  /* the specialty ones, where the local name is the whole point */
+  loomi:      {'en-US':'Dried black lime (loomi)','en-GB':'Dried black lime (loomi)',ar:'لومي',es:'Lima negra seca',fr:'Citron noir séché', mkt:'لومي · loomi'},
+  baharat:    {'en-US':'Kabsa spice blend','en-GB':'Kabsa spice blend',ar:'بهارات كبسة',es:'Mezcla de especias kabsa',fr:'Mélange d’épices kabsa', mkt:'بهارات كبسة · bharat kabsa'},
+  preslemon:  {'en-US':'Preserved lemon','en-GB':'Preserved lemon',ar:'ليمون مخلل',es:'Limón en conserva',fr:'Citron confit', mkt:'ليمون مخلل · hamed msayar'},
+  limeleaf:   {'en-US':'Makrut lime leaves','en-GB':'Makrut lime leaves',ar:'ورق الليمون الكافر',es:'Hojas de lima kaffir',fr:'Feuilles de combava', mkt:'ใบมะกรูด · bai makrut'},
+  basil_thai: {'en-US':'Thai basil','en-GB':'Thai basil',ar:'ريحان تايلندي',es:'Albahaca tailandesa',fr:'Basilic thaï', mkt:'โหระพา · horapha'},
+  fishsauce:  {'en-US':'Fish sauce','en-GB':'Fish sauce',ar:'صلصة السمك',es:'Salsa de pescado',fr:'Sauce de poisson', mkt:'น้ำปลา nam pla · nước mắm'},
+  galangal:   {'en-US':'Galangal','en-GB':'Galangal',ar:'خولنجان',es:'Galanga',fr:'Galanga', mkt:'ข่า khaa · lengkuas'},
+  lemongrass: {'en-US':'Lemongrass','en-GB':'Lemongrass',ar:'عشبة الليمون',es:'Hierba limón',fr:'Citronnelle', mkt:'ตะไคร้ takhrai · serai'},
+  candlenut:  {'en-US':'Candlenuts','en-GB':'Candlenuts',ar:'جوز الشمع',es:'Nuez de la India',fr:'Noix de bancoul', mkt:'kemiri'},
+  tamarind:   {'en-US':'Tamarind paste','en-GB':'Tamarind paste',ar:'تمر هندي',es:'Pasta de tamarindo',fr:'Pâte de tamarin', mkt:'تمر هندي · asam jawa'},
+  gochugaru:  {'en-US':'Gochugaru','en-GB':'Gochugaru',ar:'رقائق فلفل كوري',es:'Gochugaru',fr:'Gochugaru', mkt:'고춧가루'},
+  gochujang:  {'en-US':'Gochujang','en-GB':'Gochujang',ar:'معجون فلفل كوري',es:'Gochujang',fr:'Gochujang', mkt:'고추장'},
+  kimchi:     {'en-US':'Aged kimchi','en-GB':'Aged kimchi',ar:'كيمتشي معتق',es:'Kimchi maduro',fr:'Kimchi affiné', mkt:'묵은지 mugeunji'},
+  dashi:      {'en-US':'Dashi','en-GB':'Dashi',ar:'مرق داشي',es:'Dashi',fr:'Dashi', mkt:'だし'},
+  mirin:      {'en-US':'Mirin','en-GB':'Mirin',ar:'ميرين',es:'Mirin',fr:'Mirin', mkt:'みりん'},
+  methi:      {'en-US':'Kasuri methi','en-GB':'Dried fenugreek leaves',ar:'أوراق الحلبة المجففة',es:'Fenogreco seco',fr:'Feuilles de fenugrec séchées', mkt:'कसूरी मेथी'},
+  chili_kash: {'en-US':'Kashmiri chili powder','en-GB':'Kashmiri chilli powder',ar:'فلفل كشميري',es:'Chile de Cachemira',fr:'Piment du Cachemire', mkt:'कश्मीरी मिर्च'},
+  garam:      {'en-US':'Garam masala','en-GB':'Garam masala',ar:'جرام ماسالا',es:'Garam masala',fr:'Garam masala', mkt:'गरम मसाला'},
+  chili_guaj: {'en-US':'Guajillo chiles','en-GB':'Guajillo chillies',ar:'فلفل غواخيو',es:'Chiles guajillo',fr:'Piments guajillo', mkt:'chile guajillo'},
+  chili_anch: {'en-US':'Ancho chiles','en-GB':'Ancho chillies',ar:'فلفل أنشو',es:'Chiles anchos',fr:'Piments ancho', mkt:'chile ancho'},
+  achiote:    {'en-US':'Achiote paste','en-GB':'Achiote paste',ar:'معجون أشيوتي',es:'Pasta de achiote',fr:'Pâte de roucou', mkt:'recado rojo'},
+  tortilla:   {'en-US':'Corn tortillas','en-GB':'Corn tortillas',ar:'خبز التورتيلا',es:'Tortillas de maíz',fr:'Tortillas de maïs'},
+  berbere:    {'en-US':'Berbere','en-GB':'Berbere',ar:'بربري',es:'Berbere',fr:'Berbéré', mkt:'በርበሬ'},
+  scotch:     {'en-US':'Scotch bonnet','en-GB':'Scotch bonnet',ar:'فلفل سكوتش بونيه',es:'Chile scotch bonnet',fr:'Piment antillais'},
+  donne:      {'en-US':'Donne’ sali','en-GB':'Donne’ sali',ar:'فلفل حار صغير',es:'Chile donne’ sali',fr:'Piment donne’ sali', mkt:"donne' sali"},
+  fenugreek:  {'en-US':'Blue fenugreek','en-GB':'Blue fenugreek',ar:'حلبة زرقاء',es:'Fenogreco azul',fr:'Fenugrec bleu', mkt:'უცხო სუნელი · utskho suneli'},
+  pecorino:   {'en-US':'Pecorino Romano','en-GB':'Pecorino Romano',ar:'جبن بيكورينو',es:'Pecorino romano',fr:'Pecorino romano'},
+  rice_bomba: {'en-US':'Bomba rice','en-GB':'Bomba rice',ar:'أرز بومبا',es:'Arroz bomba',fr:'Riz bomba'},
+  saffron:    {'en-US':'Saffron','en-GB':'Saffron',ar:'زعفران',es:'Azafrán',fr:'Safran'},
+  paprika:    {'en-US':'Sweet paprika','en-GB':'Sweet paprika',ar:'بابريكا',es:'Pimentón dulce',fr:'Paprika doux'},
+  coconut_mk: {'en-US':'Coconut milk','en-GB':'Coconut milk',ar:'حليب جوز الهند',es:'Leche de coco',fr:'Lait de coco'},
+  soy:        {'en-US':'Soy sauce','en-GB':'Soy sauce',ar:'صلصة الصويا',es:'Salsa de soja',fr:'Sauce soja'},
+  sesame_oil: {'en-US':'Toasted sesame oil','en-GB':'Toasted sesame oil',ar:'زيت السمسم',es:'Aceite de sésamo',fr:'Huile de sésame'}
+};
+/* Display name in the current language, falling back to the canonical
+   English rather than showing nothing. */
+function ingName(id){
+  const row = ING_L10N[id];
+  if(!row) return ING[id].n;
+  return row[state.lang] || row['en-US'] || ING[id].n;
+}
+/* What to ask for in a shop, when that differs from the dictionary word. */
+function ingMarket(id){
+  const row = ING_L10N[id];
+  return row && row.mkt ? row.mkt : null;
+}
+const isRTL = () => LOCALES[state.lang].dir === 'rtl';
+/* Whether safety-critical copy exists human-translated in this language. */
+const safetyTranslated = () => LOCALES[state.lang].safety;
 
 /* ---------- allergens ----------
    Deliberately a separate system from the diet engine. A diet conflict is a
@@ -2186,7 +2426,8 @@ const EXAMPLE_PANTRY = {
 /* ---------- state ---------- */
 const state = {
   view:'atlas', dishId:null, servingsMul:1, filter:'all', regionFilter:'all',
-  diet:'none', allergies:[], market:'SA', swaps:{}, need:{},
+  diet:'none', allergies:[], market:'SA', swaps:{}, need:{}, lang:'en-US',
+  translated:{}, translating:false, showOriginal:false,
   date:new Date().toISOString().slice(0,10), day:{}, editProfile:false,
   profile:{mode:'calc', target:2200, sex:'unspecified', age:40, height:175,
            weight:80, activity:1.375, goal:'maintain', framework:'balanced'},
@@ -2466,20 +2707,26 @@ function viewAtlas(){
 
   <div class="prefs">
     <label class="pref">
-      <span class="eyebrow">Diet</span>
+      <span class="eyebrow">${esc(t('language'))}</span>
+      <select id="langsel">
+        ${Object.keys(LOCALES).map(k => `<option value="${k}" ${state.lang === k ? 'selected' : ''}>${esc(LOCALES[k].name)}</option>`).join('')}
+      </select>
+    </label>
+    <label class="pref">
+      <span class="eyebrow">${esc(t('diet'))}</span>
       <select id="dietsel">
         ${Object.keys(DIETS).map(k => `<option value="${k}" ${state.diet === k ? 'selected' : ''}>${esc(DIETS[k].label)}</option>`).join('')}
       </select>
     </label>
     <label class="pref">
-      <span class="eyebrow">Shopping from</span>
+      <span class="eyebrow">${esc(t('shopFrom'))}</span>
       <select id="marketsel">
         ${SERVED.map(k => `<option value="${k}" ${state.market === k ? 'selected' : ''}>${COUNTRIES[k].f} ${esc(COUNTRIES[k].n)}</option>`).join('')}
       </select>
     </label>
   </div>
   <div class="allergsel">
-    <span class="eyebrow">Allergies — tap to add</span>
+    <span class="eyebrow">${esc(t('allergies'))}</span>
     <div class="achips">
       ${Object.keys(ALLERGENS).filter(k => ALLERGENS[k].us || euLabels() || state.allergies.includes(k))
         .map(k => `<button class="chip achip" data-allerg="${k}" aria-pressed="${state.allergies.includes(k)}">${esc(ALLERGENS[k].label)}</button>`).join('')}
@@ -2495,9 +2742,9 @@ function viewAtlas(){
   ${d.note ? `<div class="notice" style="margin-top:10px">${esc(d.note)}</div>` : ''}
 
   <hr class="rule">
-  <div class="eyebrow">Region</div>
+  <div class="eyebrow">${esc(t('region'))}</div>
   <div class="filters" style="margin-top:7px">
-    <button class="chip" data-region="all" aria-pressed="${state.regionFilter === 'all'}">Everywhere</button>
+    <button class="chip" data-region="all" aria-pressed="${state.regionFilter === 'all'}">${esc(t('everywhere'))}</button>
     ${regions.map(rg => `<button class="chip" data-region="${esc(rg)}" aria-pressed="${state.regionFilter === rg}">${esc(rg)}</button>`).join('')}
   </div>
   ${state.regionFilter !== 'all' && REGION_NOTE[state.regionFilter]
@@ -2585,7 +2832,7 @@ function viewRecipe(){
   <div class="cols">
     <div>
       <div class="panel">
-        <h2>Ingredients</h2>
+        <h2>${esc(t('ingredients'))}</h2>
         <div class="scaler">
           <button id="mdown" aria-label="Fewer servings">−</button>
           <span class="val num">${r.serves * state.servingsMul} servings</span>
@@ -2606,20 +2853,20 @@ function viewRecipe(){
               <button class="tick ${ticked ? 'on' : ''}" data-need="${ing.i}" aria-pressed="${ticked}"
                       aria-label="${ticked ? 'Remove' : 'Add'} ${esc(ING[ing.i].n)} ${ticked ? 'from' : 'to'} shopping list">${ticked ? '✓' : ''}</button>
               <span class="qty num">${fmtIng(ing.q * state.servingsMul, ing.u)}</span>
-              <span class="iname">${esc(ING[ing.i].n)}<em>${ing.swappedFrom ? 'swapped from ' + esc(ING[ing.swappedFrom].n) + ' · ' : ''}${g === null ? 'no gram conversion defined' : '≈ ' + fmtG(g)}</em></span>
+              <span class="iname">${esc(ingName(ing.i))}<em>${ing.swappedFrom ? 'swapped from ' + esc(ingName(ing.swappedFrom)) + ' · ' : ''}${g === null ? 'no gram conversion defined' : '≈ ' + fmtG(g)}</em></span>
               <span class="stock ${state_}">${esc(label)}${short > 0 && cov.have > 0 ? ` · short ${fmtG(short)}` : ''}</span>
             </li>`;
           }).join('')}
         </ul>
         <div class="ingacts">
-          <button class="btn primary" id="needall">Add everything I'm short of</button>
+          <button class="btn primary" id="needall">${esc(t('addShort'))}</button>
           ${Object.keys(state.swaps[r.id] || {}).length ? `<button class="mini" id="clearswaps">Undo swaps</button>` : ''}
         </div>
       </div>
 
       ${state.allergies.length ? `
       <div class="panel allerg ${alg.contains.length ? 'bad' : alg.check.length ? 'warn' : 'good'}">
-        <h2>Allergens</h2>
+        <h2>${esc(t('allergens'))}</h2>
         <div class="astat">
           ${alg.contains.length
             ? `<strong>Contains ${[...new Set(alg.contains.flatMap(c => c.which))].map(w => esc(ALLERGENS[w].label)).join(', ')}.</strong>`
@@ -2630,9 +2877,9 @@ function viewRecipe(){
 
         ${alg.contains.filter(c => c.hidden.length).length ? `
           <div class="ahidden">
-            <span class="eyebrow">Easy to miss</span>
+            <span class="eyebrow">${esc(t('easyMiss'))}</span>
             ${alg.contains.filter(c => c.hidden.length).map(c => `
-              <div class="arow"><b>${esc(ING[c.ing.i].n)}</b> — contains ${c.hidden.map(w => esc(ALLERGENS[w].label)).join(', ')}.
+              <div class="arow"><b>${esc(ingName(c.ing.i))}</b> — contains ${c.hidden.map(w => esc(ALLERGENS[w].label)).join(', ')}.
               ${c.note ? `<span class="an">${esc(c.note)}</span>` : ''}</div>`).join('')}
           </div>` : ''}
 
@@ -2640,13 +2887,13 @@ function viewRecipe(){
           const blockedBy = c.which.find(w => alg.blocked[w]);
           const alts = safeAlts(c.ing.i);
           return `<div class="swapblock">
-            <div class="swaphead">${esc(ING[c.ing.i].n)} <span class="pill chili">${c.which.map(w => esc(ALLERGENS[w].label)).join(', ')}</span></div>
+            <div class="swaphead">${esc(ingName(c.ing.i))} <span class="pill chili">${c.which.map(w => esc(ALLERGENS[w].label)).join(', ')}</span></div>
             ${c.note && !c.hidden.length ? `<p class="an">${esc(c.note)}</p>` : ''}
             ${blockedBy
               ? `<p class="ablocked"><strong>No substitution saves this dish.</strong> ${esc(alg.blocked[blockedBy])}</p>`
               : alts.length
                 ? alts.map(a => `<button class="swapopt" data-swapfrom="${c.ing.i}" data-swapto="${a.to}">
-                    <b>${esc(ING[a.to].n)}</b><span>${esc(a.note)}</span>
+                    <b>${esc(ingName(a.to))}</b><span>${esc(a.note)}</span>
                     ${a.caution.length ? `<span class="acaut">Check the label for ${a.caution.map(w => esc(ALLERGENS[w].label)).join(', ')} — brands vary.</span>` : ''}
                   </button>`).join('')
                 : `<p class="swapnone">No substitution in the table avoids your allergens here. Better to choose another dish than to improvise with something that might carry the same one.</p>`}
@@ -2655,9 +2902,9 @@ function viewRecipe(){
 
         ${alg.check.length ? `
           <div class="acheck">
-            <span class="eyebrow">Depends on the brand — read the label</span>
+            <span class="eyebrow">${esc(t('readLabel'))}</span>
             ${alg.check.map(c => `<div class="arow">
-              <b>${esc(ING[c.ing.i].n)}</b> — may contain ${c.which.map(w => esc(ALLERGENS[w].label)).join(', ')}.
+              <b>${esc(ingName(c.ing.i))}</b> — may contain ${c.which.map(w => esc(ALLERGENS[w].label)).join(', ')}.
               ${c.note ? `<span class="an">${esc(c.note)}</span>` : ''}
             </div>`).join('')}
           </div>` : ''}
@@ -2665,9 +2912,13 @@ function viewRecipe(){
         ${alg.advisory.length ? `
           <div class="aadvisory">
             <span class="eyebrow">Worth knowing, not treated as a conflict</span>
-            ${alg.advisory.map(c => `<div class="arow"><b>${esc(ING[c.ing.i].n)}</b> — ${c.which.map(w => esc(ADVISORY_NOTE[w] || ALLERGENS[w].label)).join(' ')}</div>`).join('')}
+            ${alg.advisory.map(c => `<div class="arow"><b>${esc(ingName(c.ing.i))}</b> — ${c.which.map(w => esc(ADVISORY_NOTE[w] || ALLERGENS[w].label)).join(' ')}</div>`).join('')}
           </div>` : ''}
 
+        ${!safetyTranslated() ? `<div class="asafety notrans">
+          <strong>Allergen wording stays in English here.</strong>
+          This copy is not yet human-translated into ${esc(LOCALES[state.lang].name)}, and machine translation of an allergen warning is not a risk worth taking — a mistranslated one can put someone in hospital. The ingredient names above are translated; the warnings below are not.
+        </div>` : ''}
         <div class="asafety">
           <strong>The app cannot make this dish safe for you.</strong> It reads a recipe; it does not read the label on what you buy, and it cannot see cross-contact in a factory, a bulk bin, or a kitchen. Check every product every time. If a reaction could be severe, this is a starting point for your own checking and nothing more.
         </div>
@@ -2682,10 +2933,10 @@ function viewRecipe(){
           </div>
           ${diet.conflicts.map(c => `
             <div class="swapblock">
-              <div class="swaphead">${esc(ING[c.ing.i].n)} <span class="pill chili">${c.why.map(esc).join(', ')}</span></div>
+              <div class="swaphead">${esc(ingName(c.ing.i))} <span class="pill chili">${c.why.map(esc).join(', ')}</span></div>
               ${cleanSubs(c.ing.i).length
                 ? cleanSubs(c.ing.i).map(s => `<button class="swapopt" data-swapfrom="${c.ing.i}" data-swapto="${s.to}">
-                     <b>${esc(ING[s.to].n)}</b><span>${esc(s.note)}</span></button>`).join('')
+                     <b>${esc(ingName(s.to))}</b><span>${esc(s.note)}</span></button>`).join('')
                 : `<p class="swapnone">No substitution in the table fits this profile. This dish is built around the ingredient — better to choose another.</p>`}
             </div>`).join('')}
         ` : state.diet !== 'none' ? `<div class="dietflag jade"><strong>${esc(DIETS[state.diet].label)}:</strong> no conflicts in this recipe.</div>` : ''}
@@ -2694,14 +2945,14 @@ function viewRecipe(){
 
         ${proteinOpts.length ? `
           <div class="eyebrow" style="margin-top:14px">Change the protein</div>
-          <p class="swapintro">${esc(ING[proteinId].n)} is a layer, not the foundation. These all work:</p>
+          <p class="swapintro">${esc(ingName(proteinId))} is a layer, not the foundation. These all work:</p>
           ${proteinOpts.map(s => `<button class="swapopt" data-swapfrom="${proteinId}" data-swapto="${s.to}">
-             <b>${esc(ING[s.to].n)}</b><span>${esc(s.note)}</span></button>`).join('')}
+             <b>${esc(ingName(s.to))}</b><span>${esc(s.note)}</span></button>`).join('')}
         ` : ''}
       </div>` : ''}
 
       <div class="panel">
-        <h2>Per serving</h2>
+        <h2>${esc(t('perServing'))}</h2>
         <div class="kcal">
           <span class="kbig num">${Math.round(nut.k)}</span><span class="kunit">kcal</span>
           <span class="kserves">of ${r.serves} servings${state.servingsMul !== 1 ? ` · unchanged by scaling` : ''}</span>
@@ -2722,7 +2973,7 @@ function viewRecipe(){
         <div class="mbarkey">Share of energy — protein, carbohydrate, fat</div>
         ${nut.tags.length ? `<div class="ntags">${nut.tags.map(t => `<span class="pill jade">${esc(t)}</span>`).join('')}</div>` : ''}
         <div class="logrow">
-          <span class="eyebrow">Log a serving</span>
+          <span class="eyebrow">${esc(t('logServing'))}</span>
           <div class="logbtns">
             ${[0.5, 1, 1.5, 2].map(x => `<button class="mini" data-log="${x}">${x === 1 ? '1' : x}×</button>`).join('')}
           </div>
@@ -2745,22 +2996,22 @@ function viewRecipe(){
         </div>
         ${nut.proxies.length ? `<div class="nnote">
           <strong>Closest match, not exact:</strong>
-          ${nut.proxies.map(i => `${esc(ING[i].n)} — ${esc(NUTR_PROXY[i])}`).join('; ')}.
+          ${nut.proxies.map(i => `${esc(ingName(i))} — ${esc(NUTR_PROXY[i])}`).join('; ')}.
         </div>` : ''}
         <div class="nnote dim">${nut.net === null ? 'Carbohydrate is total, not net — fibre is not available for every ingredient here. ' : ''}Informational, not medical or dietary advice.</div>
       </div>
 
       <div class="panel">
-        <h2>The foundation</h2>
+        <h2>${esc(t('foundation'))}</h2>
         <p style="font-size:13.5px;color:var(--ink-2);margin:6px 0 0;line-height:1.55">${esc(craft.foundation)}</p>
-        <div class="eyebrow" style="margin-top:16px">What people change</div>
+        <div class="eyebrow" style="margin-top:16px">${esc(t('whatChange'))}</div>
         <ul class="layers">
           ${craft.layers.map(l => `<li><b>${esc(l.w)}</b><span>${esc(l.o)}</span></li>`).join('')}
         </ul>
       </div>
 
       <div class="panel">
-        <h2>Source</h2>
+        <h2>${esc(t('source'))}</h2>
         <div class="attrib" style="margin-top:8px">
           <strong>No source attached.</strong> The foundation and method above were written for this prototype and have not been kitchen-tested. In production this slot carries the original author, a link back, and the date someone who actually cooked it signed off.
         </div>
@@ -2773,7 +3024,7 @@ function viewRecipe(){
           ${[1,2,3,4,5].map(i => `<button data-star="${i}" data-on="0" aria-label="${i} star${i > 1 ? 's' : ''}">★</button>`).join('')}
         </div>
         <textarea class="note" id="note" placeholder="What you'd change next time — substitutions, heat, timing…"></textarea>
-        <button class="btn primary" id="cook" style="margin-top:9px">Log this cook</button>
+        <button class="btn primary" id="cook" style="margin-top:9px">${esc(t('logCook'))}</button>
         ${logs.length ? `<ul class="log">${logs.map(c => `<li>
           <div class="meta"><span style="color:var(--accent)">${'★'.repeat(c.rating || 0)}</span><span>${new Date(c.at).toLocaleDateString()}</span></div>
           ${c.note ? `<div>${esc(c.note)}</div>` : '<div style="color:var(--ink-3)">No note</div>'}
@@ -2783,14 +3034,30 @@ function viewRecipe(){
 
     <div>
       <div class="panel">
-        <h2>Method</h2>
+        <h2>${esc(t('method'))}</h2>
+        ${state.lang.startsWith('en') ? '' : `
+          <div class="mtrow">
+            ${state.translated[r.id] && state.translated[r.id].lang === state.lang
+              ? `<span class="pill amber">Machine translation</span><button class="mini" id="showorig">${state.showOriginal ? 'Show ' + esc(LOCALES[state.lang].name) : 'Show English'}</button>`
+              : `<button class="mini" id="translate">${state.translating ? 'Translating…' : 'Translate this method to ' + esc(LOCALES[state.lang].name)}</button>`}
+          </div>
+          ${state.translated[r.id] && state.translated[r.id].lang === state.lang && !state.showOriginal
+            ? `<div class="nnote dim">Machine-translated at your request, not reviewed by a cook. Temperatures, times and quantities are unchanged, but if a step reads oddly the English is one tap away.</div>` : ''}
+        `}
         <ol class="steps">
-          ${r.steps.map(s => `<li><div><b>${esc(s.h)}</b>${esc(s.t)}${s.heat ? `<div class="heat">🔥 ${esc(s.heat)}</div>` : ''}</div></li>`).join('')}
+          ${(() => {
+            const tr = state.translated[r.id];
+            const useTr = tr && tr.lang === state.lang && !state.showOriginal;
+            return r.steps.map((s, i) => {
+              const step = useTr && tr.steps[i] ? tr.steps[i] : s;
+              return `<li><div><b>${esc(step.h)}</b>${esc(step.t)}${step.heat ? `<div class="heat">🔥 ${esc(step.heat)}</div>` : ''}</div></li>`;
+            }).join('');
+          })()}
         </ol>
       </div>
 
       <div class="panel">
-        <h2>Ask the kitchen coach</h2>
+        <h2>${esc(t('askCoach'))}</h2>
         <p style="font-size:13px;color:var(--ink-2);margin:4px 0 10px">It knows this recipe, your servings, and what your pantry says you have.</p>
         <div class="coach">
           <div class="sugg">
@@ -2809,7 +3076,7 @@ function viewRecipe(){
       </div>
 
       <div class="panel">
-        <h2>Watch it made</h2>
+        <h2>${esc(t('watchMade'))}</h2>
         <p style="font-size:13px;color:var(--ink-2);margin:4px 0 12px">Seeing the dough come together beats reading about it. Cooks who watched a version first report better results than cooks who only read.</p>
         <a class="btn primary" href="${ytUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none">Search YouTube for ${esc(r.dish)} →</a>
         <div class="ytplan">
@@ -2844,7 +3111,7 @@ function viewPantry(){
           const pct = p.bought > 0 ? Math.max(0, Math.min(100, (p.left / p.bought) * 100)) : 0;
           const cls = pct <= 0 ? 'out' : pct < 25 ? 'low' : '';
           return `<tr>
-            <td><strong>${esc(ING[id].n)}</strong><div style="font-size:11px;color:var(--ink-3)">${ING[id].buy === 'spec' ? 'specialty market' : ING[id].buy === 'fresh' ? 'fresh · grocery' : 'shelf stable'}</div></td>
+            <td><strong>${esc(ingName(id))}</strong><div style="font-size:11px;color:var(--ink-3)">${ING[id].buy === 'spec' ? 'specialty market' : ING[id].buy === 'fresh' ? 'fresh · grocery' : 'shelf stable'}</div></td>
             <td class="num">${fmtG(p.bought)}</td>
             <td class="num">${fmtG(p.left)}<div class="meter"><i class="${cls}" style="width:${pct}%"></i></div></td>
             <td><button class="mini" data-refill="${id}">Refill</button></td>
@@ -2987,7 +3254,7 @@ function viewList(){
   <h1 class="title" style="margin:6px 0 10px">Shopping</h1>
   <div class="prefs" style="margin-bottom:6px">
     <label class="pref">
-      <span class="eyebrow">Shopping from</span>
+      <span class="eyebrow">${esc(t('shopFrom'))}</span>
       <select id="marketsel">
         ${SERVED.map(k => `<option value="${k}" ${state.market === k ? 'selected' : ''}>${COUNTRIES[k].f} ${esc(COUNTRIES[k].n)}</option>`).join('')}
       </select>
@@ -3005,7 +3272,7 @@ function viewList(){
         return `<div class="shopitem ${hard ? 'hard' : ''}">
           <div class="sihead">
             <div>
-              <b>${esc(ING[row.id].n)}</b>
+              <b>${esc(ingName(row.id))}</b>${ingMarket(row.id) ? `<div class="mktname">ask for: ${esc(ingMarket(row.id))}</div>` : ''}
               <div class="siqty num">${row.g === null ? esc(row.unit) + ' · no gram conversion' : fmtG(row.g)}</div>
             </div>
             <div class="sitags">
@@ -3018,7 +3285,7 @@ function viewList(){
           </div>
           ${src.list.length ? `<div class="whohas">
             ${src.list.map(x => `
-              <a class="who" href="https://duckduckgo.com/?q=${encodeURIComponent(x.store.n + ' ' + mkt.n + ' ' + ING[row.id].n)}" target="_blank" rel="noopener noreferrer">
+              <a class="who" href="https://duckduckgo.com/?q=${encodeURIComponent(x.store.n + ' ' + mkt.n + ' ' + (ingMarket(row.id) || ingName(row.id)))}" target="_blank" rel="noopener noreferrer">
                 <span class="wn">${esc(x.store.n)}</span>
                 <span class="wt"><span class="pill ${CONF[x.conf].c}">${CONF[x.conf].l}</span><span class="pill ${TIERS[x.store.tier].cls}">${esc(TIERS[x.store.tier].label)}</span></span>
               </a>`).join('')}
@@ -3100,6 +3367,8 @@ el.addEventListener('click', async e => {
     return;
   }
   if(t.id === 'needall'){ needAllShort(byId(state.dishId)); return; }
+  if(t.id === 'translate'){ translateMethod(byId(state.dishId)); return; }
+  if(t.id === 'showorig'){ state.showOriginal = !state.showOriginal; render(); return; }
   if(t.id === 'goshop'){ state.view = 'list'; state.dishId = null; render(); return; }
   if(t.id === 'clearneed'){ clearNeed(); return; }
 
@@ -3157,6 +3426,12 @@ const PF = {
 el.addEventListener('change', e => {
   if(e.target.id === 'dietsel'){ state.diet = e.target.value; render(); return; }
   if(e.target.id === 'marketsel'){ state.market = e.target.value; render(); return; }
+  if(e.target.id === 'langsel'){
+    state.lang = e.target.value;
+    state.showOriginal = false;
+    document.documentElement.setAttribute('dir', LOCALES[state.lang].dir);
+    render(); return;
+  }
   const f = PF[e.target.id];
   if(f){
     const [key, kind] = f;
@@ -3200,7 +3475,7 @@ ${pantryLine}
 
 Their question: ${question}
 
-Answer in under 140 words. Be specific about temperatures, times and visual cues. If they are missing something, say what actually substitutes and what that costs in flavour. Do not restate the whole recipe. No preamble.`;
+Answer in ${LOCALES[state.lang].name}, in under 140 words. Be specific about temperatures, times and visual cues. If they are missing something, say what actually substitutes and what that costs in flavour. Do not restate the whole recipe. No preamble.`;
 
   try{
     await state.sample(prompt, {
