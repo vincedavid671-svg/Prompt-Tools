@@ -120,7 +120,23 @@ outnumber successes, and the closing message reports the run.
 `names-resolve.mjs` reports: `1 query(ies) match no app ingredient (harmless,
 but stale): miso`. Left over from the `doubanjiang` work. Remove or map it.
 
-### RISK-1 — Allergen tags are hand-authored and cannot be tested · **HIGH**
+### RISK-1 — Allergen tags are hand-authored and cannot be tested · **HIGH, pass one done**
+
+**Update 2026-09-21:** a first systematic pass is complete and found five real
+defects, all now fixed — see `ALLERGEN_REVIEW.md`. Three were in substitution
+paths, where a wrong tag is handed to the person avoiding the very thing:
+`flour_gf` and `milk_oat` had notes naming wheat while tagging only gluten, and
+`flour_rice` was offered to wheat avoiders with no entry at all. `anchovy_dr`,
+the crustacean swap, gained a crustacean cross-contact caution. `oil_veg` —
+generic "vegetable oil", in 18 of 43 dishes — gained peanut and soy cautions,
+since groundnut is the default frying oil across much of this catalogue.
+
+A regression test now fails the build when a note names an allergen the tags
+omit, with negation handling so "wheat-free" does not trip it.
+
+**Still HIGH, because pass one is not sign-off.** 178 ingredients remain
+tagged by hand, the sign-off sheet is unticked, and nothing automated can prove
+an omission. The original statement below stands.
 
 The consistency suite proves the allergen *logic* is sound across 14 allergens
 × 43 dishes × every substitutable ingredient. Nothing can prove a tag was not

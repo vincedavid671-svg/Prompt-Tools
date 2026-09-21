@@ -176,6 +176,54 @@ m.R.forEach(r => {
   });
 });
 m.state.allergies = [];
+
+/* Note-versus-tag agreement.
+   The allergen review found two ingredients whose prose named an allergen the
+   tags omitted: flour_gf said "may be milled alongside wheat" while tagging
+   only gluten, and milk_oat said "often processed with wheat" while doing the
+   same. Both are offered as substitutions to people avoiding wheat, so the
+   caution they needed was the one they did not get.
+
+   A note that names an allergen is the author having thought about it. If the
+   tags disagree, one of the two is wrong and a human should decide which.
+   Negations are excluded — "wheat-free" and "no soy" name an allergen in order
+   to rule it out, and tagging those would be the opposite error. */
+const CUES = {
+  wheat:      /\bwheat\b|\brusk\b|\bbreadcrumb|\bsemolina\b|\bspelt\b|\bmalt\b/i,
+  gluten:     /\bgluten\b|\bbarley\b|\brye\b|\bspelt\b/i,
+  soy:        /\bsoy\b|\bsoya\b|\bsoybean\b/i,
+  fish:       /\banchov|\bbonito\b|\bkatsuobushi\b/i,
+  crustacean: /\bshrimp\b|\bprawn\b|\bcrab\b|\bkrill\b/i,
+  mollusc:    /\boyster\b|\bsquid\b|\bclam\b|\bmussel\b/i,
+  treenut:    /\bcashew\b|\bmacadamia\b|\bwalnut\b|\bhazelnut\b|\bpistachio\b/i,
+  peanut:     /\bpeanut\b|\bgroundnut\b/i,
+  sesame:     /\bsesame\b|\btahini\b/i,
+  mustard:    /\bmustard\b/i,
+  celery:     /\bcelery\b|\bceleriac\b/i,
+  sulphite:   /\bsulphite\b|\bsulfite\b/i,
+  egg:        /\balbumen\b/i
+};
+const negated = (note, allergen) => {
+  const words = {wheat:'wheat', gluten:'gluten', soy:'soya?', peanut:'(?:pea|ground)nut',
+                 sesame:'sesame', mustard:'mustard', celery:'celery', egg:'egg',
+                 treenut:'nut', fish:'fish', crustacean:'shellfish|shrimp',
+                 mollusc:'mollusc', sulphite:'sulphites?'}[allergen];
+  if (!words) return false;
+  return new RegExp(`(?:${words})[-\\s]free|\\bno\\s+(?:\\w+\\s+){0,2}(?:${words})\\b`
+                  + `|\\bwithout\\s+(?:\\w+\\s+){0,2}(?:${words})\\b`
+                  + `|\\bfree\\s+of\\s+(?:\\w+\\s+){0,2}(?:${words})\\b`, 'i').test(note);
+};
+Object.entries(m.ALLERGEN).forEach(([id, a]) => {
+  if (!a.note) return;
+  const tagged = new Set([...(a.has || []), ...(a.check || []), ...(a.advisory || [])]);
+  Object.entries(CUES).forEach(([allergen, re]) => {
+    if (!re.test(a.note)) return;
+    if (tagged.has(allergen)) return;
+    if (negated(a.note, allergen)) return;
+    bad(`${id}: note names "${allergen}" but no bucket tags it — decide which is wrong`);
+  });
+});
+
 Object.entries(m.CANNOT_SUB).forEach(([id, map]) => {
   if (!m.byId(id)) bad(`CANNOT_SUB for unknown dish "${id}"`);
   Object.keys(map).forEach(k => { if (!m.ALLERGENS[k]) bad(`CANNOT_SUB ${id}: unknown allergen "${k}"`); });

@@ -51,7 +51,18 @@ Two follow-ups this created, neither urgent:
 
 ---
 
-## Milestone 2 — Allergen tag review · ~2–3 days, mostly not engineering
+## Milestone 2 — Allergen tag review · **pass one done, pass two outstanding**
+
+**Done:** systematic first pass, five defects found and fixed, regression test
+added, and a per-ingredient sign-off sheet generated so pass two is a review
+rather than a repeat. See `ALLERGEN_REVIEW.md`.
+
+**Outstanding and unchanged in importance:** a qualified human has not signed
+any of it. Also open from that pass, needing your decision: the diet
+substitution path does not check the user's allergens (B1), and lupin — one of
+the EU's declarable fourteen — is not tracked (C1).
+
+Original scope, still the thing to do:
 
 Have a second qualified pair of eyes review all 178 ingredients against the 14
 allergens. Priority order: the `has` bucket, then `hidden`, then `check`.

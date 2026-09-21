@@ -970,8 +970,9 @@ const ALLERGEN = {
   tomato_pst:  {check:['celery']},
   tamari:      {has:['soy'], note:'Wheat-free, but still soy.'},
   coco_amino:  {has:[], advisory:['treenut'], note:'No soy, no wheat, no gluten.'},
-  flour_gf:    {check:['gluten'], note:'Certified gluten-free blends are tested; uncertified ones may be milled alongside wheat.'},
-  milk_oat:    {check:['gluten'], note:'Oats are often processed with wheat. Look for certified gluten-free oat milk.'},
+  flour_rice:  {check:['wheat','gluten'], note:'Rice flour is naturally free of both, but is very commonly milled on shared lines with wheat and is rarely certified. Offered here as a wheat substitute, so the shared-milling risk is the whole point of reading the bag.'},
+  flour_gf:    {check:['wheat','gluten'], note:'Certified gluten-free blends are tested; uncertified ones may be milled alongside wheat. The risk is wheat itself, not only gluten — this is offered to people avoiding wheat, so it is tagged for both.'},
+  milk_oat:    {check:['wheat','gluten'], note:'Oats are often processed with wheat. Look for certified gluten-free oat milk. Tagged for wheat as well as gluten, because shared milling is a wheat exposure.'},
   marg_df:     {check:['soy','milk'], note:'Dairy-free spreads are commonly soy-based, and some contain milk traces.'},
   cheese_df:   {check:['treenut','soy'], note:'Dairy-free cheeses are frequently cashew or soy based.'},
   seed_sun:    {check:['treenut'], note:'Seeds are often packed on tree-nut lines.'},
@@ -994,7 +995,8 @@ const ALLERGEN = {
   mirin:       {check:['wheat'], note:'Hon-mirin is rice-based, but cheaper aji-mirin often adds wheat-derived syrup.'},
   achiote:     {check:['wheat'], note:'Achiote paste sometimes uses wheat flour as a bulking agent.'},
   fish_white:  {has:['fish']},
-  anchovy_dr:  {has:['fish']},
+  anchovy_dr:  {has:['fish'], check:['crustacean'],
+                note:'Dried anchovies are routinely dried, sorted and packed alongside dried shrimp in the same facilities, and the packets sit together at the same counter. This matters here specifically: dried anchovy is the substitution offered when belacan is removed for a crustacean allergy.'},
   belacan:     {has:['crustacean'], hidden:['crustacean'],
                 note:'Belacan is fermented shrimp, pressed into a block. It is the backbone of the sambal and the dish name gives no hint of it — the most commonly missed shellfish in Malay and Indonesian cooking.'},
   cheese_qrk:  {has:['milk']},
@@ -1010,6 +1012,8 @@ const ALLERGEN = {
      merely risking it. Until now celery existed only as a label-dependent
      risk on stock cubes, so the gumbo and the sauerbraten are the first
      dishes where the contains bucket fires on it. */
+  oil_veg:     {check:['peanut','soy'], hidden:['peanut'],
+                note:'"Vegetable oil" is a category, not an ingredient. Depending on the country it is usually soybean, sunflower, rapeseed or groundnut — and groundnut is the default frying oil across West Africa, southern China and much of Southeast Asia, which is most of this catalogue. Highly refined peanut oil is exempt from EU and US declaration and is tolerated by most peanut-allergic people; cold-pressed and gourmet peanut oil is not. The bottle is the only authority.'},
   celery:      {has:['celery']},
   codsalt:     {has:['fish']},
   jameed:      {has:['milk'], note:'Jameed is yogurt strained, salted and dried hard. It is dairy in its most concentrated form, not a trace.'},

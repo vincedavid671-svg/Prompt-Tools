@@ -16,6 +16,7 @@ module may depend on, what may depend on it, and who owns which data.
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Stack, file structure, storage, data flow |
 | [DATA_MODEL.md](DATA_MODEL.md) | Entity definitions, current vs. recommended schema |
 | [FEATURE_GAPS.md](FEATURE_GAPS.md) | The 14-point capability audit with evidence |
+| [ALLERGEN_REVIEW.md](ALLERGEN_REVIEW.md) | **Safety.** Pass-one findings, and the sign-off sheet pass two works from |
 | [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md) | Exact commands and recorded test output |
 | [NEXT_STEPS.md](NEXT_STEPS.md) | Ordered milestones, and what not to do |
 
