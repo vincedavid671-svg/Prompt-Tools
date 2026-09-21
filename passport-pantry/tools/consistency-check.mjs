@@ -255,6 +255,24 @@ Object.entries(m.ING_L10N).forEach(([id, row]) => {
   langs.forEach(l => { if (!row[l]) bad(`ING_L10N ${id} missing ${l}`); });
 });
 
+/* ---------- privacy ----------
+   Regression guard for SEC-1. Everything a viewer creates — pantry, cook log,
+   diary, body profile — is personal and must be written under that viewer's
+   own path. An earlier version wrote the pantry and cook log to shared
+   top-level collections, so every viewer of a published page read and wrote
+   the same ones. This asserts at the source level that no db access uses a
+   literal path: every call must be prefixed with state.privBase. */
+section('privacy');
+const DB_CALL = /state\.db\.(?:collection|doc)\(\s*([^)]*?)\)/g;
+for (const [whole, arg] of src.matchAll(DB_CALL)) {
+  if (!arg.includes('state.privBase')) {
+    bad(`db access not namespaced to the viewer: ${whole.trim()}`);
+  }
+}
+if (!/const canPersist\s*=/.test(src)) {
+  bad('canPersist() is missing — the UI cannot tell the viewer whether anything is saved');
+}
+
 /* ---------- provenance ----------
    Neither resolver has been run, so no row may carry an identifier. A
    fabricated FDC id or QID in a health context is worse than an admitted gap. */

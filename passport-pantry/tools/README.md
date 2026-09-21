@@ -85,7 +85,36 @@ into `ING_L10N` in `prototype.html`.
 node tools/names-resolve.mjs --langs ar,es,fr,de,tr,id
 node tools/names-resolve.mjs --verify            # report, write nothing
 node tools/names-resolve.mjs --only cilantro,eggplant
+node tools/names-resolve.mjs --force             # write a genuinely partial run
 ```
+
+### Exit codes, and when it refuses
+
+| Code | Meaning |
+|---|---|
+| `0` | Wrote; everything resolved |
+| `1` | Wrote; some ingredients stayed unresolved and keep their existing names |
+| `2` | **Refused to write.** Nothing was changed. |
+
+It refuses in two cases:
+
+- **Nothing resolved at all.** Never a legitimate outcome — it means the run is
+  broken, not that Wikidata is empty. `--force` does *not* override this.
+- **Failures outnumber successes.** The signature of a network or User-Agent
+  problem rather than of Wikidata genuinely lacking labels. `--force` overrides
+  this one, for when a partial result is really what you want.
+
+This matters because the script writes into `prototype.html`. An earlier version
+wrote unconditionally, then printed *"Every row now carries its Wikidata QID"*
+and exited 0 — even when all 63 lookups had failed with 403. A caller, a CI job
+or an agent would have read that as success. Fixed; recorded as BUG-1 in
+`docs/CURRENT_STATUS.md`.
+
+Note the deliberate difference from `fdc-resolve.mjs`, which refuses on **any**
+failure: that script rewrites the whole `NUTR` block, so a missing row would be
+deleted. This one merges row by row and leaves unresolved ingredients at their
+curated values, so a partial run is legitimate and an all-or-nothing rule would
+make it unusable.
 
 No API key. Wikidata asks for a descriptive User-Agent and sane request rates;
 both are set. Responses cache to `.wd-cache`.

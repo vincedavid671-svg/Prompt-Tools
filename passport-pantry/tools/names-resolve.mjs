@@ -3,7 +3,13 @@
  * Resolve ingredient names into many languages from Wikidata, and write
  * them into the ING_L10N table in prototype.html.
  *
- *   node tools/names-resolve.mjs --langs ar,es,fr,de,tr,id
+ *   node tools/names-resolve.mjs --langs ar,es,fr
+ *
+ * Exit codes:
+ *   0  wrote, everything resolved
+ *   1  wrote, but some ingredients remain unresolved and keep their old names
+ *   2  refused to write — nothing resolved, or failures outnumbered successes
+ *      (--force overrides the second case, never the first),de,tr,id
  *   node tools/names-resolve.mjs --verify        # report, write nothing
  *   node tools/names-resolve.mjs --only cilantro,eggplant
  *
@@ -138,6 +144,10 @@ const argv = process.argv.slice(2);
 const arg = (n, d) => { const i = argv.indexOf('--' + n); return i === -1 ? d : (argv[i + 1] ?? true); };
 const LANGS  = String(arg('langs', 'ar,es,fr')).split(',').map(s => s.trim()).filter(Boolean);
 const VERIFY = argv.includes('--verify');
+/* Escape hatch for a genuinely partial run: Wikidata really does lack labels
+   for some items, and a human may want the rows that did resolve. It does not
+   override the "nothing resolved" refusal — that is never legitimate. */
+const FORCE  = argv.includes('--force');
 const ONLY   = arg('only', null);
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -264,7 +274,50 @@ Object.entries(results).forEach(([id, r]) => {
   added++;
 });
 
+/* ---------- refuse before writing ----------
+   This block is BUG-1. An earlier version wrote unconditionally, then printed
+   "Every row now carries its Wikidata QID" and exited 0 — even when all 63
+   lookups had failed with 403 and nothing had been resolved. A caller, a CI
+   job or an agent would have read that as success.
+
+   fdc-resolve refuses on ANY failure because it rewrites a whole block and a
+   missing row would be deleted. This script merges row by row and leaves
+   unresolved ingredients at their curated values, so a partial run is
+   legitimate. Two cases are not:
+
+     - nothing resolved at all: never a real outcome, always a broken run
+     - failures outnumber successes: the signature of a network or auth
+       problem rather than of Wikidata genuinely lacking labels             */
+const resolved = Object.keys(results).length;
+
+if(resolved === 0){
+  console.error('\nNothing resolved. Not writing.');
+  console.error(failures.length
+    ? `All ${failures.length} lookup(s) failed — check the network, the endpoint and any User-Agent policy before re-running.`
+    : 'No ingredients were selected. Check --only.');
+  process.exit(2);
+}
+if(failures.length > resolved && !FORCE){
+  console.error(`\nNot writing: ${failures.length} failed against ${resolved} resolved.`);
+  console.error('That ratio usually means the run is broken rather than that Wikidata');
+  console.error('lacks the labels. Fix the cause and re-run — cached responses make');
+  console.error('the re-run nearly free. Pass --force if the partial result is genuinely');
+  console.error('what you want.');
+  process.exit(2);
+}
+
 await writeFile(TARGET, src.slice(0, ls) + block + src.slice(le));
-console.log(`\nWrote ${added} rows (${skipped} left to their curated values).`);
-console.log('Every row now carries its Wikidata QID — check any of them at');
+
+/* Say what was actually written. The old message asserted a state of the
+   whole table; this one reports the run. */
+console.log(`\nWrote ${added} row(s) into ${path.relative(ROOT, TARGET)}` +
+            ` (${skipped} left to their curated values).`);
+console.log(`Those ${added} now carry a Wikidata QID — check any of them at`);
 console.log('https://www.wikidata.org/wiki/<QID>');
+
+if(failures.length){
+  console.log(`\n${failures.length} ingredient(s) remain unresolved and keep their existing names.`);
+  console.log('Exiting 1 so a caller notices. The rows above were still written.');
+  process.exit(1);
+}
+process.exit(0);

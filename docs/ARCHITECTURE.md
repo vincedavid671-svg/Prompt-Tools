@@ -123,18 +123,20 @@ to in-memory when absent:
 
 | Capability | Used for | Path | Scope |
 |---|---|---|---|
-| `db` | Pantry stock | `pantry/<ingredientId>` | **SHARED — see below** |
-| `db` | Cook log + ratings + notes | `cooked/<autoId>` | **SHARED — see below** |
+| `db` | Pantry stock | `data/users/<uid>/pantry/<ingredientId>` | Private per viewer |
+| `db` | Cook log + ratings + notes | `data/users/<uid>/cooked/<autoId>` | Private per viewer |
 | `db` | Food diary | `data/users/<uid>/days/<date>` | Private per viewer |
 | `db` | Body profile, target | `data/users/<uid>/profile` | Private per viewer |
 | `user` | Opaque viewer id | — | Identity only, not an account |
 | `sample` | Cooking coach, method translation | — | Per-call |
 
-> **Defect.** `pantry` and `cooked` are written to unnamespaced collections.
-> Every viewer of the published page reads and writes the *same* pantry and the
-> *same* cook log, including free-text notes. Only the food diary and body
-> profile are namespaced under `data/users/<uid>/`. This is recorded as
-> **SEC-1** in `CURRENT_STATUS.md` and is the highest-priority fix.
+> **Was SEC-1, now fixed.** `pantry` and `cooked` were previously written to
+> unnamespaced collections, so every viewer of a published page read and wrote
+> the same ones. All storage now goes under `data/users/<uid>/`. Persistence
+> therefore requires **both** the `db` and `user` capabilities: without a
+> private path the app keeps state in memory rather than writing it somewhere
+> shared. The consistency suite now fails the build if any `db` call uses a
+> literal path.
 
 `state.db` and `state.sample` are null when the file is opened directly from
 disk. Every call site is guarded, so the app runs fully offline minus
@@ -189,8 +191,10 @@ prototype.html        ──► consistency-check.mjs ──► exit 0/1
 ingredient the app defines has a query (`checkCoverage()`), because an earlier
 version would have silently deleted ten nutrition rows.
 
-`names-resolve.mjs` does **not** have the equivalent guard — see **BUG-1** in
-`CURRENT_STATUS.md`.
+`names-resolve.mjs` now has an equivalent guard, tuned to the fact that it
+merges row by row rather than rewriting a block: it refuses when nothing
+resolved, and when failures outnumber successes. Exit `0` wrote everything,
+`1` wrote with gaps, `2` refused and changed nothing. This was **BUG-1**.
 
 ---
 

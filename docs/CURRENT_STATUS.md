@@ -9,14 +9,71 @@ output.
 ## One-line verdict
 
 A genuinely good prototype of a hard product, with unusually honest data
-handling, sitting in the wrong repository, with one real privacy defect, one
-real tooling bug, and a data model that cannot express its own core thesis.
+handling, sitting in the wrong repository, with a data model that cannot
+express its own core thesis. The privacy defect and the tooling bug found in
+this review are **fixed** — see *Fixed* below.
+
+---
+
+## Fixed since the review
+
+### SEC-1 — Pantry and cook log are shared across all viewers · **FIXED**
+
+All eight `db` call sites now write under `state.privBase`
+(`data/users/<uid>/`), the path the food diary already used. Verified: a source
+scan finds no remaining literal collection path.
+
+Consequences deliberately accepted:
+
+- **Persistence now requires both `db` and `user`.** Without a private path
+  there is nowhere safe to write, so the pantry stays in memory for the
+  session. Losing a pantry on reload is an annoyance; writing one where others
+  can read it is not. The Pantry tab now states which of the two is happening.
+- **Ratings became personal, so the copy changed.** A shared `cooked`
+  collection made "★ 4.2 from 3 cooks" read as a community average. It never
+  was one, and now it certainly is not, so the badges read *"★ 4.2 · your 3
+  cooks"* and *"You have not cooked this yet"*. A real community layer needs
+  accounts and a separate moderated collection — Milestone 5.
+
+A regression guard was added to the consistency suite: it fails the build if
+any `state.db.collection(...)` or `state.db.doc(...)` call uses a literal path
+instead of one prefixed with `state.privBase`. Verified by reintroducing the
+bug, watching the suite fail, and reverting.
+
+### BUG-1 — `names-resolve.mjs` reported success after total failure · **FIXED**
+
+It now refuses to write in two cases, and reports what it actually did:
+
+| Exit | Meaning |
+|---|---|
+| `0` | Wrote; everything resolved |
+| `1` | Wrote; some ingredients stayed unresolved and keep their existing names |
+| `2` | Refused to write; nothing was changed |
+
+Refusals: **nothing resolved at all** (never legitimate — `--force` does not
+override it) and **failures outnumbering successes** (the signature of a
+network or User-Agent problem; `--force` does override this one).
+
+The closing message now reports the run rather than asserting a state of the
+whole table.
+
+This is deliberately *less* strict than `fdc-resolve.mjs`, which refuses on any
+failure. That script rewrites the whole `NUTR` block, where a missing row would
+be deleted; this one merges row by row and leaves unresolved ingredients at
+their curated values, so a legitimate partial run must stay possible.
+
+Verified: total-failure run exits 2 and leaves `prototype.html` byte-identical
+(the old version rewrote it), `--verify` still exits 1, and `--force` correctly
+does not override the nothing-resolved refusal. The successful-write path and
+the ratio refusal could not be exercised end-to-end because Wikidata is
+unreachable from this environment; the decision predicate was verified across
+all six input combinations instead.
 
 ---
 
 ## Defects
 
-### SEC-1 — Pantry and cook log are shared across all viewers · **HIGH**
+### ~~SEC-1 — Pantry and cook log are shared across all viewers~~ · **FIXED, kept for history**
 
 `initCaps()` subscribes to, and `savePantryItem()` / `cookDish()` write to,
 **unnamespaced** collections:
@@ -40,10 +97,11 @@ field and star ratings. What a person buys and eats is personal data. The
 in-app copy promises privacy for the *diary* and says nothing about the
 pantry, so the promise is narrower than a reader would assume.
 
-**Fix.** Route both through `privBase` exactly as the diary does, and treat
-existing rows as test data. Small change, high value. Do it first.
+**Fixed.** Both now route through `privBase`. Any rows written by the old
+shared behaviour are orphaned at the top level and should be treated as test
+data and dropped.
 
-### BUG-1 — `names-resolve.mjs` reports success after total failure · **MEDIUM**
+### ~~BUG-1 — `names-resolve.mjs` reports success after total failure~~ · **FIXED, kept for history**
 
 With every one of 63 lookups returning 403, the script printed
 `Wrote 0 rows`, then `Every row now carries its Wikidata QID`, rewrote
@@ -54,9 +112,8 @@ code that would make CI or a scripted pipeline treat a total failure as a pass.
 `fdc-resolve.mjs` handles the same situation correctly (exit 1, writes
 nothing). The two scripts should share that posture.
 
-**Fix.** Refuse to write when `added === 0`; exit non-zero when the failure
-count exceeds a threshold; make the closing message conditional on what was
-actually written.
+**Fixed.** All three: refuses when nothing resolved, refuses when failures
+outnumber successes, and the closing message reports the run.
 
 ### BUG-2 — Stale resolver query · **LOW**
 
@@ -115,8 +172,8 @@ allergen engine with three non-merging buckets · diet engine, 8 profiles ·
 nutrition with yield correction · daily calorie budget with a correct safety
 floor · location-relative sourcing across 87 countries.
 
-**Partial (4):** pantry (works; shared — SEC-1) · shopping list (works; not
-persisted) · cooking steps (content only; no guided mode) · translation (105
+**Partial (4):** pantry (works; now private per viewer, persists only when both
+capabilities are present) · shopping list (works; not persisted) · cooking steps (content only; no guided mode) · translation (105
 of 178 ingredients).
 
 **Absent (5):** multiple recipes per dish · recipe videos · technique videos ·
@@ -130,6 +187,9 @@ Deliberately minimal. No feature changes, no framework changes, no redesign.
 
 | Change | Why |
 |---|---|
+| **Fixed SEC-1** in `prototype.html` | Approved after the review. Pantry and cook log now write under the viewer's private path. |
+| **Fixed BUG-1** in `tools/names-resolve.mjs` | Approved after the review. Refuses to write on a broken run; honest exit codes. |
+| **Added** a privacy regression guard to the suite | So SEC-1 cannot silently return. |
 | **Added** `passport-pantry/tools/consistency-check.mjs` | The suite existed only outside the repository. A handoff whose tests cannot be run by the recipient is not a handoff. Rewritten to be self-contained: it extracts the script block from `prototype.html` itself. Verified: exit 0. |
 | **Added** `passport-pantry/.env.example` | Variable names only, no values. |
 | **Added** `docs/` (7 files) | This documentation. |

@@ -18,7 +18,7 @@ claim can be rechecked rather than trusted.
 | 4 | Canonical ingredients | ✅ | `ING`, 178 entries | Stable ids, purchase class, unit conversions. `toGrams()` returns `null` rather than guessing. |
 | 5 | Alternate & regional names | ✅ | `ING_L10N`, 105 entries | 5 locales incl. RTL Arabic. 28 carry a `mkt` market phrase. 28 culturally specific names excluded from automation and hand-curated. |
 | 6 | Ingredient substitutions | ✅ | `SUBS` (diet), `ALT` (allergen), `CANNOT_SUB` | Correctly split by reason. Every entry carries a prose cost. Four dishes decline to substitute and say why. |
-| 7 | Virtual pantry | 🟡 | `state.pantry`, `EXAMPLE_PANTRY`, `savePantryItem()` | Works, but ships seeded with 16 example items (labelled in UI) and **writes to a shared collection** — see SEC-1. |
+| 7 | Virtual pantry | 🟡 | `state.pantry`, `EXAMPLE_PANTRY`, `savePantryItem()` | Works and is now private per viewer (SEC-1 fixed). Ships seeded with 16 example items, labelled in UI. Persists only when both `db` and `user` are available; otherwise in-memory for the session, which the UI states. |
 | 8 | Pantry→recipe matching | ✅ | `coverage()`, `shortfallOf()`, `needOf()` | Per line: have / partial / none / not-tracked. Unconvertible units propagate as `null`, never as "enough". |
 | 9 | Shopping lists | 🟡 | `state.need`, `buildList()` | One in-memory list. **Not persisted** — lost on reload. No multiple lists, no sharing, no check-off. DM-7. |
 | 10 | Guided cooking steps | 🟡 | `r.steps[]`, `viewRecipe()` | Numbered steps with heat notes, rendered well. Not *guided*: no step-by-step mode, no timers, no progress, no wake-lock, no hands-free. |
@@ -52,7 +52,7 @@ claim can be rechecked rather than trusted.
 
 | Feature | Works | Missing |
 |---|---|---|
-| Pantry | Ledger, depletion, refill, example seed | Per-user isolation (SEC-1); manual correction UI; barcode/receipt capture; expiry |
+| Pantry | Ledger, depletion, refill, example seed, per-viewer isolation | Manual correction UI; barcode/receipt capture; expiry; persistence without the `user` capability |
 | Shopping list | Per-ingredient ticking, shortfall maths, ranked stores, hardest-first ordering | Persistence, multiple lists, check-off, sharing, quantity editing |
 | Cooking steps | Content, heat notes, translation | Step mode, timers, progress, screen wake-lock, voice |
 | Nutrition | Structure, yield correction, proxy flagging, net carbs when fibre known | **No sourced values at all** — 0 of 178 carry an FDC id |
@@ -88,11 +88,10 @@ worth preserving.
 
 | Rank | Gap | Why it ranks here |
 |---|---|---|
-| 1 | Shared pantry/cook log (SEC-1) | Privacy defect in shipped behaviour |
-| 2 | Unverified allergen tags | Safety-critical, hand-authored, untestable by the suite |
-| 3 | No multiple recipes per dish | Blocks the core product thesis; costs more the longer it waits |
-| 4 | No sourced nutrition | Calorie feature is unsuitable for anyone managing a condition |
-| 5 | No accounts | Blocks every multi-user feature and any commerce |
-| 6 | No shopping-list persistence | Most visible day-to-day annoyance |
-| 7 | No videos | Named product feature, entirely unbuilt |
-| 8 | No retailer APIs | Revenue path, but correctly deferred — most APIs point the wrong way |
+| 1 | Unverified allergen tags | Safety-critical, hand-authored, untestable by the suite |
+| 2 | No multiple recipes per dish | Blocks the core product thesis; costs more the longer it waits |
+| 3 | No sourced nutrition | Calorie feature is unsuitable for anyone managing a condition |
+| 4 | No accounts | Blocks every multi-user feature and any commerce |
+| 5 | No shopping-list persistence | Most visible day-to-day annoyance |
+| 6 | No videos | Named product feature, entirely unbuilt |
+| 7 | No retailer APIs | Revenue path, but correctly deferred — most APIs point the wrong way |

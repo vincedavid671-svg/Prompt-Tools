@@ -3378,39 +3378,48 @@ async function initCaps(){
     state.user = await window.claude?.use?.('user') ?? null;
   }catch(e){ state.user = null; }
 
-  /* A food diary and a body-composition profile are personal health data,
-     so they go under the viewer's own private path rather than the shared
-     collections the pantry and cook log use. Without the user capability
-     we keep them in memory for the session instead of writing them
-     somewhere other people could read. */
+  /* Everything a viewer creates is personal, and all of it goes under that
+     viewer's own private path. Not just the obvious health data: a pantry is
+     a record of what someone buys and eats, and a cook log carries their
+     free-text notes and ratings. An earlier version wrote the pantry and the
+     cook log to shared top-level collections, so every viewer of a published
+     page read and wrote the same ones — the bug this block exists to prevent.
+
+     The private path needs BOTH capabilities: `db` to write and `user` to
+     know whose path it is. Without both there is nowhere private to put any
+     of it, so it stays in memory for the session. That is deliberately
+     stricter than persisting wherever we can: losing a pantry on reload is an
+     annoyance, and writing one somewhere other people can read is not. */
   if(state.db && state.user){
     try{
       const uid = await state.user.id();
       state.privBase = 'data/users/' + uid + '/';
+
       const prof = await state.db.doc(state.privBase + 'profile').get();
       if(prof) state.profile = {...state.profile, ...prof};
-      state.db.collection(state.privBase + 'days').onSnapshot(docs => {
-        const next = {};
-        (docs || []).forEach(d => { next[d.id] = d.entries || []; });
-        state.day = {...state.day, ...next};
-        render();
-      });
-    }catch(e){ state.privBase = null; }
-  }
 
-  if(state.db){
-    try{
-      state.db.collection('pantry').onSnapshot(docs => {
-        if(!docs || !docs.length) return;
-        const next = {};
-        docs.forEach(d => { next[d.id] = {bought:d.bought, left:d.left}; });
-        state.pantry = next; state.pantryIsExample = false; render();
-      });
-      state.db.collection('cooked').orderBy('at','desc').limit(60).onSnapshot(docs => {
-        state.cooked = (docs || []).map(d => ({id:d.id, ...d}));
-        render();
-      });
-    }catch(e){ /* subscription unavailable; stay local */ }
+      /* Subscriptions get their own guard: if one fails to attach we stay
+         local for reads, but privBase must survive so writes still have a
+         private destination. */
+      try{
+        state.db.collection(state.privBase + 'days').onSnapshot(docs => {
+          const next = {};
+          (docs || []).forEach(d => { next[d.id] = d.entries || []; });
+          state.day = {...state.day, ...next};
+          render();
+        });
+        state.db.collection(state.privBase + 'pantry').onSnapshot(docs => {
+          if(!docs || !docs.length) return;
+          const next = {};
+          docs.forEach(d => { next[d.id] = {bought:d.bought, left:d.left}; });
+          state.pantry = next; state.pantryIsExample = false; render();
+        });
+        state.db.collection(state.privBase + 'cooked').orderBy('at','desc').limit(60).onSnapshot(docs => {
+          state.cooked = (docs || []).map(d => ({id:d.id, ...d}));
+          render();
+        });
+      }catch(e){ /* subscription unavailable; stay local for reads */ }
+    }catch(e){ state.privBase = null; }
   }
   render();
 }
@@ -3426,14 +3435,17 @@ async function saveProfile(){
 }
 async function savePantryItem(id){
   const p = state.pantry[id];
-  if(!state.db || !p) return;
-  try{ await state.db.doc('pantry/' + id).set({bought:p.bought, left:p.left, at:Date.now()}); }
+  if(!state.db || !state.privBase || !p) return;           // private path or nowhere
+  try{ await state.db.doc(state.privBase + 'pantry/' + id).set({bought:p.bought, left:p.left, at:Date.now()}); }
   catch(e){ /* read-only viewer */ }
 }
 async function flushWholePantry(){
-  if(!state.db) return;
+  if(!state.db || !state.privBase) return;
   for(const id of Object.keys(state.pantry)) await savePantryItem(id);
 }
+/* Whether anything the viewer creates can be persisted at all. Used by the
+   UI so the pantry screen states the truth rather than implying it saved. */
+const canPersist = () => Boolean(state.db && state.privBase);
 
 /* ---------- diet engine ----------
    effectiveIng() is the single place the swap is applied. Everything
@@ -3561,8 +3573,8 @@ async function cookDish(recipe, rating, note){
   const entry = {dishId:recipe.id, rating, note:note || '', at:Date.now()};
   state.cooked = [{id:'local-' + Date.now(), ...entry}, ...state.cooked];
   render();
-  if(state.db){
-    try{ await state.db.collection('cooked').add(entry); }catch(e){}
+  if(state.db && state.privBase){
+    try{ await state.db.collection(state.privBase + 'cooked').add(entry); }catch(e){}
     await flushWholePantry();
   }
 }
@@ -3704,13 +3716,17 @@ function viewAtlas(){
             a === 'check' ? `<span class="pill amber">Check labels</span>` :
             a === 'swap'  ? `<span class="pill amber">Allergen · swappable</span>` :
                             `<span class="pill chili">Contains your allergen</span>`; })()}
-          ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} · ${rat.n} cooked</span>` : `<span class="pill amber">Draft · untested</span>`}
+          ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} · you cooked ${rat.n}×</span>` : `<span class="pill amber">Draft · untested</span>`}
         </div>
       </button>`;
     }).join('')}
   </div>`;
 }
 
+/* Your own ratings only. The cook log is private per viewer, so this is
+   never a community average — the copy that renders it must not imply one.
+   A real community layer needs accounts and a separate shared, moderated
+   collection; see docs/NEXT_STEPS.md. */
 function ratingFor(dishId){
   const rs = state.cooked.filter(c => c.dishId === dishId && c.rating > 0);
   if(!rs.length) return {n:0, avg:0};
@@ -3748,7 +3764,7 @@ function viewRecipe(){
         <span class="pill plain">${esc(r.time)}</span>
         <span class="pill plain">${esc(r.level)}</span>
         <span class="pill plain num">${Math.round(nut.k)} kcal a serving</span>
-        ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} from ${rat.n} cooks</span>` : `<span class="pill amber">No one has cooked this yet</span>`}
+        ${rat.n ? `<span class="pill jade">★ ${rat.avg.toFixed(1)} · your ${rat.n} cook${rat.n > 1 ? 's' : ''}</span>` : `<span class="pill amber">You have not cooked this yet</span>`}
       </div>
     </div>
     ${tickedHere ? `<button class="btn" id="goshop">${tickedHere} on shopping list →</button>` : ''}
@@ -3945,7 +3961,7 @@ function viewRecipe(){
 
       <div class="panel">
         <h2>I cooked this</h2>
-        <p style="font-size:13px;color:var(--ink-2);margin:4px 0 0">Logging a cook subtracts these ingredients from your pantry.</p>
+        <p style="font-size:13px;color:var(--ink-2);margin:4px 0 0">Logging a cook subtracts these ingredients from your pantry. Your rating and note are private to you${canPersist() ? '' : ', and are kept in memory for this session only'}.</p>
         <div class="stars" id="stars" role="group" aria-label="Rating">
           ${[1,2,3,4,5].map(i => `<button data-star="${i}" data-on="0" aria-label="${i} star${i > 1 ? 's' : ''}">★</button>`).join('')}
         </div>
@@ -4027,6 +4043,9 @@ function viewPantry(){
   <h1 class="title" style="margin:6px 0 10px">Pantry</h1>
   <p class="lede">These are estimates, not measurements. The app anchors on the size you purchased and subtracts what each logged cook used. Correct any line and the estimate resets from there.</p>
   ${state.pantryIsExample ? `<div class="notice" style="margin-top:14px">⚠︎ Showing <strong>example stock</strong> so the screen is not empty. It is replaced the first time you log a cook or edit a quantity.</div>` : ''}
+  <div class="notice" style="margin-top:10px">${canPersist()
+    ? `<strong>Private to you.</strong> Your pantry and cook log are stored under your own path, not shared with anyone else who opens this page — including whoever published it.`
+    : `<strong>This session only.</strong> Private storage is unavailable here, so your pantry is held in memory and will be lost on reload. It is deliberately not written anywhere shared: a record of what you buy and eat is yours.`}</div>
   <div class="panel" style="margin-top:16px">
     <div class="tbl-wrap">
       <table class="pantry">

@@ -85,7 +85,7 @@ No secret is committed. `.env` is gitignored; `.env.example` holds names only.
 $ cd passport-pantry && node tools/consistency-check.mjs
 
 registry / dishes / diets / allergens / nutrition / budget / sourcing /
-language / provenance      ← all sections silent = all passed
+language / privacy / provenance   ← all sections silent = all passed
 
 43 dishes · 43 countries · 19 regions · 178 ingredients · 14 allergens
 · 8 diets · 5 locales · 105 localised ingredients · 87 served countries
@@ -140,7 +140,11 @@ dummy key; with only a dummy key the two cannot be distinguished. **The
 resolver has never been run successfully against live USDA.** That is why all
 178 nutrition rows lack an FDC id.
 
-### 4. `names-resolve.mjs` — ⚠️ **BUG FOUND**
+### 4. `names-resolve.mjs` — ✅ BUG-1 FIXED, re-verified
+
+Before the fix, every lookup failed with 403 and the script still printed
+`Every row now carries its Wikidata QID`, rewrote `prototype.html`, and exited
+`0`. After the fix:
 
 ```
 $ node tools/names-resolve.mjs
@@ -149,23 +153,33 @@ Resolving 63 ingredient names into: ar, es, fr
   ✗ cilantro   403 Forbidden
   ... (63 failures)
 
-Wrote 0 rows (0 left to their curated values).
-Every row now carries its Wikidata QID — check any of them at ...
-exit=0                                        ← WRONG
+Nothing resolved. Not writing.
+All 63 lookup(s) failed — check the network, the endpoint and any
+User-Agent policy before re-running.
+exit=2                                        ← refuses, changes nothing
+
+$ diff prototype.html <copy taken before the run>
+                                              ← byte-identical ✓
+
+$ node tools/names-resolve.mjs --verify
+exit=1                                        ← unchanged behaviour
+
+$ node tools/names-resolve.mjs --force
+Nothing resolved. Not writing.
+exit=2                    ← --force correctly does NOT override this refusal
 ```
 
-Every lookup failed, yet the script **reports success, claims every row carries
-a QID, rewrites `prototype.html` anyway, and exits 0.** Recorded as **BUG-1**
-in `CURRENT_STATUS.md`. Contrast with `fdc-resolve.mjs`, which exits 1 and
-writes nothing. The two scripts have inconsistent safety postures.
+**Exit contract now:** `0` wrote everything · `1` wrote with gaps remaining ·
+`2` refused and changed nothing.
 
-The rewrite happened to be byte-identical here (`git status` clean afterwards),
-so no damage was done — but on a *partial* failure it would commit a partially
-resolved table, which is precisely the failure `fdc-resolve` was hardened
-against.
+**Not verifiable from here:** the successful-write path and the
+failures-outnumber-successes refusal both need live Wikidata, which is
+unreachable in this environment. The decision predicate was instead verified
+across all six combinations of (resolved, failures, force), and the file
+parses.
 
-Also noted: a stale query for `miso` matches no app ingredient. Harmless, but
-it should be removed or mapped.
+Still outstanding: the stale `miso` query matches no app ingredient. Harmless
+warning, one-line fix, recorded as **BUG-2** and not yet approved.
 
 ### 5. Root Tauri project — ❌ does not build (expected)
 
@@ -214,7 +228,9 @@ Responses are cached under `tools/.fdc-cache/` and `tools/.wd-cache/`, both now
 gitignored. Re-runs are free and do not re-consume quota.
 
 **Always run `node tools/consistency-check.mjs` after any resolver run and
-before any commit.**
+before any commit.** Its `privacy` section is a regression guard for SEC-1: it
+fails if any `state.db` call uses a literal path rather than one prefixed with
+`state.privBase`. Verified by reintroducing the bug and watching it fail.
 
 ---
 

@@ -3,7 +3,9 @@
 Ordered. The order is the recommendation — each milestone removes a constraint
 the next one would otherwise hit.
 
-**Nothing below has been started. Awaiting approval.**
+**Milestone 1 is complete.** BUG-1 from Milestone 0 is also complete. Both were
+approved and done after the initial review; see `CURRENT_STATUS.md` → *Fixed*.
+Everything else below is unstarted and awaiting approval.
 
 ---
 
@@ -14,8 +16,10 @@ the next one would otherwise hit.
    Then: its own README, its own LICENCE with a real copyright holder, `docs/`
    moved to the new root, and a CI workflow that actually runs
    `tools/consistency-check.mjs`.
-2. Fix **BUG-1** and **BUG-2** in `names-resolve.mjs` — an hour of work that
-   stops a silent failure from reaching a commit.
+2. ~~Fix **BUG-1**~~ — **done.** `names-resolve.mjs` now refuses to write on a
+   broken run and has an honest exit contract (0 wrote all / 1 wrote with gaps
+   / 2 refused). **BUG-2** remains: a stale `miso` query in its MAP matches no
+   app ingredient and prints a warning every run. One line.
 3. Wire the consistency suite to a pre-commit hook or CI. It is the only
    automated protection the catalogue has and currently nothing runs it.
 
@@ -25,13 +29,19 @@ success after failing.
 
 ---
 
-## Milestone 1 — Fix the privacy defect · ~1 day · **do this before any demo**
+## ~~Milestone 1 — Fix the privacy defect~~ · **DONE**
 
-Route `pantry` and `cooked` through `state.privBase`, as the food diary already
-is. Treat existing rows as test data and drop them.
+`pantry` and `cooked` now write under `state.privBase`, as the food diary
+already did, and a regression guard in the consistency suite fails the build if
+any `db` call uses a literal path.
 
-*Why here:* it is small, it is shipped behaviour, and it is the one defect that
-would be embarrassing in front of a user or an investor.
+Two follow-ups this created, neither urgent:
+
+- **Orphaned rows.** Anything written by the old shared behaviour still sits at
+  the top level of the store. Treat as test data and drop.
+- **Ratings are now explicitly personal.** The badges say *"your 3 cooks"*
+  rather than *"from 3 cooks"*. A real community rating layer needs accounts
+  and a separate moderated collection — folded into Milestone 5.
 
 ---
 
@@ -116,16 +126,18 @@ basket. That finding is already documented and should not be re-litigated.
 
 ## Recommended next milestone
 
-**Milestone 0 plus Milestone 1**, together, as one piece of work before any
-feature development.
+**The rest of Milestone 0** — extract `passport-pantry/` into its own
+repository, and wire the consistency suite to CI.
 
-They are roughly a day and a half combined. They fix the two things that are
-actually wrong right now — a product living in a stranger's repository, and a
-shared pantry that should be private — and they put the test suite somewhere a
-reviewing agent can run it. Everything else is a choice about direction;
-these two are just correct.
+Milestone 1 is done and the worst of Milestone 0 (BUG-1) with it. What remains
+is the repository problem: the product still lives inside a fork of an
+unrelated third-party application, where `npm install` at the root builds the
+wrong thing and CI builds the wrong thing. That is roughly half a day and it
+gets more awkward with every commit.
 
-If only one thing is approved, make it Milestone 1.
+After that, **Milestone 2 (allergen tag review)** is the one I would not skip.
+It is the largest unverified safety surface in the project and it is not an
+engineering task.
 
 ---
 
