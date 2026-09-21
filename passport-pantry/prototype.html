@@ -599,7 +599,27 @@ const ING = {
   candlenut:  {n:'Candlenuts',               buy:'spec',   conv:{g:1, piece:4}},
   parsley:    {n:'Flat-leaf parsley',        buy:'fresh',  conv:{g:1, bunch:60}},
   bulgur:     {n:'Fine bulgur',              buy:'spec',   conv:{g:1, cup:140, tbsp:9}},
-  mint:       {n:'Fresh mint',               buy:'fresh',  conv:{g:1, bunch:40}}
+  mint:       {n:'Fresh mint',               buy:'fresh',  conv:{g:1, bunch:40}},
+  lentil_br:  {n:'Brown lentils, dry',       buy:'staple', conv:{g:1, cup:192}},
+  chickpea:   {n:'Chickpeas, cooked',        buy:'staple', conv:{g:1, cup:164}},
+  bean_kidney:{n:'Red kidney beans, cooked', buy:'staple', conv:{g:1, cup:177}},
+  curry_pw:   {n:'Curry powder',             buy:'staple', conv:{g:1, tsp:2, tbsp:6}},
+  beet:       {n:'Beetroot',                 buy:'fresh',  conv:{g:1, piece:140}},
+  cabbage:    {n:'White cabbage',            buy:'fresh',  conv:{g:1, piece:900}},
+  dill:       {n:'Fresh dill',               buy:'fresh',  conv:{g:1, bunch:30}},
+  cucumber:   {n:'Cucumber',                 buy:'fresh',  conv:{g:1, piece:200}},
+  lime:       {n:'Lime',                     buy:'fresh',  conv:{g:1, piece:67, ml:1}},
+  cheese_qrk: {n:'Farmer cheese (twarog)',   buy:'spec',   conv:{g:1, cup:225}},
+  cream_sour: {n:'Sour cream',               buy:'fresh',  conv:{g:1, tbsp:15, cup:230}},
+  bacon:      {n:'Smoked bacon lardons',     buy:'fresh',  conv:{g:1}},
+  bread_wh:   {n:'White bread',              buy:'fresh',  conv:{g:1, piece:30}},
+  apricot_j:  {n:'Apricot jam',              buy:'staple', conv:{g:1, tbsp:20}},
+  fish_white: {n:'Firm white fish fillet',   buy:'fresh',  conv:{g:1}},
+  oil_dende:  {n:'Dende (red palm oil)',     buy:'spec',   conv:{ml:1, g:0.92, tbsp:13.6}},
+  pandan:     {n:'Pandan leaves',            buy:'spec',   conv:{g:1, piece:6}},
+  belacan:    {n:'Belacan (shrimp paste)',   buy:'spec',   conv:{g:1, tsp:5, tbsp:15}},
+  anchovy_dr: {n:'Dried anchovies',          buy:'spec',   conv:{g:1, cup:60, tbsp:5}},
+  barberry:   {n:'Dried barberries',         buy:'spec',   conv:{g:1, tbsp:8}}
 };
 
 /* ---------- dietary flags ----------
@@ -624,7 +644,16 @@ const FLAGS = {
   dashi:['fish'], kimchi:['fish'],
   yogurt:['dairy'], cream:['dairy'], pecorino:['dairy'],
   mirin:['alcohol'], sake:['alcohol'], wine_red:['alcohol'],
-  vinegar_wh:[], tofu:[], gochujang:[], gochugaru:[]
+  vinegar_wh:[], tofu:[], gochujang:[], gochugaru:[],
+  bacon:['meat','pork'],
+  fish_white:['fish'], anchovy_dr:['fish'],
+  /* Belacan is fermented shrimp. 'fish' is loose taxonomy but exactly
+     right functionally: a pescatarian eats it, a vegan does not, and
+     kosher rules it out on the shellfish flag. */
+  belacan:['fish','shellfish'],
+  cheese_qrk:['dairy'], cream_sour:['dairy'],
+  oil_dende:[], pandan:[], barberry:[], curry_pw:[],
+  lentil_br:[], chickpea:[], bean_kidney:[]
 };
 const flagsOf = id => FLAGS[id] || [];
 
@@ -785,7 +814,27 @@ const ING_L10N = {
   paprika:    {'en-US':'Sweet paprika','en-GB':'Sweet paprika',ar:'بابريكا',es:'Pimentón dulce',fr:'Paprika doux'},
   coconut_mk: {'en-US':'Coconut milk','en-GB':'Coconut milk',ar:'حليب جوز الهند',es:'Leche de coco',fr:'Lait de coco'},
   soy:        {'en-US':'Soy sauce','en-GB':'Soy sauce',ar:'صلصة الصويا',es:'Salsa de soja',fr:'Sauce soja'},
-  sesame_oil: {'en-US':'Toasted sesame oil','en-GB':'Toasted sesame oil',ar:'زيت السمسم',es:'Aceite de sésamo',fr:'Huile de sésame'}
+  sesame_oil: {'en-US':'Toasted sesame oil','en-GB':'Toasted sesame oil',ar:'زيت السمسم',es:'Aceite de sésamo',fr:'Huile de sésame'},
+  beet:       {'en-US':'Beets','en-GB':'Beetroot',ar:'شمندر',es:'Remolacha',fr:'Betterave'},
+  cabbage:    {'en-US':'Green cabbage','en-GB':'White cabbage',ar:'ملفوف',es:'Repollo',fr:'Chou blanc'},
+  dill:       {'en-US':'Fresh dill','en-GB':'Fresh dill',ar:'شبت',es:'Eneldo',fr:'Aneth'},
+  cucumber:   {'en-US':'Cucumber','en-GB':'Cucumber',ar:'خيار',es:'Pepino',fr:'Concombre'},
+  lime:       {'en-US':'Lime','en-GB':'Lime',ar:'ليمون أخضر',es:'Lima',fr:'Citron vert'},
+  chickpea:   {'en-US':'Garbanzo beans','en-GB':'Chickpeas',ar:'حمص',es:'Garbanzos',fr:'Pois chiches'},
+  lentil_br:  {'en-US':'Brown lentils','en-GB':'Brown lentils',ar:'عدس بني',es:'Lentejas pardinas',fr:'Lentilles brunes'},
+  bean_kidney:{'en-US':'Red kidney beans','en-GB':'Red kidney beans',ar:'فاصوليا حمراء',es:'Frijoles rojos',fr:'Haricots rouges'},
+  curry_pw:   {'en-US':'Curry powder','en-GB':'Curry powder',ar:'مسحوق الكاري',es:'Curry en polvo',fr:'Poudre de curry'},
+  cream_sour: {'en-US':'Sour cream','en-GB':'Soured cream',ar:'كريمة حامضة',es:'Crema agria',fr:'Crème aigre'},
+  cheese_qrk: {'en-US':'Farmer cheese','en-GB':'Curd cheese',ar:'جبن قريش',es:'Queso fresco tipo quark',fr:'Fromage blanc caillé', mkt:'twaróg · ser biały'},
+  bacon:      {'en-US':'Bacon lardons','en-GB':'Smoked streaky bacon',ar:'لحم مقدد',es:'Panceta ahumada',fr:'Lardons fumés'},
+  bread_wh:   {'en-US':'White bread','en-GB':'White bread',ar:'خبز أبيض',es:'Pan blanco',fr:'Pain de mie'},
+  apricot_j:  {'en-US':'Apricot jam','en-GB':'Apricot jam',ar:'مربى المشمش',es:'Mermelada de albaricoque',fr:'Confiture d’abricot'},
+  fish_white: {'en-US':'Firm white fish','en-GB':'Firm white fish',ar:'سمك أبيض',es:'Pescado blanco firme',fr:'Poisson blanc ferme'},
+  oil_dende:  {'en-US':'Dendê (red palm oil)','en-GB':'Dendê (red palm oil)',ar:'زيت النخيل الأحمر',es:'Aceite de dendê',fr:'Huile de dendê', mkt:'azeite de dendê'},
+  pandan:     {'en-US':'Pandan leaves','en-GB':'Pandan leaves',ar:'أوراق الباندان',es:'Hojas de pandan',fr:'Feuilles de pandan', mkt:'daun pandan'},
+  belacan:    {'en-US':'Belacan (shrimp paste)','en-GB':'Belacan (shrimp paste)',ar:'معجون الروبيان المخمر',es:'Pasta de camarón fermentada',fr:'Pâte de crevettes fermentée', mkt:'belacan · terasi'},
+  anchovy_dr: {'en-US':'Dried anchovies','en-GB':'Dried anchovies',ar:'أنشوجة مجففة',es:'Anchoas secas',fr:'Anchois séchés', mkt:'ikan bilis'},
+  barberry:   {'en-US':'Dried barberries','en-GB':'Dried barberries',ar:'زرشك',es:'Agracejo seco',fr:'Épine-vinette séchée', mkt:'زرشک · zereshk'}
 };
 /* Display name in the current language, falling back to the canonical
    English rather than showing nothing. */
@@ -904,7 +953,20 @@ const ALLERGEN = {
   berbere:     {check:['mustard','celery']},
   garam:       {check:['mustard']},
   mirin:       {check:['wheat'], note:'Hon-mirin is rice-based, but cheaper aji-mirin often adds wheat-derived syrup.'},
-  achiote:     {check:['wheat'], note:'Achiote paste sometimes uses wheat flour as a bulking agent.'}
+  achiote:     {check:['wheat'], note:'Achiote paste sometimes uses wheat flour as a bulking agent.'},
+  fish_white:  {has:['fish']},
+  anchovy_dr:  {has:['fish']},
+  belacan:     {has:['crustacean'], hidden:['crustacean'],
+                note:'Belacan is fermented shrimp, pressed into a block. It is the backbone of the sambal and the dish name gives no hint of it — the most commonly missed shellfish in Malay and Indonesian cooking.'},
+  cheese_qrk:  {has:['milk']},
+  cream_sour:  {has:['milk']},
+  bread_wh:    {has:['wheat','gluten'], check:['milk','soy','sesame'],
+                note:'Supermarket bread frequently contains milk powder or soy flour, and seeded loaves are made on sesame lines.'},
+  bacon:       {check:['milk','soy','sulphite'], hidden:['milk'],
+                note:'Cured meats routinely carry sulphites, and some cures use milk or soy protein as a carrier. Not obvious from a pack of lardons.'},
+  curry_pw:    {check:['mustard','celery']},
+  apricot_j:   {check:['sulphite'], note:'Dried apricot is routinely sulphited, and some jams are too.'},
+  barberry:    {check:['sulphite'], note:'Dried fruit is commonly sulphited to hold its colour.'}
 };
 /* Coconut is classified as a tree nut in US labelling, but most people with
    a tree-nut allergy tolerate it. Advisory rather than a block, with the
@@ -947,7 +1009,12 @@ const ALT = {
   almond:[{to:'seed_pump', note:'Toasted pumpkin seeds instead of slivered almonds on the kabsa. Same crunch, no tree nut.'}],
   sesame_oil:[{to:'oil_veg', note:'You lose the toasted aroma, which is much of the point. Nothing replaces it — better to leave it out and accept the dish is different.'}],
   stock_beef:[{to:'water', note:'Homemade stock, or water plus aromatics. Commercial stock is where the celery hides.'}],
-  stock_chx:[{to:'water', note:'Homemade, or water plus aromatics.'}]
+  stock_chx:[{to:'water', note:'Homemade, or water plus aromatics.'}],
+  belacan:[{to:'anchovy_dr', note:'Pounded dried anchovy gives savour without crustacean. It is fish rather than shellfish, so no use for a fish allergy, and the sambal loses the specific funk belacan brings.'}],
+  anchovy_dr:[{to:'peanut', note:'Double the roasted peanuts and leave the anchovies out — the plate keeps its crunch. You lose the salt-and-sea note that balances the sambal against the coconut rice.'}],
+  cheese_qrk:[{to:'cheese_df', note:'A dairy-free soft cheese. The filling binds less firmly, so mash it hotter and season harder. Most of these are cashew or soy based, so check the label for a nut allergy.'}],
+  cream_sour:[{to:'coconut_ck', note:'Unsweetened coconut cream with a squeeze of lemon reads as sour dairy. In borscht the coconut is faintly noticeable; in a hot dish it disappears.'}],
+  bread_wh:[{to:'flour_gf', note:'Not a like-for-like swap: use two level tablespoons of a gluten-free blend with the milk instead of soaked bread. It binds, but the crumb that keeps a bobotie soft is gone.'}]
 };
 
 /* Dishes where an allergen is load-bearing and no substitution rescues the
@@ -959,7 +1026,11 @@ const CANNOT_SUB = {
           gluten:'As above.'},
   mincepie:{wheat:'Both pastries are wheat. A gluten-free pie is possible but the puff lid will not laminate the same way.',
             gluten:'As above.'},
-  bangers:{wheat:'Only if your sausages contain rusk — many do, some do not. This one is solved by reading the label rather than by substitution.'}
+  bangers:{wheat:'Only if your sausages contain rusk — many do, some do not. This one is solved by reading the label rather than by substitution.'},
+  moqueca:{fish:'Moqueca is a fish stew. There is a real Bahian version built on green plantain instead, offered here as a protein swap, but it is not a moqueca de peixe with the fish taken out.'},
+  nasi_lemak:{fish:'Both the anchovies and the belacan in the sambal are fish or shellfish. Swapping each individually is offered, but a nasi lemak with neither is a plate of coconut rice and chilli jam — worth eating, and not the dish.'},
+  pierogi:{wheat:'The dough has to be rolled to two millimetres and survive a simmer with a wet filling inside it. Gluten-free blends tear at that thickness.',
+           gluten:'As above: the gluten network is what lets the dough go that thin.'}
 };
 
 /* ---------- diet profiles ---------- */
@@ -1002,7 +1073,26 @@ const SUBS = {
   vinegar_rw:[{to:'vinegar_rc', note:'Milder. Add a squeeze of lime to bring the sharpness back up.'}],
   worcester:[{to:'soy', note:'Worcestershire contains anchovy. Soy gives the same savoury depth without fish.'}],
   butter:[{to:'ghee', note:'Nearly interchangeable here, and it takes more heat before it burns.'}],
-  fishsauce:[{to:'soy', note:'Different, not equivalent — you lose the funk that defines the dish. Add a pinch of salt.'}]
+  fishsauce:[{to:'soy', note:'Different, not equivalent — you lose the funk that defines the dish. Add a pinch of salt.'}],
+  bacon:[
+    {to:'mushroom',    note:'Browned hard and dry in butter or oil to drive off the water. You get savour and chew but none of the rendered fat the rest of the dish was going to cook in, so add a spoon of oil.'}],
+  lamb_leg:[
+    {to:'beef_chuck',  note:'Cut the same size. Needs roughly 30 minutes longer to give in, and reads less sweet.'},
+    {to:'chickpea',    note:'For a meatless version, cooked chickpeas added late plus a longer fry on the aromatics. The dish becomes lighter and needs more salt and more fat to carry it.'}],
+  beef_chuck:[
+    {to:'mushroom',    note:'A mix of browned mushrooms gives body without meat. Brown them in batches — crowded, they boil and stay pale.'},
+    {to:'bean_kidney', note:'In a soup or braise, cooked kidney beans carry the pot well. Add them in the last half hour so they hold their shape.'}],
+  fish_white:[
+    {to:'banana_grn',  note:'Green plantain in thick slices instead of fish. This is a real Bahian moqueca in its own right, not an improvised substitute.'},
+    {to:'chicken_th',  note:'Works in a coconut braise, but it needs 25 minutes rather than 12 and the dish stops being about the fish.'}],
+  belacan:[
+    {to:'soy',         note:'A spoonful of dark soy for savoury depth. Honest about the gap: nothing plant-based replaces fermented shrimp, and the sambal will taste flatter.'}],
+  anchovy_dr:[
+    {to:'peanut',      note:'More roasted peanuts in their place. Keeps the crunch, loses the salt.'}],
+  cheese_qrk:[
+    {to:'cheese_df',   note:'A dairy-free soft cheese binds less firmly. Mash it into the potato while the potato is still hot.'}],
+  cream_sour:[
+    {to:'coconut_ck',  note:'Coconut cream with a squeeze of lemon. Close on texture, faintly noticeable on flavour.'}]
 };
 
 /* ---------- regions ---------- */
@@ -1016,7 +1106,11 @@ const REGION_OF = {
   'United Kingdom':'Europe', Italy:'Europe', Spain:'Europe', Greece:'Europe',
   Morocco:'North Africa', Ethiopia:'East Africa',
   Peru:'Latin America', Mexico:'Latin America',
-  Jamaica:'Caribbean', Guam:'Pacific Islands', 'New Zealand':'Oceania'
+  Jamaica:'Caribbean', Guam:'Pacific Islands', 'New Zealand':'Oceania',
+  Nigeria:'West Africa', 'South Africa':'Southern Africa',
+  Egypt:'North Africa', Iran:'Middle East',
+  Poland:'Eastern Europe', Ukraine:'Eastern Europe', France:'Europe',
+  Uzbekistan:'Central Asia', Malaysia:'Southeast Asia', Brazil:'Latin America'
 };
 const REGION_NOTE = {
   'Middle East':'Rice cooked in the broth of the meat it is served with. Dried limes, baharat, charcoal, and generous platters built for sharing.',
@@ -1030,7 +1124,11 @@ const REGION_NOTE = {
   'North Africa':'Slow, nearly dry cooking under a cone. Preserved lemon and olive on one side, dried fruit and honey on the other.',
   'Latin America':'Chilli as flavour rather than heat alone, and in Peru a century of Cantonese technique layered onto local produce.',
   'Pacific Islands':'Fire and acid. Grilled protein chopped by hand, dressed with citrus while warm, finished with fresh coconut.',
-  'Oceania':'Pastry, mince and the pie as a national form. British inheritance reworked around local meat.'
+  'Oceania':'Pastry, mince and the pie as a national form. British inheritance reworked around local meat.',
+  'West Africa':'A stew base fried until the oil separates, and rice or a pounded starch underneath it. Scotch bonnet for perfume as much as heat, and smoke treated as a flavour to chase rather than a fault.',
+  'Southern Africa':'Cape Malay sweet-spicing laid over Dutch and British baking, and the braai as the default way to cook meat. Milder and fruitier than the word curry suggests.',
+  'Eastern Europe':'Sour as a seasoning in its own right — vinegar, kvass, fermented cream — with beet, cabbage, potato and wheat dough doing the rest. Soups that are better the day after.',
+  'Central Asia':'Rice, lamb fat and hand-cut carrot in a single heavy pot, cooked without stirring. Cumin and dried fruit over chilli; the meal is a shared platter, not a plate each.'
 };
 
 /* ---------- regional grocery markets ----------
@@ -1190,7 +1288,17 @@ const LOCAL = {
   JM:[{n:'Local supermarkets and the market', t:'In person', tier:'none', for:['fresh','staple','spec'],
        d:'No major delivery platform operates here. Scotch bonnet, thyme, pimento and provisions come from the market, and will be fresher and cheaper than anything shipped.'}],
   GU:[{n:'Local stores and the fiesta network', t:'In person', tier:'none', for:['fresh','staple','spec'],
-       d:"No delivery platform operates on island. Fresh grated coconut and donne' sali are not retail products here so much as things people have — ask."}]
+       d:"No delivery platform operates on island. Fresh grated coconut and donne' sali are not retail products here so much as things people have — ask."}],
+  UZ:[{n:'Korzinka', t:'Supermarket', tier:'link', for:['fresh','staple'],
+       d:'The largest domestic chain, with online ordering in Tashkent and the bigger cities.'},
+      {n:'Chorsu and neighbourhood bazaars', t:'Market', tier:'none', for:['fresh','spec'],
+       d:'Rice by variety, carrots by the sack, tail fat, barberries by weight. Plov ingredients are a market purchase here rather than a supermarket one, and the rice seller will ask what you are making.'}],
+  /* Iran has an active domestic delivery sector, but none of it is
+     reachable by an outside integrator, so claiming a route here would be
+     dishonest. The bazaar is the correct answer for exactly what this
+     cuisine needs. */
+  IR:[{n:'Bazaars and neighbourhood grocers', t:'In person', tier:'none', for:['fresh','staple','spec'],
+       d:'No international platform operates here. Herbs are bought by the kilo and often pre-cleaned, and dried limes and barberries are sold loose by weight — both cheaper and far better than anything shipped.'}]
 };
 
 const COUNTRIES = {
@@ -1222,7 +1330,8 @@ const COUNTRIES = {
   AR:{n:'Argentina', f:'🇦🇷'}, CL:{n:'Chile', f:'🇨🇱'}, EC:{n:'Ecuador', f:'🇪🇨'},
   UY:{n:'Uruguay', f:'🇺🇾'}, CR:{n:'Costa Rica', f:'🇨🇷'}, ZM:{n:'Zambia', f:'🇿🇲'},
   NL:{n:'Netherlands', f:'🇳🇱'}, JM:{n:'Jamaica', f:'🇯🇲'}, GU:{n:'Guam', f:'🇬🇺'},
-  ET:{n:'Ethiopia', f:'🇪🇹'}, LB:{n:'Lebanon', f:'🇱🇧'}
+  ET:{n:'Ethiopia', f:'🇪🇹'}, LB:{n:'Lebanon', f:'🇱🇧'},
+  IR:{n:'Iran', f:'🇮🇷'}, UZ:{n:'Uzbekistan', f:'🇺🇿'}
 };
 
 /* ---------- nutrition, per 100 g ----------
@@ -1314,7 +1423,17 @@ const NUTR = {
   lemongrass:{k:99,p:1.8,c:25.3,f:0.5},   galangal:{k:71,p:1.0,c:15.0,f:0.8},
   shallot:{k:72,p:2.5,c:16.8,f:0.1},      tamarind:{k:239,p:2.8,c:62.5,f:0.6},
   candlenut:{k:628,p:8.0,c:12.0,f:65.0},  parsley:{k:36,p:3.0,c:6.3,f:0.8},
-  bulgur:{k:342,p:12.3,c:75.9,f:1.3},     mint:{k:70,p:3.8,c:14.9,f:0.9}
+  bulgur:{k:342,p:12.3,c:75.9,f:1.3},     mint:{k:70,p:3.8,c:14.9,f:0.9},
+  lentil_br:{k:352,p:24.6,c:63.4,f:1.1},  chickpea:{k:139,p:7.3,c:22.5,f:2.6},
+  bean_kidney:{k:127,p:8.7,c:22.8,f:0.5}, curry_pw:{k:325,p:14.3,c:55.8,f:14.0},
+  beet:{k:43,p:1.6,c:9.6,f:0.2},          cabbage:{k:25,p:1.3,c:5.8,f:0.1},
+  dill:{k:43,p:3.5,c:7.0,f:1.1},          cucumber:{k:15,p:0.7,c:3.6,f:0.1},
+  lime:{k:30,p:0.7,c:10.5,f:0.2},         cheese_qrk:{k:98,p:12.4,c:3.4,f:4.3},
+  cream_sour:{k:198,p:2.4,c:4.6,f:19.4},  bacon:{k:393,p:11.6,c:1.4,f:39.7},
+  bread_wh:{k:266,p:9.0,c:49.0,f:3.3},    apricot_j:{k:250,p:0.4,c:62.0,f:0.1},
+  fish_white:{k:82,p:17.8,c:0,f:0.7},     oil_dende:{k:884,p:0,c:0,f:100},
+  pandan:{k:23,p:2.1,c:3.7,f:0.5},        belacan:{k:210,p:24.2,c:0,f:12.3},
+  anchovy_dr:{k:332,p:64.5,c:0.3,f:6.2},  barberry:{k:308,p:0.1,c:82.4,f:1.4}
 };
 
 /* ---------- daily budget ----------
@@ -1440,7 +1559,16 @@ const NUTR_PROXY = {
   candlenut:'macadamia — the standard culinary substitute, close in fat',
   rice_bomba:'generic short-grain rice; bomba absorbs considerably more liquid',
   dashi:'generic fish stock — real dashi varies with the katsuobushi-to-kombu ratio',
-  gochujang:'formulations vary widely in sugar and grain content between brands'
+  gochujang:'formulations vary widely in sugar and grain content between brands',
+  belacan:'anchovy paste — USDA has no fermented shrimp paste',
+  anchovy_dr:'whole dried anchovy, not the canned-in-oil entry USDA holds',
+  barberry:'dried cranberry — USDA has no barberry',
+  pandan:'generic fresh herb, and the leaves are not eaten in any case',
+  cheese_qrk:'dry-curd cottage cheese — twaróg varies widely by fat content',
+  oil_dende:'refined palm oil — dendê is unrefined, and the colour and carotene are the point',
+  apricot_j:'generic fruit preserve; a South African fruit chutney is more common in bobotie',
+  chickpea:'canned chickpeas, drained',
+  bean_kidney:'canned kidney beans, drained'
 };
 
 /* ---------- what actually gets eaten ----------
@@ -1466,8 +1594,17 @@ const EATEN = {
   moussaka:{potato:0.85, cinnamon:0},
   rendang:{lemongrass:0, limeleaf:0},
   al_pastor:{pineapple:0.75},
-  oyakodon:{}, kimchi_jjigae:{}, butter_chicken:{}, cacio_pepe:{},
-  menemen:{}, tabbouleh:{}
+  jollof:{bay:0},
+  koshari:{oil_veg:0.35},
+  ghormeh:{loomi:0},
+  pierogi:{potato:0.85},
+  borscht:{potato:0.85, bay:0},
+  osh:{garlic:0.55},
+  nasi_lemak:{oil_veg:0.5, pandan:0},
+  coq_au_vin:{chicken_th:0.70, bay:0},
+  bobotie:{bay:0},
+  jiaozi:{}, mincepie:{}, oyakodon:{}, kimchi_jjigae:{}, butter_chicken:{},
+  cacio_pepe:{}, menemen:{}, tabbouleh:{}, moqueca:{}
 };
 const EATEN_NOTE = {
   pho_ga:'The carcass and all the aromatics are strained out and binned, and you eat roughly a third of the bird by weight. Counting the whole chicken and the spices would overstate this bowl by a wide margin.',
@@ -1484,7 +1621,16 @@ const EATEN_NOTE = {
   adobo:'Bone-in thighs; the bay leaves are fished out.',
   moussaka:'Potatoes are peeled, and the cinnamon stick is removed from the meat sauce.',
   rendang:'Lemongrass stalks and lime leaves flavour the paste and are left on the plate.',
-  al_pastor:'Part of the pineapple cooks into the stack as a tenderiser rather than being eaten.'
+  al_pastor:'Part of the pineapple cooks into the stack as a tenderiser rather than being eaten.',
+  jollof:'Bay leaves are picked out of the pot.',
+  koshari:'The onions are deep-fried and drained; most of that oil stays in the pan rather than on the plate.',
+  ghormeh:'Dried limes are pierced, simmered and left on the side of the bowl.',
+  pierogi:'Potatoes are peeled before boiling.',
+  borscht:'Potatoes are peeled, and the bay leaves are fished out.',
+  osh:'The garlic heads go in whole and unpeeled. The cloves are squeezed out and eaten; the skins are not.',
+  nasi_lemak:'Half the sambal oil and the anchovy frying oil drain off rather than being eaten, and the knotted pandan is pulled out of the rice.',
+  coq_au_vin:'Bone-in thighs, and the bay leaves are removed before serving.',
+  bobotie:'The bay leaves stand upright in the custard for aroma and are not eaten.'
 };
 
 /* ---------- nutrition maths ----------
@@ -1545,7 +1691,8 @@ function nutritionOf(r){
 const OC_LABEL = {
   universal:'Any supermarket', asian:'East Asian', sea:'Southeast Asian',
   me:'Middle Eastern', carib:'Caribbean', latin:'Latin American',
-  euro:'European', cauc:'Caucasian', pac:'Pacific Islander'
+  euro:'European', cauc:'Caucasian', pac:'Pacific Islander',
+  afr:'African'
 };
 const SOURCE = {
   soy:{oc:'asian'}, sesame_oil:{oc:'asian'}, shaoxing:{oc:'asian'},
@@ -1585,7 +1732,16 @@ const SOURCE = {
   tamarind:{oc:'sea'}, candlenut:{oc:'sea'}, shallot:{oc:'universal'},
   pork_belly:{oc:'universal', keep:'fresh'}, pork_sh:{oc:'universal', keep:'fresh'},
   beef_chuck:{oc:'universal', keep:'fresh'},
-  donne:{oc:'pac', keep:'fresh'}
+  donne:{oc:'pac', keep:'fresh'},
+  cheese_qrk:{oc:'euro', keep:'chill'}, cream_sour:{oc:'universal', keep:'chill'},
+  bacon:{oc:'euro', keep:'chill'}, bread_wh:{oc:'universal', keep:'chill'},
+  fish_white:{oc:'universal', keep:'fresh'}, lime:{oc:'universal', keep:'fresh'},
+  beet:{oc:'universal', keep:'fresh'}, cabbage:{oc:'universal', keep:'fresh'},
+  dill:{oc:'universal', keep:'fresh'}, cucumber:{oc:'universal', keep:'fresh'},
+  oil_dende:{oc:'afr'}, pandan:{oc:'sea', keep:'fresh'},
+  belacan:{oc:'sea'}, anchovy_dr:{oc:'sea'}, barberry:{oc:'me'},
+  curry_pw:{oc:'universal'}, lentil_br:{oc:'universal'},
+  chickpea:{oc:'universal'}, bean_kidney:{oc:'universal'}, apricot_j:{oc:'universal'}
 };
 function ocOf(id){ return (SOURCE[id] && SOURCE[id].oc) || 'universal'; }
 function keepOf(id){
@@ -1602,7 +1758,7 @@ const NATIVE = {
   SA:['me'], AE:['me','asian'], KW:['me'], QA:['me'], BH:['me'], OM:['me'],
   JO:['me'], IQ:['me'], EG:['me'], MA:['me'], TR:['me'], IL:['me'],
   GE:['cauc'], AM:['cauc'], AZ:['cauc'],
-  JM:['carib'], MX:['latin'], PE:['latin'], CO:['latin'], BR:['latin'],
+  JM:['carib'], MX:['latin'], PE:['latin'], CO:['latin'], BR:['latin','afr'],
   AR:['latin'], CL:['latin'], EC:['latin'], UY:['latin'], CR:['latin'],
   GU:['pac'],
   GB:['euro'], IE:['euro'], FR:['euro'], DE:['euro'], IT:['euro'],
@@ -1612,7 +1768,9 @@ const NATIVE = {
   NO:['euro'], FI:['euro'], EE:['euro'], LV:['euro'], LT:['euro'],
   AU:['euro'], NZ:['euro'], US:['euro'], CA:['euro'],
   IN:['asian','me'], PK:['asian','me'], BD:['asian'],
-  ET:['me'], LB:['me']
+  ET:['me','afr'], LB:['me'],
+  NG:['afr'], GH:['afr'], KE:['afr'], ZA:['afr','euro'],
+  UA:['euro'], IR:['me'], UZ:['me']
 };
 
 /* ---------- store sourcing profiles ----------
@@ -1628,7 +1786,7 @@ const STORE_META = {
   'Tamimi Markets':          {strong:['euro','me'], wide:true},
   'Danube':                  {strong:['euro','me'], wide:true},
   'Panda':                   {strong:['me']},
-  'Amazon':                  {strong:['asian','sea','me','euro','latin','cauc'], ships:true},
+  'Amazon':                  {strong:['asian','sea','me','euro','latin','cauc','afr'], ships:true},
   'noon':                    {strong:['me','asian'], ships:true},
   'Salla merchants':         {strong:['me','asian','sea','cauc','latin'], ships:true},
   'Zid merchants':           {strong:['me','asian','sea'], ships:true},
@@ -1651,7 +1809,10 @@ const STORE_META = {
   'Kibsons':                 {strong:[]},
   'Glovo':                   {strong:[], wide:true},
   'Local supermarkets and the market':      {strong:['carib'], wide:true},
-  'Local stores and the fiesta network':    {strong:['pac'], wide:true}
+  'Local stores and the fiesta network':    {strong:['pac'], wide:true},
+  'Korzinka':                              {strong:['euro','me'], wide:true},
+  'Chorsu and neighbourhood bazaars':      {strong:['me'], wide:true},
+  'Bazaars and neighbourhood grocers':     {strong:['me'], wide:true}
 };
 const metaOf = s => STORE_META[s.n] || {strong:[]};
 
@@ -2188,6 +2349,248 @@ const R = [
     {h:'Combine late', t:'Fold everything with the soaked bulgur, olive oil and salt no more than 20 minutes before eating. Dressed early it wilts.'},
     {h:'Serve', t:'Cold, with romaine leaves to scoop it. Part of a mezze, not a side dish.'}
   ]
+},
+{
+  id:'jollof', country:'Nigeria', flag:'🇳🇬', dish:'Jollof Rice', native:'Jollof',
+  region:'Contested across West Africa. This is the Nigerian party version — drier, smokier and cooked down hard.',
+  blurb:'The stew base is fried until the oil separates and the raw tomato taste has gone. Everything after that is steam, and the scorched bottom layer is wanted rather than tolerated.',
+  serves:6, time:'1 h 30 m', level:'Medium',
+  ings:[
+    {i:'rice_long', q:600, u:'g'}, {i:'tomato', q:6, u:'piece'},
+    {i:'pepper_bell', q:2, u:'piece'}, {i:'scotch', q:2, u:'piece'},
+    {i:'onion', q:3, u:'piece'}, {i:'tomato_pst', q:150, u:'g'},
+    {i:'oil_veg', q:150, u:'ml'}, {i:'stock_chx', q:600, u:'ml'},
+    {i:'curry_pw', q:1, u:'tbsp'}, {i:'thyme', q:2, u:'tsp'},
+    {i:'bay', q:3, u:'piece'}, {i:'ginger', q:1, u:'tbsp'},
+    {i:'garlic', q:4, u:'clove'}, {i:'salt', q:2, u:'tsp'}
+  ],
+  steps:[
+    {h:'The base', t:'Blend the tomatoes, red bell peppers, scotch bonnets and one onion smooth. This purée is the stew base, and how far you cook it down is the difference between jollof and red boiled rice.'},
+    {h:'Reduce it', t:'Boil the purée hard in a dry pot, uncovered, until it thickens and drops by about a third, 15 to 20 minutes.', heat:'High and uncovered. The water has to leave before any frying can start.'},
+    {h:'Fry', t:'Soften the remaining sliced onion in the oil, add the tomato paste and fry it until it turns from orange to brick, about 5 minutes. Add the reduced purée, ginger, garlic, curry powder, thyme and bay.', heat:'Medium. Keep going until oil pools at the edges — that separation is the signal the base is done, and it is the step people cut short.'},
+    {h:'Season the liquid', t:'Add the stock and salt and taste it now. It should be slightly too strong; the rice will pull the edge off.'},
+    {h:'Rice in', t:'Wash the rice until the water runs clear, stir it through and level the top. The liquid should sit level with the rice, not above it.'},
+    {h:'Steam', t:'Cover with foil and then the lid, and cook on the lowest heat for 30 minutes without lifting or stirring. Stirring breaks the grains and you end up with porridge.', heat:'The lowest setting you have. A heat diffuser helps on a gas ring.'},
+    {h:'The bottom', t:'For party jollof, raise the heat for the last 3 to 4 minutes until you can smell scorching, then take it off and leave it covered 10 minutes. Fluff from the edges inwards and serve the browned base with the rest.'}
+  ]
+},
+{
+  id:'koshari', country:'Egypt', flag:'🇪🇬', dish:'Koshari', native:'كشري',
+  region:'Cairo street food, sold from dedicated koshari houses that make nothing else',
+  blurb:'Rice, lentils, macaroni and chickpeas under a cumin-led tomato sauce, fried onion on top and a garlic-vinegar sharpener poured over at the table. Four starches that have to be cooked apart and stay distinct.',
+  serves:6, time:'1 h 15 m', level:'Medium',
+  ings:[
+    {i:'rice_long', q:300, u:'g'}, {i:'lentil_br', q:200, u:'g'},
+    {i:'pasta', q:200, u:'g'}, {i:'chickpea', q:240, u:'g'},
+    {i:'onion', q:4, u:'piece'}, {i:'oil_veg', q:300, u:'ml'},
+    {i:'flour', q:2, u:'tbsp'}, {i:'tomato', q:6, u:'piece'},
+    {i:'tomato_pst', q:100, u:'g'}, {i:'garlic', q:6, u:'clove'},
+    {i:'vinegar_wh', q:80, u:'ml'}, {i:'cumin', q:2, u:'tsp'},
+    {i:'coriander_s', q:1, u:'tsp'}, {i:'chili_dry', q:2, u:'piece'},
+    {i:'salt', q:2, u:'tsp'}
+  ],
+  steps:[
+    {h:'Fried onion first', t:'Slice three onions paper-thin, toss them with the flour, and fry in batches until deep brown. Drain on paper. They keep darkening off the heat, so pull them a shade lighter than you want them.', heat:'175 °C / 350 °F. Cooler and they go greasy; hotter and they burn before they dry out.'},
+    {h:'Lentils', t:'Simmer the lentils in plenty of water for 15 minutes until just tender — not collapsing. Drain, keeping a cup of the cooking liquid.'},
+    {h:'Rice', t:'Cook the rice in that reserved liquid topped up with water, one part rice to one and a half of liquid, covered and barely simmering for 15 minutes, then 10 minutes off the heat.'},
+    {h:'Pasta', t:'Boil the macaroni in well-salted water, drain, and toss with a spoon of oil so it does not set into a block.'},
+    {h:'Sauce', t:'Fry the last onion, chopped, then the tomato paste until brick-coloured. Add the grated tomato, half the garlic, cumin, coriander and crushed chilli, and simmer 20 minutes.', heat:'Medium, then low. It should pour, not cling — this is a sauce, not a ragù.'},
+    {h:'Daqqa', t:'Crush the remaining garlic with salt, cover it with the vinegar and warm it briefly. Poured over at the table, this sharpener is what keeps the plate from being heavy.'},
+    {h:'Build', t:'Rice, then lentils, then macaroni, then chickpeas. Sauce over the top, fried onion last so it stays crisp, vinegar-garlic and chilli sauce on the side.'}
+  ]
+},
+{
+  id:'ghormeh', country:'Iran', flag:'🇮🇷', dish:'Ghormeh Sabzi', native:'قورمه سبزی',
+  region:'Nationwide, and the dish most often named when Iranians are asked for one',
+  blurb:'A herb stew rather than a meat stew with herbs in it. The herbs are fried down until they darken almost to black, and that long slow frying is the entire flavour of the dish.',
+  serves:6, time:'3 h', level:'Medium',
+  ings:[
+    {i:'lamb_leg', q:700, u:'g'}, {i:'parsley', q:300, u:'g'},
+    {i:'cilantro', q:2, u:'bunch'}, {i:'chives_g', q:150, u:'g'},
+    {i:'methi', q:2, u:'tbsp'}, {i:'bean_kidney', q:240, u:'g'},
+    {i:'loomi', q:4, u:'piece'}, {i:'turmeric', q:1, u:'tsp'},
+    {i:'onion', q:2, u:'piece'}, {i:'oil_veg', q:80, u:'ml'},
+    {i:'salt', q:2, u:'tsp'}, {i:'pepper', q:1, u:'tsp'},
+    {i:'rice_bas', q:400, u:'g'}
+  ],
+  steps:[
+    {h:'Dry the herbs', t:'Wash the parsley, cilantro and chives and dry them completely before chopping them very fine. Wet herbs steam instead of frying, and the stew stays green and tastes raw.'},
+    {h:'Fry the herbs', t:'Fry the chopped herbs in half the oil over medium-low, stirring often, for 20 to 30 minutes. They go from bright green to near-black and the smell turns sweet and toasted. This step is the dish.', heat:'Medium-low throughout. Add the dried fenugreek in the last 10 minutes — it turns bitter fast in a hot pan.'},
+    {h:'Meat', t:'In a second pan brown the diced lamb with the chopped onion and turmeric in the rest of the oil until no pink is left.'},
+    {h:'Build', t:'Combine meat, herbs and beans, cover with water by two fingers, and simmer covered for 2 hours.', heat:'Low — a bare simmer. A boil tightens the lamb before it has a chance to give in.'},
+    {h:'Dried limes', t:'Pierce the loomi and add them at the halfway point. Taste from then on: left too long they turn the pot bitter and nothing brings it back.'},
+    {h:'Finish', t:'Salt at the end, once the beans are soft. A slick of dark green oil on the surface is how an Iranian cook knows it is ready.'},
+    {h:'Serve', t:'With chelow — steamed basmati — and the crisp tahdig from the base of the rice pot if you made one.'}
+  ]
+},
+{
+  id:'pierogi', country:'Poland', flag:'🇵🇱', dish:'Pierogi Ruskie', native:'Pierogi ruskie',
+  region:'Named for Ruthenia, not Russia — the old borderlands now split between Poland and Ukraine',
+  blurb:'Potato and curd cheese dumplings. The filling has to be seasoned harder than feels right, because the dough is deliberately plain and mutes everything inside it.',
+  serves:6, time:'1 h 30 m', level:'Medium',
+  ings:[
+    {i:'flour', q:500, u:'g'}, {i:'water', q:250, u:'ml'},
+    {i:'egg', q:1, u:'piece'}, {i:'oil_veg', q:2, u:'tbsp'},
+    {i:'potato', q:700, u:'g'}, {i:'cheese_qrk', q:250, u:'g'},
+    {i:'onion', q:3, u:'piece'}, {i:'butter', q:60, u:'g'},
+    {i:'cream_sour', q:200, u:'g'}, {i:'salt', q:2, u:'tsp'},
+    {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Filling first', t:'Boil the peeled potatoes until soft, drain, and dry them in the hot pan for a minute before mashing them with the curd cheese. Cold potato will not take the cheese up evenly.'},
+    {h:'Onion', t:'Fry two finely chopped onions in the butter until deep gold, about 15 minutes. Half goes into the filling, half is kept back for serving.', heat:'Medium-low. Gold, not brown — burnt onion turns the whole filling bitter.'},
+    {h:'Season hard', t:'Salt and pepper the filling until it tastes slightly too strong eaten on its own. That is the correct level once it is inside dough.'},
+    {h:'Dough', t:'Mix the flour with just-boiled water, the egg and the oil. Knead 8 minutes to a soft, smooth dough and rest it under an upturned bowl for 30 minutes. Keep it covered at every stage — a dried edge will not seal.'},
+    {h:'Shape', t:'Roll to about 2 mm, cut 8 cm rounds, and fill each with a walnut of filling. Wipe the rim clean, press firmly, then crimp. Filling caught in the seam is what opens in the pot.'},
+    {h:'Boil', t:'Cook in batches in well-salted water. They rise to the surface, then need 2 minutes more.', heat:'A gentle simmer, never a rolling boil. The seam is the weak point and a hard boil finds it.'},
+    {h:'Serve', t:'Buttered, with the reserved fried onion and sour cream. Leftovers fried hard in butter the next day are better than the first serving, and most Polish households plan for it.'}
+  ]
+},
+{
+  id:'borscht', country:'Ukraine', flag:'🇺🇦', dish:'Borscht', native:'Борщ',
+  region:'Ukrainian. Inscribed by UNESCO in 2022 on the list of intangible heritage in need of urgent safeguarding.',
+  blurb:'Beet soup, where the colour is the hard part. Beets lose their red in a long boil, so they are stewed separately with acid and only joined to the pot at the end.',
+  serves:6, time:'2 h', level:'Medium',
+  ings:[
+    {i:'beef_chuck', q:600, u:'g'}, {i:'beet', q:500, u:'g'},
+    {i:'cabbage', q:400, u:'g'}, {i:'potato', q:400, u:'g'},
+    {i:'carrot', q:2, u:'piece'}, {i:'onion', q:2, u:'piece'},
+    {i:'tomato_pst', q:60, u:'g'}, {i:'garlic', q:4, u:'clove'},
+    {i:'bay', q:2, u:'piece'}, {i:'dill', q:1, u:'bunch'},
+    {i:'vinegar_wh', q:2, u:'tbsp'}, {i:'oil_veg', q:60, u:'ml'},
+    {i:'cream_sour', q:200, u:'g'}, {i:'salt', q:2, u:'tsp'},
+    {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Broth', t:'Cover the beef with cold water, bring it up slowly, and skim carefully for the first ten minutes. Then add bay and a whole onion and hold it at a bare simmer for 90 minutes.', heat:'Barely trembling. Skimming and low heat are the only two things keeping the broth clear.'},
+    {h:'Beets apart', t:'Grate the beets and stew them in a separate pan with the oil, tomato paste and vinegar for 20 minutes. The acid fixes the colour; beets boiled loose in the pot come out brown.'},
+    {h:'Fried base', t:'Soften the grated carrot and chopped onion in oil until sweet, about 10 minutes. This fried base is what separates borscht from vegetables boiled in water.'},
+    {h:'Assemble', t:'Lift the beef out, dice it and return it. Add the potatoes, then the shredded cabbage five minutes later — the cabbage should keep some bite.'},
+    {h:'Late additions', t:'Stir the beets and the fried base in only for the last 5 minutes. Long cooking undoes the work of both.'},
+    {h:'Garlic, then wait', t:'Crush the raw garlic with salt and stir it in off the heat. Then leave the pot alone for at least an hour, or overnight. Borscht on the second day is a different and better soup.'},
+    {h:'Serve', t:'Reheated without boiling, with sour cream and more dill than looks sensible. Pampushky — garlic rolls — alongside if you have them.'}
+  ]
+},
+{
+  id:'osh', country:'Uzbekistan', flag:'🇺🇿', dish:'Osh (Plov)', native:'Osh · Палов',
+  region:'Fergana style, where the rice is cooked in the zirvak rather than steamed apart from it',
+  blurb:'Rice cooked entirely in the broth of the meat and carrots beneath it, never stirred through. The carrot is not a vegetable here — it is half the dish, and it is cut by knife, never grated.',
+  serves:8, time:'2 h', level:'Medium',
+  ings:[
+    {i:'lamb_leg', q:800, u:'g'}, {i:'rice_long', q:700, u:'g'},
+    {i:'carrot', q:1000, u:'g'}, {i:'onion', q:3, u:'piece'},
+    {i:'oil_veg', q:150, u:'ml'}, {i:'cumin', q:1, u:'tbsp'},
+    {i:'coriander_s', q:1, u:'tsp'}, {i:'barberry', q:2, u:'tbsp'},
+    {i:'chickpea', q:150, u:'g'}, {i:'raisin', q:60, u:'g'},
+    {i:'garlic', q:2, u:'piece'}, {i:'salt', q:1, u:'tbsp'},
+    {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Rice first', t:'Rinse the rice through several changes of water until it runs clear, then leave it to soak in warm salted water while everything else cooks. An hour is not too long.'},
+    {h:'Heat the oil', t:'In a kazan or the heaviest pot you own, heat the oil until it shimmers and just begins to smoke. Uzbek cooks brown a piece of onion or bone in it first and throw that away.', heat:'High. This is the only high-heat stage in the dish.'},
+    {h:'Zirvak', t:'Sear the diced lamb hard, then the sliced onion until deep gold, then the carrots — cut into batons about the thickness of a pencil, with a knife. Grated carrot dissolves and takes the texture of the dish with it.'},
+    {h:'Broth', t:'Add the cumin, coriander, chickpeas, barberries and raisins, cover with water by a finger, salt it firmly, and simmer uncovered 40 minutes. This broth is the zirvak, and it is all the rice will ever taste of.', heat:'Low. Salt it harder than you would a soup — the rice takes most of it up.'},
+    {h:'Rice on top', t:'Drain the rice and spread it level over the zirvak without stirring. Add just enough boiling water to cover it by a centimetre, and bury the whole unpeeled garlic heads in the surface.'},
+    {h:'Boil off, then steam', t:'Cook uncovered on high until the water drops below the rice, then gather the rice into a mound, poke holes down to the base with a chopstick, cover tightly and steam on the lowest heat for 25 minutes.', heat:'High, then the lowest you have. The holes let steam up through the mound instead of waterlogging the base.'},
+    {h:'Serve', t:'Rest it covered 10 minutes, then turn the pot out onto a platter and mix it once — rice, then carrot, then meat on top and the garlic at the centre. Eaten from the shared dish.'}
+  ]
+},
+{
+  id:'moqueca', country:'Brazil', flag:'🇧🇷', dish:'Moqueca Baiana', native:'Moqueca baiana',
+  region:'Bahia. The Espírito Santo version uses neither coconut nor dendê, and the two states do not accept that they are the same dish.',
+  blurb:'Fish stewed in coconut milk and dendê with nothing browned first. Everything goes in raw and layered, the pot is shaken rather than stirred, and the palm oil goes in at the very end.',
+  serves:4, time:'45 m', level:'Easy',
+  ings:[
+    {i:'fish_white', q:800, u:'g'}, {i:'lime', q:60, u:'ml'},
+    {i:'garlic', q:4, u:'clove'}, {i:'onion', q:2, u:'piece'},
+    {i:'tomato', q:3, u:'piece'}, {i:'pepper_bell', q:2, u:'piece'},
+    {i:'cilantro', q:1, u:'bunch'}, {i:'scallion', q:0.5, u:'bunch'},
+    {i:'coconut_mk', q:400, u:'ml'}, {i:'oil_dende', q:3, u:'tbsp'},
+    {i:'salt', q:2, u:'tsp'}, {i:'pepper', q:1, u:'tsp'},
+    {i:'rice_long', q:300, u:'g'}
+  ],
+  steps:[
+    {h:'Marinate', t:'Cut the fish into large pieces and leave it 20 minutes in the lime juice, crushed garlic, salt and pepper. No longer — past that the acid starts cooking the surface.'},
+    {h:'Layer it', t:'In a wide clay or heavy pot, lay down half the sliced onion, tomato and pepper, then the fish, then the rest of the vegetables over the top. Nothing is browned first; this is not a stew built in stages.'},
+    {h:'Coconut', t:'Pour the coconut milk around the sides rather than over the fish, and bring it to a bare simmer uncovered.', heat:'Medium-low. It must not boil — coconut milk splits and the fish breaks apart.'},
+    {h:'Cook', t:'Simmer 12 to 15 minutes. Move things by shaking the pot by its handles, not with a spoon.'},
+    {h:'Dendê last', t:'Spoon the dendê over in the final 2 minutes. Added early it loses its perfume and turns the dish heavy, and this is the step most recipes outside Bahia get wrong.'},
+    {h:'Serve', t:'Cilantro and scallion scattered over, straight from the pot, with plain rice and farofa if you have it.'}
+  ]
+},
+{
+  id:'nasi_lemak', country:'Malaysia', flag:'🇲🇾', dish:'Nasi Lemak', native:'Nasi lemak',
+  region:'National dish, eaten most often at breakfast and wrapped in banana leaf',
+  blurb:'Rice steamed in coconut milk with pandan, with a chilli sambal fried until the oil separates out of it. Both halves are simple, and the sambal decides whether the plate is any good.',
+  serves:4, time:'1 h', level:'Medium',
+  ings:[
+    {i:'rice_long', q:400, u:'g'}, {i:'coconut_mk', q:300, u:'ml'},
+    {i:'pandan', q:3, u:'piece'}, {i:'ginger', q:20, u:'g'},
+    {i:'chili_dry', q:15, u:'piece'}, {i:'shallot', q:8, u:'piece'},
+    {i:'garlic', q:4, u:'clove'}, {i:'belacan', q:1, u:'tsp'},
+    {i:'tamarind', q:1, u:'tbsp'}, {i:'sugar_palm', q:1, u:'tbsp'},
+    {i:'oil_veg', q:100, u:'ml'}, {i:'anchovy_dr', q:60, u:'g'},
+    {i:'peanut', q:80, u:'g'}, {i:'egg', q:4, u:'piece'},
+    {i:'cucumber', q:1, u:'piece'}, {i:'salt', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Rice', t:'Rinse the rice, then cook it with the coconut milk, an equal volume of water, the knotted pandan leaves, bruised ginger and salt.', heat:'Low and covered for 20 minutes, then 10 minutes off the heat before the lid comes off. Coconut milk scorches on the base if you rush it.'},
+    {h:'Chilli paste', t:'Soak the dried chillies in hot water for 20 minutes, then blend them with the shallots, garlic and belacan to a smooth paste.'},
+    {h:'Fry it down', t:'Fry the paste in the oil over medium-low, stirring, for 20 to 30 minutes until it darkens to brick red and the oil separates and floats clear. This is pecah minyak, broken oil, and short of it the sambal tastes raw.', heat:'Medium-low the whole way. Over a high flame it catches and turns bitter.'},
+    {h:'Season', t:'Add the tamarind, palm sugar and salt. It should land sweet first, then salty, then hot, and stay glossy rather than dry.'},
+    {h:'Sides', t:'Fry the dried anchovies until crisp and the peanuts until golden, separately, and drain both. Boil or fry the eggs, and slice the cucumber.'},
+    {h:'Plate', t:'Fluff the rice, pull the pandan out, and set each element apart on the plate rather than mixed. Wrapped in banana leaf it steams gently on the way to work and is better for it.'}
+  ]
+},
+{
+  id:'coq_au_vin', country:'France', flag:'🇫🇷', dish:'Coq au Vin', native:'Coq au vin',
+  region:'Burgundy. Originally an old rooster, which is why the wine and the long cooking were needed at all.',
+  blurb:'A red wine braise built in stages — lardons, bird, onions and mushrooms each cooked on their own and returned at the end. The order is the recipe.',
+  serves:4, time:'2 h 30 m', level:'Medium',
+  ings:[
+    {i:'chicken_th', q:1200, u:'g'}, {i:'wine_red', q:750, u:'ml'},
+    {i:'bacon', q:150, u:'g'}, {i:'mushroom', q:300, u:'g'},
+    {i:'onion', q:250, u:'g'}, {i:'carrot', q:2, u:'piece'},
+    {i:'garlic', q:4, u:'clove'}, {i:'flour', q:30, u:'g'},
+    {i:'butter', q:40, u:'g'}, {i:'stock_chx', q:300, u:'ml'},
+    {i:'thyme', q:2, u:'tsp'}, {i:'bay', q:2, u:'piece'},
+    {i:'parsley', q:30, u:'g'}, {i:'salt', q:2, u:'tsp'},
+    {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Marinate', t:'Optional, and with supermarket chicken it is worth more than any other single step: leave the pieces overnight in the wine with the thyme, bay and crushed garlic.'},
+    {h:'Render', t:'Dry the chicken thoroughly. Render the lardons in a heavy pot until crisp, lift them out and leave the fat behind.'},
+    {h:'Brown', t:'Brown the chicken hard in that fat, skin side down first, in batches with room around every piece. Crowd the pot and it steams — and the colour you lose there is the colour the sauce was going to have.', heat:'Medium-high. Deep brown, not golden.'},
+    {h:'Flour', t:'Pour off most of the fat, return the chicken, dust it with the flour and turn it over the heat for 2 minutes so the flour cooks out.'},
+    {h:'Braise', t:'Add the wine and stock, scrape the base clean, and simmer covered for 1 hour 15 minutes.', heat:'Low, just breaking the surface. A boil makes the meat stringy and the sauce cloudy.'},
+    {h:'Garnish apart', t:'Meanwhile glaze the small onions in butter and a splash of water until tender and shining, and fry the mushrooms hard and dry in butter. Both go in for the last 10 minutes only — cooked in the pot from the start they go grey and give their water to the sauce.'},
+    {h:'Finish', t:'Lift the chicken out, reduce the sauce until it coats a spoon, check the salt, then return everything and scatter the parsley. Better still reheated the next day.'}
+  ]
+},
+{
+  id:'bobotie', country:'South Africa', flag:'🇿🇦', dish:'Bobotie', native:'Bobotie',
+  region:'Cape Malay, from the Cape communities with roots in Southeast Asia. Written down in South Africa earlier than almost anything else on the table.',
+  blurb:'Curried mince baked under an egg custard. The milk-soaked bread is not filler — it is what keeps the mince soft through an hour in the oven.',
+  serves:6, time:'1 h 30 m', level:'Easy',
+  ings:[
+    {i:'beef_grd', q:900, u:'g'}, {i:'onion', q:2, u:'piece'},
+    {i:'garlic', q:3, u:'clove'}, {i:'curry_pw', q:2, u:'tbsp'},
+    {i:'turmeric', q:1, u:'tsp'}, {i:'bread_wh', q:2, u:'piece'},
+    {i:'milk', q:400, u:'ml'}, {i:'egg', q:3, u:'piece'},
+    {i:'raisin', q:80, u:'g'}, {i:'apricot_j', q:2, u:'tbsp'},
+    {i:'vinegar_wh', q:2, u:'tbsp'}, {i:'almond', q:40, u:'g'},
+    {i:'bay', q:4, u:'piece'}, {i:'oil_veg', q:2, u:'tbsp'},
+    {i:'salt', q:2, u:'tsp'}, {i:'pepper', q:1, u:'tsp'}
+  ],
+  steps:[
+    {h:'Soak', t:'Soak the bread in half the milk and set it aside. Keep the rest of the milk back for the topping.'},
+    {h:'Spice base', t:'Soften the chopped onion and garlic in the oil, then add the curry powder and turmeric and fry them for a minute, until they smell toasted rather than dusty.', heat:'Medium. Dry spice burns in seconds — keep it moving in the pan.'},
+    {h:'Mince', t:'Brown the mince, breaking it up as it goes. Squeeze the bread out, keeping the milk, and work it through with the raisins, jam, vinegar, almonds, salt and pepper.'},
+    {h:'Taste and balance', t:'Bobotie should read mild, sweet and slightly sour rather than hot — closer to chutney than to curry. Adjust with vinegar or jam now, not later.'},
+    {h:'Bake the base', t:'Press it into a dish, not too deep, and stand the bay leaves upright in the surface. Bake 25 minutes.', heat:'180 °C / 350 °F.'},
+    {h:'Custard', t:'Beat the eggs with the reserved milk and the milk squeezed from the bread, pour it over, and bake another 25 to 30 minutes until just set and lightly browned.', heat:'180 °C / 350 °F. Take it out with a slight wobble — overbaked custard weeps.'},
+    {h:'Serve', t:'Rest 10 minutes. With yellow rice and sambals — chopped tomato and onion, sliced banana, chutney.'}
+  ]
 }
 ];
 
@@ -2382,6 +2785,86 @@ tabbouleh:{
     {w:'Grain', o:'Fine bulgur soaked in lemon. Coarse bulgur stays gritty; quinoa is a modern substitution that changes the texture entirely.'},
     {w:'Herbs', o:'Mint always, in a much smaller quantity than parsley. Some families add a little scallion green.'},
     {w:'Acid', o:'Lemon, generously, and more than you would expect. Sumac appears in some Palestinian versions.'}
+  ]},
+jollof:{
+  foundation:'A tomato, red pepper and scotch bonnet base fried until the oil separates, then rice steamed in it and never stirred. Rice boiled and folded into sauce afterwards is not jollof.',
+  layers:[
+    {w:'Country', o:'Nigerian runs drier and smokier; Ghanaian usually uses aromatic rice and comes out lighter in colour. The argument is genuine, old, and not going to be settled here.'},
+    {w:'Rice', o:'Long-grain parboiled holds its shape through the steam. Basmati softens and is widely considered a mistake.'},
+    {w:'Heat', o:'Scotch bonnet is standard, and the quantity is a household decision. Party jollof is usually milder than its colour suggests.'},
+    {w:'The bottom', o:'Deliberate scorching for smoke. Some cooks finish over wood, some drop a lit coal in a foil cup into the covered pot.'}
+  ]},
+koshari:{
+  foundation:'Four starches cooked separately so each keeps its own texture, a cumin-led tomato sauce, and a garlic-vinegar sharpener poured at the table. Cook them together and you have a pilaf.',
+  layers:[
+    {w:'Pulse', o:'Brown lentils always. Chickpeas are near-universal in Cairo and less common elsewhere.'},
+    {w:'Pasta', o:'Small elbow macaroni is the standard; some houses add short vermicelli or ditalini alongside it.'},
+    {w:'Heat', o:'Shatta, the chilli sauce, is served beside the plate rather than stirred through, so the eater decides.'},
+    {w:'Onion', o:'The crisp fried onion is not a garnish. A koshari house is judged on it before anything else.'}
+  ]},
+ghormeh:{
+  foundation:'Herbs fried until they darken, dried lime for sourness, and a long slow simmer. Herbs added late, or still green, make a thinner and completely different stew.',
+  layers:[
+    {w:'Herb mix', o:'Parsley, cilantro and Persian leek or chives in roughly three to two to two. Fenugreek is tiny in quantity and non-negotiable in character.'},
+    {w:'Sour', o:'Dried limes are standard, lime juice is common, plenty of households use both. Sour grape juice appears in the north.'},
+    {w:'Protein', o:'Lamb shank or diced leg; beef works. A meatless version leaning on the beans is normal in fasting weeks.'},
+    {w:'Bean', o:'Red kidney beans across most of Iran, pinto in some regions.'}
+  ]},
+pierogi:{
+  foundation:'A soft rested wheat dough rolled thin, and a hot-mashed potato and twaróg filling seasoned well past the point that seems sensible. Ruskie means potato and cheese; anything else is a different pierogi.',
+  layers:[
+    {w:'Cheese', o:'Twaróg, a fresh curd cheese. Farmer cheese, dry ricotta or a mild feta pressed dry are the nearest things abroad.'},
+    {w:'Dough', o:'Hot water gives a softer, more forgiving dough; egg gives a firmer one that fries better the next day. Households disagree permanently.'},
+    {w:'Fat', o:'Butter and fried onion in town, skwarki — rendered pork fat with cracklings — in the countryside and the east.'},
+    {w:'Second cooking', o:'Boiled then fried in butter is the standard treatment for leftovers, and for a lot of people the better dish.'}
+  ]},
+borscht:{
+  foundation:'Beets stewed separately with acid so they hold their colour, a fried carrot and onion base, and a long rest before serving. Everything boiled together in one pot gives brown soup.',
+  layers:[
+    {w:'Stock', o:'Beef and bone most commonly; pork ribs, goose, or dried mushrooms during Lent and in the north.'},
+    {w:'Sour', o:'Vinegar, beet kvass, sour apple, tomato or lemon. Cooks defend their choice firmly.'},
+    {w:'Extras', o:'Beans in the Poltava style, prunes and smoked pear in some regions, pampushky — garlic rolls — alongside almost everywhere.'},
+    {w:'Fat', o:'A spoon of salo crushed with garlic stirred in off the heat is traditional, and does more for the pot than it has any right to.'}
+  ]},
+osh:{
+  foundation:'A zirvak — meat, onion and hand-cut carrot simmered into a broth — with rinsed rice cooked on top of it in that broth alone and never stirred through. Rice boiled apart and mixed in is a pilaf, not osh.',
+  layers:[
+    {w:'Style', o:'Fergana cooks the rice in the zirvak. Tashkent and Bukhara steam it separately, which gives a drier, looser grain.'},
+    {w:'Rice', o:'Devzira, a red-tinged Fergana rice, drinks far more liquid than an ordinary long grain and is worth hunting for.'},
+    {w:'Fat', o:'Cottonseed oil is traditional. Lamb tail fat rendered first is the richer wedding version.'},
+    {w:'Additions', o:'Chickpeas, raisins, barberries, quince in autumn, and for a feast a whole quail or horse sausage buried in the rice.'}
+  ]},
+moqueca:{
+  foundation:'Raw ingredients layered in a wide pot, coconut milk poured around rather than over, a bare simmer, and the dendê added at the very end. Nothing is browned and nothing is stirred.',
+  layers:[
+    {w:'State', o:'Baiana uses coconut milk and dendê. Capixaba, from Espírito Santo, uses neither and takes annatto instead — the same name for a genuinely different dish.'},
+    {w:'Protein', o:'Firm white fish such as grouper, snapper or corvina; shrimp; crab; or a mix. Banana-da-terra makes a vegetarian moqueca that is a dish in its own right.'},
+    {w:'Pot', o:'A panela de barro — black clay cured with mangrove tannin — holds heat evenly and is part of the tradition rather than a flourish.'},
+    {w:'Heat', o:'Pimenta malagueta is offered beside the pot, never cooked into it. The table decides.'}
+  ]},
+nasi_lemak:{
+  foundation:'Rice steamed in coconut milk with pandan, and a chilli-shallot sambal fried until the oil separates. Rice cooked in water with coconut stirred in afterwards is not nasi lemak.',
+  layers:[
+    {w:'Sambal', o:'Sweet and thick around Kuala Lumpur, hotter and sharper on the east coast. The sugar-to-tamarind balance is the household signature.'},
+    {w:'Protein', o:'Sambal alone at a roadside stall; with fried chicken, rendang, squid or beef lung on a full plate.'},
+    {w:'Rice', o:'Some cooks add only a knotted pandan leaf, others lemongrass, and a few add fenugreek seed — a Malay touch that rarely makes it into written recipes.'},
+    {w:'Wrap', o:'Banana leaf is not decoration. The packet keeps steaming on the way to work and the leaf perfumes the rice.'}
+  ]},
+coq_au_vin:{
+  foundation:'Everything browned separately and brought together late: lardons, bird, onions and mushrooms each cooked on their own terms, then a slow braise in red wine. One-pot shortcuts cost exactly the colour and clarity the dish is about.',
+  layers:[
+    {w:'Wine', o:'Burgundy by name, but any dry medium-bodied red works. Coq au vin jaune in the Jura and coq au Riesling in Alsace are white-wine versions with the same structure.'},
+    {w:'Bird', o:'A real coq needs a marinade and three hours. Supermarket thighs need neither, and are what most people should actually use.'},
+    {w:'Thickening', o:'Flour early, a beurre manié at the end, or — in the old version — the blood. Each gives a different gloss.'},
+    {w:'Garnish', o:'Lardons, glazed pearl onions, mushrooms and garlic croutons. All four are part of the dish rather than decoration on it.'}
+  ]},
+bobotie:{
+  foundation:'Curried mince lightened with milk-soaked bread and finished under a baked egg custard. Without the custard it is a curry; without the bread it bakes dry and grainy.',
+  layers:[
+    {w:'Meat', o:'Beef or lamb, or the two mixed. Traditionally a way of using yesterday’s roast rather than a dish built from fresh mince.'},
+    {w:'Sweet', o:'Apricot jam, fruit chutney, raisins, dried apricot. Cape Malay cooking runs sweeter than the word curry leads people to expect.'},
+    {w:'Sour', o:'Vinegar or lemon juice, enough to stop the sweetness sitting flat on the tongue.'},
+    {w:'Topping', o:'Egg and milk custard, sometimes tinted with turmeric, with bay leaves standing upright in it. Some houses use a lemon leaf instead.'}
   ]}
 };
 

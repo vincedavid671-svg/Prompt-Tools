@@ -152,7 +152,11 @@ then appear wherever every counted ingredient has a fibre figure, and the keto a
 low-carb tags switch to using the net number.
 
 Some ingredients have no USDA entry at all — scotch bonnet, donne' sali, makrut
-lime leaf, palm sugar, baharat, ají amarillo. The closest available food is used
+lime leaf, palm sugar, baharat, ají amarillo, belacan, barberry, dendê. The list
+grew from 27 to 36 with the second batch of dishes, and it will keep growing for
+a structural reason rather than a fixable one: USDA is a US database, so the more
+genuinely global this catalogue gets, the more of its nutrition is a stand-in.
+The closest available food is used
 and **flagged on the recipe as a proxy**, because a cited number that quietly
 describes a different food is worse than an admitted estimate. A test keeps the
 app's proxy list and the resolver's in step.
@@ -240,7 +244,7 @@ approximations is a genuine harm, not a rough edge.
 
 ### 6. Language
 
-The app reaches 85 countries and shipped entirely in English. That is three
+The app reaches 87 countries and shipped entirely in English. That is three
 separate problems wearing one word, and they need different answers.
 
 **1. UI chrome** — a finite set of short strings, human-translated once and
@@ -292,8 +296,10 @@ is an explicit `[dir="rtl"]` block.
 `tools/names-resolve.mjs` resolves names from **Wikidata** — CC0, so no
 share-alike obligation on a commercial product, unlike Open Food Facts' ODbL.
 Each name carries a **QID**, the stable identifier that makes it checkable.
-Sixteen culturally specific ingredients are excluded from automation entirely
-and carry a hand-curated `mkt` field: the exact thing to say at the counter.
+Twenty-two culturally specific ingredients are excluded from automation entirely
+and carry a hand-curated `mkt` field: the exact thing to say at the counter —
+belacan, ikan bilis, zereshk, dendê and twaróg among them, none of which a
+generic translator renders usefully.
 See `tools/README.md`.
 
 ### 7. Allergens
@@ -639,15 +645,19 @@ dishes is enough to find out. If it does not, nothing else matters.
 
 | Region | Dishes |
 |---|---|
-| Europe | Bangers and Mash, Cacio e Pepe, Paella Valenciana, Moussaka |
-| Southeast Asia | Phở Gà, Phanaeng Curry, Rendang, Chicken Adobo |
+| Europe | Bangers and Mash, Cacio e Pepe, Paella Valenciana, Moussaka, Coq au Vin |
+| Southeast Asia | Phở Gà, Phanaeng Curry, Rendang, Chicken Adobo, Nasi Lemak |
 | East Asia | Pork & Chive Jiaozi, Oyakodon, Kimchi Jjigae |
-| Middle East | Chicken Kabsa, Menemen, Tabbouleh |
-| Latin America | Lomo Saltado, Tacos al Pastor |
+| Middle East | Chicken Kabsa, Menemen, Tabbouleh, Ghormeh Sabzi |
+| Latin America | Lomo Saltado, Tacos al Pastor, Moqueca Baiana |
+| Eastern Europe | Pierogi Ruskie, Borscht |
+| North Africa | Chicken Tagine, Koshari |
 | South Asia | Butter Chicken |
 | Caucasus | Khinkali |
-| North Africa | Chicken Tagine |
+| Central Asia | Osh (Plov) |
+| West Africa | Jollof Rice |
 | East Africa | Doro Wat |
+| Southern Africa | Bobotie |
 | Caribbean | Rundown |
 | Pacific Islands | Chicken Kelaguen |
 | Oceania | Mince and Cheese Pie |
@@ -655,6 +665,23 @@ dishes is enough to find out. If it does not, nothing else matters.
 Three are vegetarian as written — Cacio e Pepe, Menemen, Tabbouleh — which the
 first eleven were not, and the diet engine needs dishes that pass as well as
 dishes that fail to be worth anything.
+
+The second expansion, from 23 dishes to 33, was chosen for coverage rather than
+popularity. Four regions had no entry at all — West Africa, Southern Africa,
+Eastern Europe and Central Asia — and a region-first Atlas with a blank region in
+it is a visible hole. Two of the ten also exist to stress parts of the engine
+that nothing else reached: nasi lemak is the first dish carrying a hidden
+crustacean allergen in a name that gives no hint of it, and moqueca is the first
+where the load-bearing allergen has no substitution that keeps the dish itself,
+so it says so instead.
+
+Adding those ten also forced one new sourcing channel. African ingredients had
+nowhere to sit — berbere had been filed under Middle Eastern, which is wrong but
+worked — and a Nigerian or South African user had no native channel at all, so
+their own everyday staples read as unsourceable. `afr` fixes that, and Brazil
+carries it too: dendê is a Bahian staple that arrived through the Atlantic slave
+trade, and treating it as an African-channel ingredient is the accurate
+description rather than a convenient one.
 
 **Next — make the ledger real**
 Extend the conversion table, add barcode scan for purchase anchoring, correction
@@ -689,9 +716,10 @@ business or a hobby.
 
 ## Prototype technical notes
 
-Single self-contained HTML file. No build step, no dependencies. **23 dishes
-across 12 regions and 23 countries**, 141 canonical ingredients, 14 allergens,
-eight diet profiles, and 24 delivery platforms reaching 85 countries.
+Single self-contained HTML file. No build step, no dependencies. **33 dishes
+across 16 regions and 33 countries**, 161 canonical ingredients, 14 allergens,
+eight diet profiles, five locales, and 24 delivery platforms reaching 87
+countries.
 
 A consistency suite (not shipped in the file) checks: every recipe ingredient
 exists in the registry and normalizes to grams; every substitution target exists

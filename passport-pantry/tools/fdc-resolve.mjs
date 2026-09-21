@@ -197,7 +197,27 @@ const MAP = {
   candlenut:   {q:'nuts macadamia nuts raw'},
   parsley:     {q:'parsley fresh'},
   bulgur:      {q:'bulgur dry', not:['cooked']},
-  mint:        {q:'peppermint fresh'}
+  mint:        {q:'peppermint fresh'},
+  lentil_br:   {q:'lentils raw', not:['sprouted','cooked']},
+  chickpea:    {q:'chickpeas garbanzo beans canned drained solids'},
+  bean_kidney: {q:'beans kidney red canned drained solids'},
+  curry_pw:    {q:'spices curry powder'},
+  beet:        {q:'beets raw', not:['canned','greens','pickled']},
+  cabbage:     {q:'cabbage raw', not:['red','savoy','chinese','napa']},
+  dill:        {q:'dill weed fresh'},
+  cucumber:    {q:'cucumber with peel raw'},
+  lime:        {q:'limes raw'},
+  cheese_qrk:  {q:'cheese cottage lowfat dry curd'},
+  cream_sour:  {q:'cream sour cultured', not:['reduced fat','fat free','imitation']},
+  bacon:       {q:'pork cured bacon raw'},
+  bread_wh:    {q:'bread white commercially prepared', not:['toasted','reduced calorie']},
+  apricot_j:   {q:'jams and preserves apricot'},
+  fish_white:  {q:'fish cod atlantic raw'},
+  oil_dende:   {q:'oil palm'},
+  pandan:      {q:'parsley fresh'},
+  belacan:     {q:'fish anchovy paste'},
+  anchovy_dr:  {q:'fish anchovy european raw'},
+  barberry:    {q:'cranberries dried sweetened'}
 };
 
 /* Ingredients where the best available USDA food is a stand-in rather than
@@ -230,7 +250,16 @@ const PROXY_NOTE = {
   candlenut:   'Macadamia used for candlenut — the standard culinary substitute and close in fat content.',
   rice_bomba:  'Generic short-grain white rice; bomba absorbs considerably more liquid than the nutrition figures suggest.',
   dashi:       'Generic fish stock. Real dashi varies with the katsuobushi-to-kombu ratio.',
-  gochujang:   'Formulations vary widely in sugar and grain content between brands.'
+  gochujang:   'Formulations vary widely in sugar and grain content between brands.',
+  belacan:     'USDA has no fermented shrimp paste; anchovy paste used. Comparable in salt and protein, wrong in every other respect.',
+  anchovy_dr:  'Whole dried anchovy. USDA holds raw and canned-in-oil anchovy; drying concentrates protein and salt well beyond either.',
+  barberry:    'No barberry entry; dried sweetened cranberry used. Barberry is far more sour and unsweetened, so the sugar figure is an overstatement.',
+  pandan:      'No pandan entry; a generic fresh herb used. The leaves are knotted, cooked and removed, so they contribute nothing to the plate anyway.',
+  cheese_qrk:  'Dry-curd cottage cheese used for twarog. Fat content varies enormously between a tlusty and a chudy curd.',
+  oil_dende:   'Refined palm oil used. Dende is unrefined — the colour, carotene and aroma are the whole point of it, and none of that shows in the macros.',
+  apricot_j:   'Generic fruit preserve. A South African fruit chutney, which is the more usual choice in bobotie, is less sweet and carries vinegar.',
+  chickpea:    'Canned chickpeas, drained. Cooked-from-dry differs mainly in sodium.',
+  bean_kidney: 'Canned kidney beans, drained. Same caveat as the chickpeas.'
 };
 
 /* ------------------------------------------------------------------ */

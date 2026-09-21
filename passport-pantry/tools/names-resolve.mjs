@@ -127,7 +127,8 @@ const MAP = {
 const HAND_CURATED = [
   'limeleaf', 'baharat', 'loomi', 'berbere', 'donne', 'scotch',
   'gochugaru', 'methi', 'chili_kash', 'achiote', 'candlenut',
-  'chili_guaj', 'chili_anch', 'paste_pnng', 'paste_aji', 'rice_bomba'
+  'chili_guaj', 'chili_anch', 'paste_pnng', 'paste_aji', 'rice_bomba',
+  'belacan', 'anchovy_dr', 'barberry', 'pandan', 'oil_dende', 'cheese_qrk'
 ];
 
 /* ------------------------------------------------------------------ */
