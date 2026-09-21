@@ -37,6 +37,20 @@ The repository root is a **Tauri 2 + Vite + TypeScript** desktop application
 `vite.config.ts`, `src-tauri/` Rust crate and CI workflows. See
 `PROJECT_OVERVIEW.md`. Do not conflate the two.
 
+### The module boundary
+
+Passport Pantry is a separated module inside that repository, by decision, with
+its own `package.json` (zero dependencies, own scripts) and a boundary enforced
+by `tools/boundary-check.mjs`:
+
+- nothing in `passport-pantry/` references anything above it
+- nothing outside `passport-pantry/` depends on it, except prose in `/docs`
+- the module runs standalone — `npm run check` needs no install and no root
+
+`MODULE_BOUNDARY.md` is the governing document, including the three conditions
+that would justify extracting it later. Read it before changing an import, a
+manifest, or a storage path.
+
 ---
 
 ## 2. Application structure

@@ -9,13 +9,19 @@ Everything else below is unstarted and awaiting approval.
 
 ---
 
-## Milestone 0 — Handoff hygiene · ~half a day · no approval needed to plan
+## Milestone 0 — Handoff hygiene · mostly done
 
-1. **Extract `passport-pantry/` into its own repository.**
-   `git subtree split` or a fresh repo preserving the 14 commits that touch it.
-   Then: its own README, its own LICENCE with a real copyright holder, `docs/`
-   moved to the new root, and a CI workflow that actually runs
-   `tools/consistency-check.mjs`.
+1. ~~**Extract `passport-pantry/` into its own repository.**~~ — **decided
+   against, for now.** The module stays in this repository with an enforced
+   boundary instead. See `MODULE_BOUNDARY.md` for the rules, and §6 of that
+   document for the three conditions that would justify revisiting:
+   independent deployability, a second consumer, or a separate security and
+   release lifecycle. **Done:** module manifest, boundary check wired into
+   `npm run check`, purpose/dependencies/API/data-ownership documented.
+
+   Still outstanding from this item: a LICENCE naming a real copyright holder
+   for the module's own content, and a CI workflow that runs
+   `cd passport-pantry && npm run check`. Neither requires extraction.
 2. ~~Fix **BUG-1**~~ — **done.** `names-resolve.mjs` now refuses to write on a
    broken run and has an honest exit contract (0 wrote all / 1 wrote with gaps
    / 2 refused). **BUG-2** remains: a stale `miso` query in its MAP matches no
@@ -23,9 +29,9 @@ Everything else below is unstarted and awaiting approval.
 3. Wire the consistency suite to a pre-commit hook or CI. It is the only
    automated protection the catalogue has and currently nothing runs it.
 
-*Why first:* everything after this is more expensive while the product lives
-inside someone else's forked application, and while a resolver can report
-success after failing.
+*Why first:* a boundary that is documented but not enforced decays quietly —
+one import, one shared config, and a later extraction stops being cheap. The
+check exists so the decision to stay stays reversible.
 
 ---
 
@@ -126,18 +132,20 @@ basket. That finding is already documented and should not be re-litigated.
 
 ## Recommended next milestone
 
-**The rest of Milestone 0** — extract `passport-pantry/` into its own
-repository, and wire the consistency suite to CI.
+**Milestone 2 — the allergen tag review.**
 
-Milestone 1 is done and the worst of Milestone 0 (BUG-1) with it. What remains
-is the repository problem: the product still lives inside a fork of an
-unrelated third-party application, where `npm install` at the root builds the
-wrong thing and CI builds the wrong thing. That is roughly half a day and it
-gets more awkward with every commit.
+Milestone 1 is done, BUG-1 is done, and the module boundary is now established
+and enforced. What remains at the top of the list is the largest unverified
+safety surface in the project: 178 ingredients tagged by hand against 14
+allergens, where the test suite can prove the logic and can prove nothing about
+an omitted tag.
 
-After that, **Milestone 2 (allergen tag review)** is the one I would not skip.
-It is the largest unverified safety surface in the project and it is not an
-engineering task.
+It is not an engineering task, which is exactly why it keeps not happening. It
+does not get easier as the catalogue grows.
+
+The two small leftovers from Milestone 0 — a real LICENCE for the module and a
+CI job running `npm run check` — are worth folding into whatever is done next,
+since neither takes an hour.
 
 ---
 

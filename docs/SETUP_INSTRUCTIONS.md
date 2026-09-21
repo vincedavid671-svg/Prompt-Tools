@@ -16,11 +16,29 @@
 
 **Not required:** no database server, no Docker, no Python, no Rust, no build
 toolchain, no package install step. The cooking application has **zero
-dependencies**.
+dependencies**, declared as such in `passport-pantry/package.json` and checked
+by `npm run test:boundary`.
 
 > Rust and the Tauri CLI *are* required to build the application at the
 > repository root — but that is the forked prompt manager, not this product.
 > See `PROJECT_OVERVIEW.md`.
+
+---
+
+## Module scripts
+
+The module has its own manifest with **zero dependencies**, so every script
+runs on a bare Node 18+ with no `npm install`:
+
+```bash
+cd passport-pantry
+npm test               # data invariants + the SEC-1 privacy guard
+npm run test:boundary  # enforces docs/MODULE_BOUNDARY.md, both directions
+npm run test:ingest    # ingester parser self-test
+npm run check          # all three, in that order
+```
+
+`npm run check` exits 0 only if all three pass. Run it before any commit.
 
 ---
 
@@ -82,7 +100,7 @@ No secret is committed. `.env` is gitignored; `.env.example` holds names only.
 ### 1. Consistency suite ✅ PASS
 
 ```
-$ cd passport-pantry && node tools/consistency-check.mjs
+$ cd passport-pantry && npm test
 
 registry / dishes / diets / allergens / nutrition / budget / sourcing /
 language / privacy / provenance   ← all sections silent = all passed
@@ -93,6 +111,24 @@ language / privacy / provenance   ← all sections silent = all passed
 All checks passed
 exit=0
 ```
+
+### 1b. Module boundary ✅ PASS
+
+```
+$ npm run test:boundary
+
+outward — passport-pantry/ must not reference anything above it
+inward — nothing outside passport-pantry/ may depend on it
+self-sufficiency — the module must run without the repository root
+
+Boundary holds: no outward references, no inward dependencies,
+module runs standalone.
+exit=0
+```
+
+Both directions were verified by deliberately breaking them: adding a
+`process.cwd()` to a module file, and adding a file under `src/` that
+references `passport-pantry`. Each produced a named violation and exit 1.
 
 ### 2. Ingester self-test ✅ PASS
 

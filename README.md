@@ -1,3 +1,34 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     MONOREPO NOTICE — added downstream, not part of upstream Prompt Tools.
+     Safe to drop when rebasing on upstream; it documents a second module.
+     ───────────────────────────────────────────────────────────────────── -->
+
+> ### 📦 This repository contains two unrelated modules
+>
+> **1. Prompt Tools** — the desktop prompt manager documented below.
+> Root `package.json`, `src/`, `src-tauri/`, and the CI workflows all belong to
+> it. This is the upstream project.
+>
+> **2. [`passport-pantry/`](./passport-pantry/)** — Passport Pantry, a
+> travel-memory recipe application. Unrelated to Prompt Tools, developed
+> downstream, and kept here as a **separated module** with an enforced
+> boundary rather than a second application tangled into the first.
+>
+> ```bash
+> cd passport-pantry && npm run check   # no npm install needed
+> ```
+>
+> Documentation: **[`docs/`](./docs/)** — start with `PROJECT_OVERVIEW.md`,
+> then `MODULE_BOUNDARY.md` before touching the module's edges.
+>
+> The two share no code in either direction, and
+> `passport-pantry/tools/boundary-check.mjs` fails the build if that changes.
+>
+> *本仓库包含两个互不相关的模块：上游的 Prompt Tools，以及下游添加的
+> `passport-pantry/`。两者没有任何代码依赖关系。*
+
+---
+
 # Prompt Tools: 你的专属提示词管家
 
 <p align="center">

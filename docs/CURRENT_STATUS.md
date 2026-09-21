@@ -138,14 +138,26 @@ resolver is written, tested and unrun because no live USDA call has succeeded.
 The calorie budget is therefore suitable for direction and habit, and not for
 managing a medical condition. The app says so.
 
-### RISK-3 — Wrong repository · **HIGH (process, not code)**
+### RISK-3 — Shared repository with a forked upstream · **MEDIUM (was HIGH)**
 
 The product lives inside a fork of an unrelated third-party Chinese desktop
-application. Consequences: a reviewer's first instinct (`npm install`,
-`npm run build`) builds the wrong thing; CI builds the wrong thing; the README
-describes the wrong thing; the MIT `LICENSE` still reads
-`Copyright (c) 2025 [Your Name or Organization]`; and the commit history of two
-unrelated products is interleaved.
+application. **Downgraded** after the owner's decision to keep it here as a
+separated module with an enforced boundary — see `MODULE_BOUNDARY.md`.
+
+What the boundary now handles: coupling is zero in both directions and
+`boundary-check.mjs` fails the build if that changes, so extraction remains a
+one-command operation whenever §6 of that document says it is time.
+
+What remains genuinely unresolved:
+
+- A reviewer's first instinct (`npm install`, `npm run build`) at the root
+  still builds the prompt manager. Mitigated by a pointer in the root README
+  and by the module having its own `package.json` and scripts.
+- CI still builds the wrong thing — no workflow runs `npm run check`.
+- The MIT `LICENSE` still reads `Copyright (c) 2025 [Your Name or
+  Organization]`, and the module has no licence of its own.
+- The commit history of two unrelated products is interleaved. Only extraction
+  fixes that, and it is not currently worth extraction.
 
 ### RISK-4 — Single 327 KB file · **MEDIUM**
 
@@ -190,6 +202,9 @@ Deliberately minimal. No feature changes, no framework changes, no redesign.
 | **Fixed SEC-1** in `prototype.html` | Approved after the review. Pantry and cook log now write under the viewer's private path. |
 | **Fixed BUG-1** in `tools/names-resolve.mjs` | Approved after the review. Refuses to write on a broken run; honest exit codes. |
 | **Added** a privacy regression guard to the suite | So SEC-1 cannot silently return. |
+| **Added** `passport-pantry/package.json` | Module manifest: own name, own scripts, zero dependencies, deliberately not a root workspace. |
+| **Added** `tools/boundary-check.mjs` | Enforces `MODULE_BOUNDARY.md` in both directions. Verified by introducing a violation each way. |
+| **Added** `docs/MODULE_BOUNDARY.md` | Purpose, dependencies, API boundaries, data ownership, and the criteria for later separation. |
 | **Added** `passport-pantry/tools/consistency-check.mjs` | The suite existed only outside the repository. A handoff whose tests cannot be run by the recipient is not a handoff. Rewritten to be self-contained: it extracts the script block from `prototype.html` itself. Verified: exit 0. |
 | **Added** `passport-pantry/.env.example` | Variable names only, no values. |
 | **Added** `docs/` (7 files) | This documentation. |

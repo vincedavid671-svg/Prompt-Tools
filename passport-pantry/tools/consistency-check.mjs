@@ -255,6 +255,13 @@ Object.entries(m.ING_L10N).forEach(([id, row]) => {
   langs.forEach(l => { if (!row[l]) bad(`ING_L10N ${id} missing ${l}`); });
 });
 
+/* The module boundary is deliberately NOT checked here. It is owned entirely
+   by tools/boundary-check.mjs, which can see the whole repository — this file
+   only ever loads the app and reasons about recipe data. Duplicating the
+   patterns across both scripts is how two checks drift apart, and the first
+   version of this file proved it by tripping its own pattern list.
+   Run both with `npm run check`. */
+
 /* ---------- privacy ----------
    Regression guard for SEC-1. Everything a viewer creates — pantry, cook log,
    diary, body profile — is personal and must be written under that viewer's

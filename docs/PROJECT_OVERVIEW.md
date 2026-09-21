@@ -6,7 +6,7 @@
 
 ---
 
-## Read this first: the repository is not what its name says
+## Read this first: this is a two-module repository
 
 This repository is `vincedavid671-svg/Prompt-Tools`, a **fork of
 `jwangkun/Prompt-Tools`** — an unrelated open-source Chinese desktop
@@ -30,9 +30,20 @@ Prompt-Tools/                  <- forked Tauri prompt manager (NOT ours)
 A reviewing agent that runs `npm install` or `npm run build` at the repository
 root is building the prompt manager, not the cooking app.
 
-Extracting `passport-pantry/` into its own repository is the first
-recommendation in `NEXT_STEPS.md`. It is a prerequisite for almost everything
-else, and it is cheap to do now and expensive to do later.
+**The decision is to keep it here** as a clearly separated module rather than
+extract it — see `MODULE_BOUNDARY.md`, which is the governing document for
+anything touching the module's edges. The separation is enforced, not just
+intended: `passport-pantry/tools/boundary-check.mjs` fails the build if the
+module reaches above its own directory, or if anything in the repository starts
+depending on it. Coupling is currently zero in both directions, which is what
+keeps a later extraction a one-command operation.
+
+Work inside the module with:
+
+```bash
+cd passport-pantry
+npm run check          # all three suites; no npm install needed
+```
 
 ---
 
