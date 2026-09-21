@@ -139,7 +139,18 @@ const MAP = {
   bay:         {q:'spices bay leaf'},
   almond:      {q:'nuts almonds', not:['oil','butter','milk','paste']},
   raisin:      {q:'raisins seedless', not:['golden']},
-  potato_fl:   {q:'potatoes russet flesh and skin raw'}
+  potato_fl:   {q:'potatoes russet flesh and skin raw'},
+  /* allergen-substitution targets */
+  tamari:      {q:'soy sauce made from soy tamari'},
+  coco_amino:  {q:'coconut aminos'},
+  flour_gf:    {q:'flour gluten free', type:'Survey (FNDDS)'},
+  flour_rice:  {q:'rice flour white'},
+  milk_oat:    {q:'oat milk unsweetened', type:'Survey (FNDDS)'},
+  marg_df:     {q:'margarine like spread approximately 60% fat tub'},
+  cheese_df:   {q:'cheese substitute', type:'Survey (FNDDS)'},
+  flax:        {q:'seeds flaxseed'},
+  seed_sun:    {q:'seeds sunflower seed kernels dried'},
+  seed_pump:   {q:'seeds pumpkin and squash seed kernels dried'}
 };
 
 /* Ingredients where the best available USDA food is a stand-in rather than
@@ -158,7 +169,11 @@ const PROXY_NOTE = {
   paste_aji:  'No ají amarillo entry; canned hot chilli used.',
   rice_bas:   'Basmati treated as generic long-grain white rice.',
   shaoxing:   'Generic cooking wine used.',
-  mackerel:   'Salted mackerel before desalting; boiling and soaking lower the sodium considerably.'
+  mackerel:   'Salted mackerel before desalting; boiling and soaking lower the sodium considerably.',
+  coco_amino: 'USDA is unlikely to hold coconut aminos. If this resolves to something else, check it — or hand-fill from the bottle.',
+  flour_gf:   'No single USDA food for a gluten-free blend; blends differ by manufacturer. Treat as indicative.',
+  cheese_df:  'Dairy-free cheeses vary enormously by base (cashew, coconut, soy). Any single match is only indicative.',
+  marg_df:    'Generic tub spread used; dairy-free blocks for baking are firmer and higher in fat.'
 };
 
 /* ------------------------------------------------------------------ */
@@ -265,6 +280,23 @@ async function resolveOne(id, spec){
 }
 const round = v => Math.round(v * 10) / 10;
 
+/**
+ * The rewrite is driven by MAP, so any ingredient the app defines but MAP
+ * omits would be silently dropped from the table — which breaks the app,
+ * because nutritionOf() then counts it as uncountable. This happened once
+ * already: ten allergen-substitution ingredients were added to the app
+ * after this script was written. Check before writing, never after.
+ */
+async function checkCoverage(){
+  const src = await readFile(TARGET, 'utf8');
+  const i = src.indexOf('const ING = {');
+  const j = src.indexOf('\n};', i);
+  const appIngredients = [...src.slice(i, j).matchAll(/^  (\w+):\s*\{n:/gm)].map(m => m[1]);
+  const uncovered = appIngredients.filter(id => !MAP[id]);
+  const orphaned  = Object.keys(MAP).filter(id => !appIngredients.includes(id));
+  return {appIngredients, uncovered, orphaned};
+}
+
 /** Pull the current NUTR block out of the page so we can diff and rewrite. */
 async function readCurrent(){
   const src = await readFile(TARGET, 'utf8');
@@ -302,6 +334,20 @@ function renderBlock(rows){
 }
 
 /* ------------------------------------------------------------------ */
+
+const cov = await checkCoverage();
+if(cov.uncovered.length){
+  console.error(`Refusing to run: ${cov.uncovered.length} ingredient(s) in the app have no query here.`);
+  console.error('Writing the table would delete their nutrition rows and break the app.');
+  cov.uncovered.forEach(id => console.error('  ' + id));
+  console.error('\nAdd a MAP entry for each, then re-run.');
+  process.exit(2);
+}
+if(cov.orphaned.length){
+  console.log(`Note: ${cov.orphaned.length} query(ies) here match no app ingredient — harmless, but stale:`);
+  cov.orphaned.forEach(id => console.log('  ' + id));
+  console.log('');
+}
 
 const ids = ONLY ? String(ONLY).split(',').map(s => s.trim()) : Object.keys(MAP);
 const {src, start, end, cur} = await readCurrent();
